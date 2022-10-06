@@ -1,7 +1,21 @@
+# Projecto Billar
+
+
+
+
+
+
+
+
+
+
+# Importante
+Aqui abajo esta el README del projecto original:
+
+
 # OpenGL Premake5 Boilerplate
 
-This project a starting point for any application using GLFW, GLAD and GLM. It uses Premake5 to generate the build files. 
-It provides the 'engine.h' header file which imports the libraries and there is a basic GLFW example in 'main.cpp'.
+This project a starting point for any application using GLFW, GLAD and GLM. It uses Premake5 to generate the build files.
 
 ## Getting Started
 
