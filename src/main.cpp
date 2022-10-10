@@ -4,114 +4,100 @@
 
 #include <stdio.h>
 #include <iostream>
-
+#include <math.h>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-/////////// librerias originales ///////////
-// #include "engine.h"
-// #include "gl_utils.h"
-// #include "window.h"
-// #include "shader.h"
-// #include "renderer2d.h"
+#include "window.h"
+#include "gl_utils.h"
+#include "shaderProgram.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 
 
 // funciones
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
-    glViewport(0, 0, width, height);
-}
-
 void processInput(GLFWwindow *window)
 {
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 }
 
-// shaders ejemplo
-const char *vertexShaderSource = "#version 330 core\n"
-    "layout (location = 0) in vec3 aPos;\n"
-    "uniform vec2 dPos;\n"
-    "void main()\n"
-    "{\n"
-    "   gl_Position = vec4(aPos.x + dPos.x, aPos.y + dPos.y, aPos.z, 1.0);\n"
-    "}\0";
+// // shaders ejemplo
+// const char *vertexShaderSource = "#version 330 core\n"
+//     "layout (location = 0) in vec3 aPos;\n"
+//     "uniform vec2 dPos;\n"
+//     "void main()\n"
+//     "{\n"
+//     "   gl_Position = vec4(aPos.x + dPos.x, aPos.y + dPos.y, aPos.z, 1.0);\n"
+//     "}\0";
 
-const char *fragmentShaderSource = "#version 330 core\n"
-    "out vec4 FragColor;\n"
-    "void main()\n"
-    "{\n"
-    "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-    "}\0";
+// const char *fragmentShaderSource = "#version 330 core\n"
+//     "out vec4 FragColor;\n"
+//     "void main()\n"
+//     "{\n"
+//     "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+//     "}\0";
 
+// shader files
+std::string vertexDir = "shaders/default.vert";
+std::string fragmentDir = "shaders/default.frag";
 
+std::string textureDir = "textures/container.jpg";
 
 
 int main()
 {
-    glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(800, 600, "Test", NULL, NULL);
+    Window window(1200, 900, "Billar");
 
-    if (window == NULL)
-    {
-        std::cout << "Failed to create GLFW window\n";
-        glfwTerminate();
-        return -1;
+    if (!window.initWindow()) {
+        return 1;
     }
 
-    glfwMakeContextCurrent(window);
-
-
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    {
-        std::cout << "Failed to initialize GLAD\n";
-        glfwTerminate();
-        return -1;
-    }
-
-    glViewport(0,0,800,600);
-
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-
-    // triangle vertices
+    // // square vertices with (EBO)
     // float vertices[] = {
-    //     -0.5f, -0.5f, 0.0f,
-    //     0.5f, -0.5f, 0.0f,
-    //     0.0f,  0.5f, 0.0f
+    //     /////////////////////// square dots
+    //      0.5f,  0.5f, 0.0f,  // top right
+    //      0.5f, -0.5f, 0.0f,  // bottom right
+    //     -0.5f, -0.5f, 0.0f,  // bottom left
+    //     -0.5f,  0.5f, 0.0f,  // top left
+    //     /////////////////////// triangle dots
+    //     -0.5f, -0.5f, 0.0f,  //
+    //      0.5f, -0.5f, 0.0f,  //
+    //      0.0f,  0.5f, 0.0f   //
     // };
 
-    // sqare vertices without EBO
-    // float vertices[] = {
-    //     // first triangle
-    //     0.5f,  0.5f, 0.0f,  // top right
-    //     0.5f, -0.5f, 0.0f,  // bottom right
-    //     -0.5f,  0.5f, 0.0f,  // top left 
-    //     // second triangle
-    //     0.5f, -0.5f, 0.0f,  // bottom right
-    //     -0.5f, -0.5f, 0.0f,  // bottom left
-    //     -0.5f,  0.5f, 0.0f   // top left
-    // }; 
+    // float vertices2[] = {
+    //     // positions         // colors
+    //      0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,   // bottom right
+    //     -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   // bottom left
+    //      0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f,   // top
+    //     -1.0f,  0.5f, 0.0f,  1.0f, 0.0f, 0.0f    // top to the left
+    // };
 
-    // square vertices with (EBO)
     float vertices[] = {
-        0.5f,  0.5f, 0.0f,  // top right
-        0.5f, -0.5f, 0.0f,  // bottom right
-        -0.5f, -0.5f, 0.0f,  // bottom left
-        -0.5f,  0.5f, 0.0f   // top left 
+        /////////////////////// square dots
+        // positions        // colors           // textures
+         0.5f,  0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  1.0f, 1.0f,     // top right
+         0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f,     // bottom right
+        -0.5f, -0.5f, 0.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f,     // bottom left
+        -0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 0.0f,  0.0f, 1.0f,     // top left
+        /////////////////////// triangle dots
+         0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  1.0f, 0.0f,     // bottom right
+        -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,  0.0f, 0.0f,     // bottom left
+         0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f,  0.5f, 1.0f      // top
     };
+    
+
     unsigned int indices[] = {  // note that we start from 0!
-        0, 1, 3,   // first triangle
-        1, 2, 3    // second triangle
+        0, 1, 2,   // first triangle
+        0, 2, 3,   // second triangle
     };
-
-
-
+    unsigned int indices2[] = {
+        4, 5, 6    // another triangle
+    };
 
 
     // generate VAO (Vertex Array Object)
@@ -138,44 +124,78 @@ int main()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-
-
-    // set vertices attributes pointers
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    // set vertices attributes pointers for previously bound VAO
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3*sizeof(float)));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6*sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    // generate VAO2 (Vertex Array Object)
+    unsigned int VAO2;
+    glGenVertexArrays(1, &VAO2);
+
+    // Bind the VAO2
+    glBindVertexArray(VAO2);
+
+    // generate EBO2 (Element Buffer Object)
+    unsigned int EBO2;
+    glGenBuffers(1, &EBO2);
+
+    // bind the EBO2
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO2);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices2), indices2, GL_STATIC_DRAW);
+
+    // set vertices attributes pointers for previously bound VAO2
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3*sizeof(float)));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6*sizeof(float)));
+    glEnableVertexAttribArray(2);
 
 
-    // vertex shader
-    unsigned int vertexShader;
-    vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-    glCompileShader(vertexShader);
-        // sould check compiling here
-    
-    // fragment shader
-    unsigned int fragmentShader;
-    fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
-        // sould check compiling here
+    ShaderProgram shaderProgram(vertexDir, fragmentDir);
 
-    // compile shaders
-    unsigned int shaderProgram;
-    shaderProgram = glCreateProgram();
+    if(!shaderProgram.compileShaders())
+    {
+        return 1;
+    }
 
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-        // should check linking
-    glUseProgram(shaderProgram);
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+
+    // textures
+    unsigned int texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    // set the texture wrapping/filtering options (on the currently bound texture object)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    int width, height, nrChannels;
+    unsigned char* data = stbi_load(textureDir.c_str(), &width, &height, &nrChannels, 0);
+    if (data)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        // failed
+    }
+    stbi_image_free(data);
+
+
+
+
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     ImGui::StyleColorsDark();
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplGlfw_InitForOpenGL(window.getGLFWwindow(), true);
     ImGui_ImplOpenGL3_Init("#version 330");
 
 
@@ -184,7 +204,7 @@ int main()
     float yPos = 0;
 
     unsigned int nFrame = 0;
-    while(!glfwWindowShouldClose(window))
+    while(!window.shouldClose())
     {
         // rendering commands here
         glClearColor(0.3f, 0.3f, 0.35f, 1.0f);
@@ -198,111 +218,60 @@ int main()
         if (!io.WantCaptureMouse)
         {
             // input handling here
-            processInput(window);
+            processInput(window.getGLFWwindow());
 
         }
 
 
-        // triangle code here:
-        glUseProgram(shaderProgram);
-        glBindVertexArray(VAO);                         // Binding VAO automatically binds EBO
-        // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);  // EBO is bound to VAO, so this is not needed
-        if (drawTriangles)
+        // activate shader
+        // glUseProgram(shaderProgram);
+        shaderProgram.activate();
+
+
+        // add uniform (modify position)
+        glUniform2f(glGetUniformLocation(shaderProgram.getProgram(), "dPos"), xPos, yPos);
+
+        float timeValue = glfwGetTime();
+        float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
+        int vertexColorLocation = glGetUniformLocation(shaderProgram.getProgram(), "ourColor");
+        glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
+
+
+        if (!drawTriangles)
         {
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+            glBindTexture(GL_TEXTURE_2D, texture);
+            GL(glBindVertexArray(VAO));                         // Binding VAO automatically binds EBO
+            // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO2);  // EBO is bound to VAO, so this is not needed
+            GL(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*) 0));
                                 //       ^ indices size
         }
-        glBindVertexArray(0);
+        else
+        {
+            glBindTexture(GL_TEXTURE_2D, texture);
+            GL(glBindVertexArray(VAO2));
+            GL(glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (void*) 0));
+        }
 
 
         ImGui::Begin("My name is window, ImGUI window");
         ImGui::Text("Hello there!");
-        ImGui::Checkbox("Draw Triangle", &drawTriangles);
+        ImGui::Checkbox("Draw Triangle(T), Draw Square(F)", &drawTriangles);
         ImGui::SliderFloat("xPos", &xPos, -1.0f, 1.0f);
         ImGui::SliderFloat("yPos", &yPos, -1.0f, 1.0f);
+        ImGui::Text("Frame number %u", nFrame);
         ImGui::End();
-
-        glUseProgram(shaderProgram);
-        glUniform2f(glGetUniformLocation(shaderProgram, "dPos"), xPos, yPos);
-
-
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 
-
         // check and call events and swap the buffers
-        glfwSwapBuffers(window);
-        glfwPollEvents();
+
+        window.update();
 
         nFrame++;
     }
 
 
-
     glfwTerminate();
     return 0;
-
-
-    //////////////////// CODIGO ORIGINAL : NO USAR ////////////////////
-
-    // glm::vec3 vector(1, 0, 1);
-    // printf("%f %f %f\n", vector.x, vector.y, vector.z);
-
-    // Window window("OpenGL Boilerplate!!!", 960, 540, true);
-    // window.Create();
-
-    // Shader shader("Basic", "res/basic.vert", "res/basic.frag");
-    // if (!shader.Create())
-    //     return 1;
-
-    // Renderer2D renderer(shader, window.GetDataPointer(), 100);
-    // renderer.Create();
-
-    // // Setup ImGui
-
-    // IMGUI_CHECKVERSION();
-    // ImGui::CreateContext();
-
-    // ImGui::StyleColorsDark();
-
-    // ImGui_ImplGlfw_InitForOpenGL(window.GetGlfwWindow(), true);
-    // ImGui_ImplOpenGL3_Init("#version 130");
-
-    // bool show_demo_window = true;
-
-    // while (!window.ShouldClose())
-    // {
-    //     glClear(GL_COLOR_BUFFER_BIT);
-
-    //     renderer.Start();
-        
-    //     for (int i = 0; i < 1000; i++) {
-    //         float x = (float)rand()/(float)(RAND_MAX);
-    //         float y = (float)rand()/(float)(RAND_MAX);
-    //         renderer.DrawQuad(glm::vec2(x * window.GetSize().x, y * window.GetSize().y), glm::vec2(10.0f, 10.0f), glm::vec4(x, y * 0.5f, 0.2f, 1.0f));
-    //     }
-
-    //     renderer.End();
-
-    //     ImGui_ImplOpenGL3_NewFrame();
-    //     ImGui_ImplGlfw_NewFrame();
-    //     ImGui::NewFrame();
-
-    //     renderer.DrawImGui();
-
-    //     if (show_demo_window)
-    //         ImGui::ShowDemoWindow(&show_demo_window);
-
-    //     ImGui::Render();
-    //     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-    //     window.Update();
-    // }
-
-    // renderer.Destroy();
-
-    // shader.Destroy();
-
-    // window.Destroy();
 }
