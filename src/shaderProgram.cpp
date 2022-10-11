@@ -67,7 +67,7 @@ bool ShaderProgram::compileShaders() {
 
     m_shaderProgram = shaderProgram;
 
-    std::cout << "ShaderProgram:" << m_shaderProgram << std::endl;
+    // std::cout << "ShaderProgram:" << m_shaderProgram << std::endl;
 
     return true;
 }
