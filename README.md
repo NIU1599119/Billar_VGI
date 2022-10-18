@@ -8,16 +8,20 @@ Para clonar el repositorio:
 Utilizamos premake5 para generar los archivos de compilado con uno de los scripts siguientes segun nuestro sistema operativo
 
 ### Windows
+Abrir consola en la carpeta base.  
 Ejecutar `win_init.bat` para generar los archivos de solucion y projecto de visual studio 2022.  
 Para compilar se utiliza el entorno de visual studio.
 #### Nota
-Cualquier edicion de las propiedades de la solucion se guardaran solo localmente y se reescribiran si se vuelven a generar los archivos de vs2022.
+Cualquier edicion de las propiedades de la solucion se guardaran solo localmente y se reescribiran si se vuelven a generar los archivos de vs2022.  
+No se puede ejecutar en un directorio con caracteres especiales (por ejemplo, con accentos)
 
 ### Linux
+Abrir consola en la carpeta base.  
 Ejecutar `unix_init.sh` para generar los Makefiles.  
 Para compilar se utiliza el comando `make` en el directorio base
 
 ### Mac
+Abrir consola en la carpeta base.  
 Ejecutar `mac_init.sh` para generar los Makefiles.  
 Para compilar se utiliza el comando `make` en el directorio base
 #### Nota

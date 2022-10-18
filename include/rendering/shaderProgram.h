@@ -1,3 +1,5 @@
+#pragma once
+
 #include <glad/glad.h>
 #include <string>
 #include "gl_utils.h"

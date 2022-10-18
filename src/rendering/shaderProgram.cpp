@@ -1,9 +1,10 @@
 
-#include "shaderProgram.h"
+#include "rendering/shaderProgram.h"
 #include "gl_utils.h"
+#include "debug.h"
 
 #include <fstream>
-#include <iostream>
+
 
 
 std::string readShaderFile(std::string dir) {
@@ -97,7 +98,8 @@ bool ShaderProgram::checkShaderCompilation(unsigned int shaderID, unsigned int t
             typeStr = "UNKNOWN";
             break;
         }
-        std::cout << "ERROR::SHADER::" << typeStr << "::COMPILATION_FAILED\n" << infoLog << std::endl;
+        LOG_ERROR("%s::COMPILATION_FAILED\n%s", typeStr.c_str(), infoLog);
+        // std::cout << "ERROR::SHADER::" << typeStr << "::COMPILATION_FAILED\n" << infoLog << std::endl;
 
         return false;
     }
@@ -111,7 +113,8 @@ bool ShaderProgram::checkProgramLinking(unsigned int programID)
     GL(glGetProgramiv(programID, GL_LINK_STATUS, &success));
     if (!success)
     {
-        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+        LOG_ERROR("PROGRAM::LINKING_FAILED\n%s", infoLog);
+        // std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
 
         return false;
     }

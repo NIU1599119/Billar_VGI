@@ -1,27 +1,41 @@
+#pragma once
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <string>
 
-class Window {
+#include "input.h"
+
+struct WindowData
+{
+    std::string title;
+    unsigned int width;
+    unsigned int height;
+    bool vSync;
+
+    Input input;
+    // input is passed to glfw as it only has window user pointer
+};
+
+
+class Window { 
 public:
-    Window() {};
-    Window(unsigned int width, unsigned int height) : m_width(width), m_height(height) {};
-    Window(unsigned int width, unsigned int height, std::string title) : m_width(width), m_height(height), m_title(title) {};
+    Window(unsigned int width=800, unsigned int height=600, std::string title="Default", bool vSync=true);
     ~Window();
     bool initWindow();
 
     void update();
 
-
     GLFWwindow* getGLFWwindow() { return m_window; };
 
     bool shouldClose() { return glfwWindowShouldClose(m_window); };
 
+    void setVSync(bool enabled);
+
+    Input* getInput() { return &m_data.input; }
 
 private:
     GLFWwindow* m_window;
-    unsigned int m_width = 800, m_height = 600;
-    std::string m_title = "Default";
-};
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+    WindowData m_data;
+};
