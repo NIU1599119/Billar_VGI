@@ -4,7 +4,7 @@
 #include "rendering/texture.h"
 
 
-bool Texture::createTexture()
+bool Texture::create()
 {
     // textures
     unsigned int texture;
@@ -33,7 +33,7 @@ bool Texture::createTexture()
     return true;
 }
 
-void Texture::activateTexture()
+void Texture::activate()
 {
     glBindTexture(GL_TEXTURE_2D, m_glTexture);
 }

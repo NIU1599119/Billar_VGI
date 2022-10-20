@@ -5,13 +5,16 @@
 #include <string>
 
 class Texture {
+/*
+    This class is temporal, it may be changed to enable model imports
+*/
 public:
     Texture() {};
     Texture(std::string src) : m_source(src) {};
     ~Texture() {};
 
-    bool createTexture();
-    void activateTexture();
+    bool create();
+    void activate();
 
 
 private:

@@ -28,6 +28,7 @@ void Mesh::create()
 {
     ASSERT(m_VAO == 0);
     ASSERT(m_VBO == 0);
+    ASSERT(m_attributeData.size() > 0);
 
     // generate VAO (Vertex Array Object)
     unsigned int VAO;

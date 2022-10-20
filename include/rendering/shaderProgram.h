@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 #include <string>
 #include "gl_utils.h"
+#include <glm/glm.hpp>
 
 class ShaderProgram {
 public:
@@ -13,6 +14,12 @@ public:
     void activate() { GL(glUseProgram(m_shaderProgram)); };
 
     unsigned int getProgram() { return m_shaderProgram; };
+
+    // uniforms
+    // add more when needed
+
+    void setUniformMat4(std::string name, glm::mat4 uniformMat4); // this is for the model view projection matrices mainly
+
 
 private:
     unsigned int m_shaderProgram;

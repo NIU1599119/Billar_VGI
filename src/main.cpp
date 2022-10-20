@@ -13,6 +13,8 @@
 #include "rendering/texture.h"
 #include "rendering/mesh.h"
 
+#include "rendering/simpleModel.h"
+
 
 #include "camera/camera.h"
 // #include "input.h" // included in window
@@ -29,9 +31,6 @@
 bool mouseCapture = false;
 bool pressing = true;
 
-// Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
-
-
 
 // funciones
 
@@ -39,24 +38,10 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
     Input* input = &((WindowData *)glfwGetWindowUserPointer(window))->input;
     input->updateCursor(xpos, ypos);
-    // camera.offsetAngles(xoffset, yoffset);
 }
-
-// void empty_callback(GLFWwindow* window, double xpos, double ypos) {};
 
 void processInput(GLFWwindow *window, Input* input, float deltaTime, CameraController* controller)
 {
-    // const float cameraSpeed = 2.5f * deltaTime; // adjust accordingly
-    // glm::vec3 offset = glm::vec3(0.0f, 0.0f, 0.0f);
-    // if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-    //     offset += cameraSpeed * camera.getFront();
-    // if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-    //     offset -= cameraSpeed * camera.getFront();
-    // if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-    //     offset -= cameraSpeed * camera.getRight();
-    // if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-    //     offset += cameraSpeed * camera.getRight();
-    // camera.offsetPosition(offset);
 
     if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS)
     {
@@ -106,7 +91,7 @@ std::string textureDir = "textures/minecraft-grass.png";
 int main()
 {
 
-    Window window(1200, 900, "Billar");
+    Window window(1200, 900, "Billar", true);
 
     if (!window.initWindow()) {
         return 1;
@@ -116,12 +101,12 @@ int main()
     float vDiv = 1.0f/3.0f;
 
     float cubeVertices[] {
-        -0.5f, -0.5f, -0.5f,  0.0f, vDiv,
-        0.5f, -0.5f, -0.5f,  uDiv, vDiv,
-        0.5f,  0.5f, -0.5f,  uDiv, 0,
-        0.5f,  0.5f, -0.5f,  uDiv, 0,
-        -0.5f,  0.5f, -0.5f,  0.0f, 0,
-        -0.5f, -0.5f, -0.5f,  0.0f, vDiv,
+        -0.5f, -0.5f, -0.5f,  uDiv, vDiv,
+        0.5f, -0.5f, -0.5f,  0.0f, vDiv,
+        0.5f,  0.5f, -0.5f,  0.0f, 0,
+        0.5f,  0.5f, -0.5f,  0.0f, 0,
+        -0.5f,  0.5f, -0.5f,  uDiv, 0,
+        -0.5f, -0.5f, -0.5f,  uDiv, vDiv,
 
         -0.5f, -0.5f,  0.5f,  0.0f, 2*vDiv,
         0.5f, -0.5f,  0.5f,  uDiv, 2*vDiv,
@@ -165,9 +150,7 @@ int main()
 
 
     Mesh cubeMesh;
-
     cubeMesh.setVertex(cubeVertices, 36, 5*sizeof(float), cubeAttributes);
-
     cubeMesh.create();
 
 
@@ -185,34 +168,20 @@ int main()
 
     Texture texture(textureDir);
 
-    if (!texture.createTexture())
+    if (!texture.create())
     {
         std::cout << "Failed creating the texture\n";
         return 1;
     }
 
-
-    // model transform
-    glm::mat4 model = glm::mat4(1.0f);
+    Rendering::SimpleModel cube(&cubeMesh, &texture);
 
 
-
-    // camera code
-
-    // glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);          // translate camera 3 z-units       (camera is far away from objects)
-
-    // glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-    // glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
-
-    // glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
-    // float radius = 10.0f;
 
     Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
-
     // camera perspective to screen
-    glm::mat4 projection = glm::mat4(1.0f);
-    projection = glm::perspective(45.0f, 1200.0f / 800.0f, 0.1f, 100.0f);
+    glm::mat4 projection = glm::perspective(45.0f, 1200.0f / 800.0f, 0.1f, 100.0f); /// this should be updated when window changes size
 
 
 
@@ -227,6 +196,8 @@ int main()
     bool drawTriangles = true;
     glm::vec3 cubePosition = glm::vec3(0, 0, 0);
     glm::vec3 cubeDirection = glm::vec3(0.5f, 1.0f, 0.0f);
+
+    cube.setPosition(&cubePosition);
 
 
     // input initialization
@@ -267,34 +238,18 @@ int main()
 
         // if (!io.WantCaptureMouse)
         // {
-        //     // input handling here
+        //     // blocks anything here if mouse is over imgui
+        //     // input handling inside
         // }
-        processInput(window.getGLFWwindow(), input, deltaTime, cameraController);
+        //     // physics update outside (also update the position of everything)
+        processInput(window.getGLFWwindow(), input, deltaTime, cameraController);   // this should be changed later
 
-
-        // activate shader
-        // glUseProgram(shaderProgram);
-        shaderProgram.activate();
-
-
-        // model transformations
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, cubePosition);
-        model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), cubeDirection);
-
+        // // model transformations
+        // model = glm::mat4(1.0f);
+        // model = glm::translate(model, cubePosition);
+        // model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), cubeDirection);
 
         glm::mat4 view = camera.getViewMatrix();
-
-
-        unsigned int modelLoc = glGetUniformLocation(shaderProgram.getProgram(), "model");
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-
-        unsigned int viewLoc = glGetUniformLocation(shaderProgram.getProgram(), "view");
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-
-        unsigned int projectionLoc = glGetUniformLocation(shaderProgram.getProgram(), "projection");
-        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
-
 
         // float timeValue = glfwGetTime();
         // float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
@@ -318,20 +273,24 @@ int main()
 
         if (drawTriangles)
         {
-            texture.activateTexture();
+            // texture.activate();
 
-            cubeMesh.draw();
+            cube.setPosition(&cubePosition);
+
+            cube.draw(&shaderProgram, view, projection);
 
             for (int i = 0; i < 10; i++)
             {
-                glm::mat4 iModel = glm::mat4(1.0f);
-                iModel = glm::translate(iModel, cubePositions[i]);
-                float angle = 20.0f*i;
-                iModel = glm::rotate(iModel, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+                // glm::mat4 iModel = glm::mat4(1.0f);
+                // iModel = glm::translate(iModel, cubePositions[i]);
+                // float angle = 20.0f*i;
+                // iModel = glm::rotate(iModel, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
 
-                glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(iModel));
+                // shaderProgram.setUniformMat4("model", iModel);
 
-                cubeMesh.redraw();  // cube was previously drawn so we can redraw here
+                cube.setPosition(&cubePositions[i]);
+
+                cube.redraw(&shaderProgram);  // cube was previously drawn so we can redraw here
             }
 
         }
@@ -353,6 +312,14 @@ int main()
             cameraController = new CameraControllerFly(&camera);
             bindInputToController(input, cameraController);
         }
+        if (ImGui::Button("Camera fps"))
+        {
+            unbindInputToController(input);
+            if (cameraController != nullptr)
+                delete cameraController;
+            cameraController = new CameraControllerFps(&camera);
+            bindInputToController(input, cameraController);
+        }
         if (ImGui::Button("Camera orbit"))
         {
             unbindInputToController(input);
@@ -362,6 +329,7 @@ int main()
             bindInputToController(input, cameraController);
         }
         ImGui::Text("Frame number %u", nFrame);
+        ImGui::Text("FPS: %f", 1/deltaTime);
         ImGui::End();
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
