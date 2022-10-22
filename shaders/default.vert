@@ -1,36 +1,23 @@
 #version 330 core
 
-
-/////// PREVIOUS SHADER WITH TEXTURES AND THINGS
-// layout (location = 0) in vec3 aPos;   // the position variable has attribute position 0
-// // layout (location = 1) in vec3 aColor; // the color variable has attribute position 1
-// layout (location = 1) in vec2 aTexCoord; // the texture variable has attribute position 1
-
-// // uniform vec2 dPos;
-
-// uniform mat4 model;
-// uniform mat4 view;
-// uniform mat4 projection;
-
-// // out vec3 ourColor;
-// out vec2 TexCoord;
-
-// void main()
-// {
-//     // gl_Position = vec4(aPos.x + dPos.x, aPos.y + dPos.y, aPos.z, 1.0);
-//     gl_Position = projection * view * model * vec4(aPos, 1.0f);
-//     // ourColor = aColor;
-//     TexCoord = aTexCoord;
-// }
-
-
 layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec3 aNormal;
+layout (location = 2) in vec2 aTexCoords;
 
+out vec3 FragPos;
+out vec3 Normal;
+out vec2 TexCoords;
+
+uniform mat4 normalRotation;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
 void main()
 {
-    gl_Position = projection * view * model * vec4(aPos, 1.0);
+    FragPos = vec3(model * vec4(aPos, 1.0));
+    Normal = vec3(normalRotation * vec4(aNormal, 1.0));
+    TexCoords = aTexCoords;
+
+    gl_Position = projection * view * vec4(FragPos, 1.0);
 } 

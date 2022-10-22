@@ -85,7 +85,7 @@ void processInput(GLFWwindow *window, Input* input, float deltaTime, CameraContr
 std::string vertexDir = "shaders/default.vert";
 std::string fragmentDir = "shaders/default.frag";
 
-std::string textureDir = "textures/minecraft-grass.png";
+// std::string textureDir = "textures/container2.png";
 
 
 int main()
@@ -97,86 +97,161 @@ int main()
         return 1;
     }
 
-    float uDiv = 1.0f/4.0f;
-    float vDiv = 1.0f/3.0f;
-
-    float cubeVertices[] {
-        -0.5f, -0.5f, -0.5f,  uDiv, vDiv,
-        0.5f, -0.5f, -0.5f,  0.0f, vDiv,
-        0.5f,  0.5f, -0.5f,  0.0f, 0,
-        0.5f,  0.5f, -0.5f,  0.0f, 0,
-        -0.5f,  0.5f, -0.5f,  uDiv, 0,
-        -0.5f, -0.5f, -0.5f,  uDiv, vDiv,
-
-        -0.5f, -0.5f,  0.5f,  0.0f, 2*vDiv,
-        0.5f, -0.5f,  0.5f,  uDiv, 2*vDiv,
-        0.5f,  0.5f,  0.5f,  uDiv, 3*vDiv,
-        0.5f,  0.5f,  0.5f,  uDiv, 3*vDiv,
-        -0.5f,  0.5f,  0.5f,  0.0f, 3*vDiv,
-        -0.5f, -0.5f,  0.5f,  0.0f, 2*vDiv,
-
-        -0.5f,  0.5f,  0.5f,  3*uDiv, 2*vDiv,
-        -0.5f,  0.5f, -0.5f,  3*uDiv, vDiv,
-        -0.5f, -0.5f, -0.5f,  4*uDiv, vDiv,
-        -0.5f, -0.5f, -0.5f,  4*uDiv, vDiv,
-        -0.5f, -0.5f,  0.5f,  4*uDiv, 2*vDiv,
-        -0.5f,  0.5f,  0.5f,  3*uDiv, 2*vDiv,
-
-        0.5f,  0.5f,  0.5f,  2*uDiv, 2*vDiv,
-        0.5f,  0.5f, -0.5f,  2*uDiv, vDiv,
-        0.5f, -0.5f, -0.5f,  uDiv, vDiv,
-        0.5f, -0.5f, -0.5f,  uDiv, vDiv,
-        0.5f, -0.5f,  0.5f,  uDiv, 2*vDiv,
-        0.5f,  0.5f,  0.5f,  2*uDiv, 2*vDiv,
-
-        -0.5f, -0.5f, -0.5f,  0.0f, vDiv,
-        0.5f, -0.5f, -0.5f,  uDiv, vDiv,
-        0.5f, -0.5f,  0.5f,  uDiv, vDiv*2,
-        0.5f, -0.5f,  0.5f,  uDiv, vDiv*2,
-        -0.5f, -0.5f,  0.5f,  0.0f, vDiv*2,
-        -0.5f, -0.5f, -0.5f,  0.0f, vDiv,
-
-        -0.5f,  0.5f, -0.5f,  3*uDiv, vDiv,
-        0.5f,  0.5f, -0.5f,  2*uDiv, vDiv,
-        0.5f,  0.5f,  0.5f,  2*uDiv, vDiv*2,
-        0.5f,  0.5f,  0.5f,  2*uDiv, vDiv*2,
-        -0.5f,  0.5f,  0.5f,  3*uDiv, vDiv*2,
-        -0.5f,  0.5f, -0.5f,  3*uDiv, vDiv
-    };
-
-    std::vector<AttributeData> cubeAttributes;
-    cubeAttributes.push_back(AttributeData(3, 0));
-    cubeAttributes.push_back(AttributeData(2, (void*)(3*sizeof(float))));
-
-
-    Mesh cubeMesh;
-    cubeMesh.setVertex(cubeVertices, 36, 5*sizeof(float), cubeAttributes);
-    cubeMesh.create();
-
-
     // enables z-buffer
     glEnable(GL_DEPTH_TEST);
 
+    float lightCubeVertices[] = {
+        -0.5f, -0.5f, -0.5f,
+        0.5f, -0.5f, -0.5f,
+        0.5f,  0.5f, -0.5f,
+        0.5f,  0.5f, -0.5f,
+        -0.5f,  0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
+
+        -0.5f, -0.5f,  0.5f,
+        0.5f, -0.5f,  0.5f,
+        0.5f,  0.5f,  0.5f,
+        0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
+        -0.5f, -0.5f,  0.5f,
+
+        -0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
+
+        0.5f,  0.5f,  0.5f,
+        0.5f,  0.5f, -0.5f,
+        0.5f, -0.5f, -0.5f,
+        0.5f, -0.5f, -0.5f,
+        0.5f, -0.5f,  0.5f,
+        0.5f,  0.5f,  0.5f,
+
+        -0.5f, -0.5f, -0.5f,
+        0.5f, -0.5f, -0.5f,
+        0.5f, -0.5f,  0.5f,
+        0.5f, -0.5f,  0.5f,
+        -0.5f, -0.5f,  0.5f,
+        -0.5f, -0.5f, -0.5f,
+
+        -0.5f,  0.5f, -0.5f,
+        0.5f,  0.5f, -0.5f,
+        0.5f,  0.5f,  0.5f,
+        0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f, -0.5f
+    };
+
+    std::vector<AttributeData> lightCubeAttributes;
+    lightCubeAttributes.push_back(AttributeData(3, 0));
+    Mesh lightCubeMesh;
+    lightCubeMesh.setVertex(lightCubeVertices, 36, 3*sizeof(float), lightCubeAttributes);
+    lightCubeMesh.create();
+
+    Rendering::SimpleModel lightCube(&lightCubeMesh);
+    glm::vec3 lightCubePosition = glm::vec3( 0.7f,  0.2f,  2.0f);
+    lightCube.scale(0.2f);
+    lightCube.setPosition(&lightCubePosition);
+    glm::vec3 lightCubeColor = glm::vec3(1.0f, 1.0f, 1.0f);
+
+
+
+
+    float cubeVertices[] = {
+        // positions          // normals           // texture coords
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+        0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
+        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
+        0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
+        0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
+
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+
+        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+        0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+        0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+        0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+        0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+        0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
+        0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+        0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
+        0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
+        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
+    };
+
+
+
+
+    std::vector<AttributeData> cubeAttributes;
+    cubeAttributes.push_back(AttributeData(3, 0));
+    cubeAttributes.push_back(AttributeData(3, (void*)(3*sizeof(float))));
+    cubeAttributes.push_back(AttributeData(2, (void*)(6*sizeof(float))));
+
+    Mesh cubeMesh;
+    cubeMesh.setVertex(cubeVertices, 36, 8*sizeof(float), cubeAttributes);
+    cubeMesh.create();
+
+    Texture diffuseTexture("textures/container2.png");
+    if (!diffuseTexture.create())
+    {
+        LOG_ERROR("Failed creating the texture");
+        return 1;
+    }
+    Texture specularTexture("textures/container2_specular.png");
+    if (!specularTexture.create())
+    {
+        LOG_ERROR("Failed creating the texture");
+        return 1;
+    }
+    Texture emissionTexture("textures/matrix.jpg");
+    if (!emissionTexture.create())
+    {
+        LOG_ERROR("Failed creating the texture");
+        return 1;
+    }
+
+    Rendering::SimpleModel cube(&cubeMesh);
+
+
 
     ShaderProgram shaderProgram(vertexDir, fragmentDir);
-
     if(!shaderProgram.compileShaders())
     {
-        std::cout << "Failed compiling shader\n";
+        LOG_ERROR("Failed compiling shader");
         return 1;
     }
 
-    Texture texture(textureDir);
-
-    if (!texture.create())
+    ShaderProgram lightShader("shaders/light.vert", "shaders/light.frag");
+    if(!lightShader.compileShaders())
     {
-        std::cout << "Failed creating the texture\n";
+        LOG_ERROR("Failed compiling shader");
         return 1;
     }
-
-    Rendering::SimpleModel cube(&cubeMesh, &texture);
-
-
 
     Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
@@ -228,8 +303,8 @@ int main()
     while(!window.shouldClose())
     {
         // rendering commands here
-        glClearColor(0.3f, 0.3f, 0.35f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        GL(glClearColor(0.1f, 0.1f, 0.15f, 1.0f));
+        GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
         // ImGui newframe
         ImGui_ImplOpenGL3_NewFrame();
@@ -257,7 +332,6 @@ int main()
         // glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
 
         glm::vec3 cubePositions[] = {
-            glm::vec3( 0.0f,  0.0f,  0.0f),
             glm::vec3( 2.0f,  5.0f, -15.0f),
             glm::vec3(-1.5f, -2.2f, -2.5f),
             glm::vec3(-3.8f, -2.0f, -12.3f),
@@ -269,28 +343,94 @@ int main()
             glm::vec3(-1.3f,  1.0f, -1.5f)
         };
 
-
+        glm::vec3 pointLightPositions[] = {
+            lightCubePosition,
+            glm::vec3( 2.3f, -3.3f, -4.0f),
+            glm::vec3(-4.0f,  2.0f, -12.0f),
+            glm::vec3( 0.0f,  0.0f, -3.0f)
+        };
 
         if (drawTriangles)
         {
             // texture.activate();
+            shaderProgram.activate();   // need to activate before setting uniforms
+            // shaderProgram.setUniformVec3("lightColor", lightCubeColor);
+            // shaderProgram.setUniformVec3("objectColor", glm::vec3(1.0f, 0.5f, 0.31f));
+            // shaderProgram.setUniformVec3("lightPos", lightCubePosition);
+            shaderProgram.setUniformVec3("viewPos", camera.getPosition());
+
+            shaderProgram.setUniformVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
+            // shaderProgram.setUniformVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
+            shaderProgram.setUniformInt("material.diffuse", 0);
+            // shaderProgram.setUniformVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+            shaderProgram.setUniformInt("material.specular", 1);
+            shaderProgram.setUniformInt("material.emission", 2);
+            shaderProgram.setUniformFloat("material.shininess", 32.0f);
+
+            // point light loop
+            for (int i = 0; i < 4; i++)
+            {
+                shaderProgram.setUniformVec3("pointLights[" + std::to_string(i) + "].position", pointLightPositions[i]);
+
+                shaderProgram.setUniformFloat("pointLights[" + std::to_string(i) + "].constant", 1.0f);
+                shaderProgram.setUniformFloat("pointLights[" + std::to_string(i) + "].linear", 0.09f);
+                shaderProgram.setUniformFloat("pointLights[" + std::to_string(i) + "].cuadratic", 0.0032f);
+                
+
+                shaderProgram.setUniformVec3("pointLights[" + std::to_string(i) + "].ambient", glm::vec3(0.1f));
+                shaderProgram.setUniformVec3("pointLights[" + std::to_string(i) + "].diffuse", lightCubeColor * 0.5f);
+                shaderProgram.setUniformVec3("pointLights[" + std::to_string(i) + "].specular", lightCubeColor * 1.0f);
+
+            }
+            // directional light (the sun)
+            shaderProgram.setUniformVec3("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
+
+            shaderProgram.setUniformVec3("dirLight.ambient", glm::vec3(0.1f));
+            shaderProgram.setUniformVec3("dirLight.diffuse", lightCubeColor * 0.5f);
+            shaderProgram.setUniformVec3("dirLight.specular", lightCubeColor * 1.0f);
+
+            // spot light (flashlight)
+            shaderProgram.setUniformVec3("spotLight.position", camera.getPosition());
+            shaderProgram.setUniformVec3("spotLight.direction", camera.getFront());
+            shaderProgram.setUniformFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+            shaderProgram.setUniformFloat("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
+
+            shaderProgram.setUniformFloat("spotLight.constant", 1.0f);
+            shaderProgram.setUniformFloat("spotLight.linear", 0.09f);
+            shaderProgram.setUniformFloat("spotLight.quadratic", 0.0032f);
+
+            shaderProgram.setUniformVec3("spotLight.ambient", glm::vec3(0.1f));
+            shaderProgram.setUniformVec3("spotLight.diffuse", lightCubeColor *1.0f);
+            shaderProgram.setUniformVec3("spotLight.specular", lightCubeColor * 1.0f);
 
             cube.setPosition(&cubePosition);
+            cube.setOrientation(glm::radians(25.0f)*(float)glfwGetTime(), cubeDirection);
+            // cube.rotate(glm::radians(10.0f)*deltaTime, cubeDirection);
+
+            diffuseTexture.activate(0);
+            specularTexture.activate(1);
+            emissionTexture.activate(2);
 
             cube.draw(&shaderProgram, view, projection);
 
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 9; i++)
             {
-                // glm::mat4 iModel = glm::mat4(1.0f);
-                // iModel = glm::translate(iModel, cubePositions[i]);
-                // float angle = 20.0f*i;
-                // iModel = glm::rotate(iModel, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-
-                // shaderProgram.setUniformMat4("model", iModel);
-
                 cube.setPosition(&cubePositions[i]);
+                cube.setOrientation(glm::radians(20.0f*i), glm::vec3(1.0f, 0.3f, 0.5f));
 
                 cube.redraw(&shaderProgram);  // cube was previously drawn so we can redraw here
+            }
+
+            lightShader.activate();
+            lightShader.setUniformVec3("lightColor", lightCubeColor);
+
+            lightCube.setPosition(&pointLightPositions[0]);
+            lightCube.draw(&lightShader, view, projection);
+
+            for (int i = 1; i < 4; i++)
+            {
+                lightCube.setPosition(&pointLightPositions[i]);
+                lightCube.redraw(&lightShader);
             }
 
         }
@@ -300,8 +440,10 @@ int main()
         ImGui::Begin("My name is window, ImGUI window");
         ImGui::Text("Cube Controls");
         ImGui::Checkbox("Draw Triangles", &drawTriangles);
-        ImGui::SliderFloat3("Position", glm::value_ptr(cubePosition), -10.0f, 3.0f);
+        ImGui::SliderFloat3("Position", glm::value_ptr(cubePosition), -1.5f, 1.5f);
         ImGui::SliderFloat3("Direction", glm::value_ptr(cubeDirection), -1.0f, 1.0f);
+        ImGui::SliderFloat3("Light Position", glm::value_ptr(lightCubePosition), -2.0f, 2.0f);
+        ImGui::ColorEdit3("Light Color", glm::value_ptr(lightCubeColor));
         ImGui::Separator();
         ImGui::Text("Camera Controls");
         if (ImGui::Button("Camera fly"))
