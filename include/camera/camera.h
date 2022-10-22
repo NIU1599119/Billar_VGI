@@ -38,6 +38,8 @@ public:
 
     glm::vec3 getPlaneFront() { return -glm::normalize(glm::cross(m_right, m_worldUp)); };
 
+    glm::vec3 getPosition() { return m_position; };
+
 private:
     glm::quat m_orientation;
     glm::vec3 m_position;
