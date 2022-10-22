@@ -23,11 +23,20 @@ namespace Rendering {
     */
     public:
         SimpleModel() {};
-        SimpleModel(Mesh* mesh, Texture* texture) : m_mesh(mesh), m_texture(texture) {};
+        SimpleModel(Mesh* mesh, Texture* texture = nullptr) : m_mesh(mesh), m_texture(texture) {};
 
         void setPosition(glm::vec3* newPosition) { m_position = newPosition; };
 
-        void rotate(); // implement this later
+        void rotate(float angle, glm::vec3 direction) { // angle is in radians
+            glm::quat rotation = glm::angleAxis(angle, direction);
+            m_orientation = glm::normalize(m_orientation*rotation);
+        }; // implement this later
+
+        void setOrientation(float angle, glm::vec3 direction) { // angle is in radians
+            m_orientation = glm::normalize(glm::angleAxis(angle, direction));
+        }
+
+        void scale(float scale) { m_scaling = glm::vec3(scale); };
 
         void draw(ShaderProgram* shader, glm::mat4 view, glm::mat4 perspective);
 
@@ -42,6 +51,7 @@ namespace Rendering {
         glm::vec3* m_position;
         glm::quat m_orientation = glm::quat(0.0f, 0.0f, 1.0f, 0.0f);
         // could add a scaling vector later
+        glm::vec3 m_scaling = glm::vec3(1.0f);
 
         // could save the transformation mat4 here too
     };

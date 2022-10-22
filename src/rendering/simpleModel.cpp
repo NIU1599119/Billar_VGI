@@ -14,11 +14,16 @@ namespace Rendering {
         if (m_position != nullptr)
             translate = glm::translate(translate, *m_position);
         glm::mat4 rotate = glm::mat4_cast(m_orientation);
-        glm::mat4 model = translate * rotate;
+        glm::mat4 scale = glm::scale(glm::mat4(1.0f), m_scaling);
+        glm::mat4 model = translate * rotate * scale;
 
+        // shader activation
+        shader->activate();
+        shader->setUniformMat4("normalRotation", rotate);
         shader->setUniformMat4("model", model);
         shader->setUniformMat4("view", view);
         shader->setUniformMat4("projection", projection);
+
 
         m_mesh->draw();
     }
@@ -49,8 +54,10 @@ namespace Rendering {
         if (m_position != nullptr)
             translate = glm::translate(translate, *m_position);
         glm::mat4 rotate = glm::mat4_cast(m_orientation);
-        glm::mat4 model = translate * rotate;
+        glm::mat4 scale = glm::scale(glm::mat4(1.0f), m_scaling);
+        glm::mat4 model = translate * rotate * scale;
 
+        shader->setUniformMat4("normalRotation", rotate);
         shader->setUniformMat4("model", model);
 
         m_mesh->redraw();
