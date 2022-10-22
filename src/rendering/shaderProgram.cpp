@@ -62,9 +62,9 @@ bool ShaderProgram::compileShaders() {
     success = checkProgramLinking(shaderProgram);
     if (!success) return false;
     
-    GL(glUseProgram(shaderProgram));
-    GL(glDeleteShader(vertexShader));
-    GL(glDeleteShader(fragmentShader));
+    // GL(glUseProgram(shaderProgram));
+    // GL(glDeleteShader(vertexShader));
+    // GL(glDeleteShader(fragmentShader));
 
     m_shaderProgram = shaderProgram;
 
@@ -126,7 +126,27 @@ bool ShaderProgram::checkProgramLinking(unsigned int programID)
 
 void ShaderProgram::setUniformMat4(std::string name, glm::mat4 uniformMat4)
 {
-    unsigned int uniformLoc = glGetUniformLocation(m_shaderProgram, name.c_str());
-    glUniformMatrix4fv(uniformLoc, 1, GL_FALSE, glm::value_ptr(uniformMat4));
+    unsigned int uniformLoc = GL(glGetUniformLocation(m_shaderProgram, name.c_str()));
+    GL(glUniformMatrix4fv(uniformLoc, 1, GL_FALSE, glm::value_ptr(uniformMat4)));
 }
 
+void ShaderProgram::setUniformVec3(std::string name, glm::vec3 uniformVec3)
+{
+    // activate(); // es mejor activar antes de poner todos los uniforms
+    unsigned int uniformLoc = GL(glGetUniformLocation(m_shaderProgram, name.c_str()));
+    GL(glUniform3f(uniformLoc, uniformVec3.x, uniformVec3.y, uniformVec3.z));
+}
+
+void ShaderProgram::setUniformFloat(std::string name, float uniformFloat)
+{
+    // activate(); // es mejor activar antes de poner todos los uniforms
+    unsigned int uniformLoc = GL(glGetUniformLocation(m_shaderProgram, name.c_str()));
+    GL(glUniform1f(uniformLoc, uniformFloat));
+}
+
+void ShaderProgram::setUniformInt(std::string name, int uniformInt)
+{
+    // activate(); // es mejor activar antes de poner todos los uniforms
+    unsigned int uniformLoc = GL(glGetUniformLocation(m_shaderProgram, name.c_str()));
+    GL(glUniform1i(uniformLoc, uniformInt));
+}

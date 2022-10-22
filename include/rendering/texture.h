@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 
 #include <string>
+#include "debug.h"
 
 class Texture {
 /*
@@ -14,7 +15,7 @@ public:
     ~Texture() {};
 
     bool create();
-    void activate();
+    void activate(int id = 0); // default id is 0
 
 
 private:

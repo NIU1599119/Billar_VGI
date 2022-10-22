@@ -19,6 +19,9 @@ public:
     // add more when needed
 
     void setUniformMat4(std::string name, glm::mat4 uniformMat4); // this is for the model view projection matrices mainly
+    void setUniformVec3(std::string name, glm::vec3 uniformVec3);
+    void setUniformFloat(std::string name, float uniformFloat);
+    void setUniformInt(std::string name, int uniformInt);
 
 
 private:
