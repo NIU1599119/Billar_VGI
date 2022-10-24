@@ -1,5 +1,5 @@
 
-#include "rendering/shaderProgram.h"
+#include "rendering/shader.h"
 #include "gl_utils.h"
 #include "debug.h"
 
@@ -26,7 +26,7 @@ std::string readShaderFile(std::string dir) {
 }
 
 
-bool ShaderProgram::compileShaders() {
+bool Shader::compileShaders() {
     
     std::string vertShaderStr = readShaderFile(m_vertexPath);
     std::string fragShaderStr = readShaderFile(m_fragmentPath);
@@ -74,7 +74,7 @@ bool ShaderProgram::compileShaders() {
 }
 
 
-bool ShaderProgram::checkShaderCompilation(unsigned int shaderID, unsigned int type)
+bool Shader::checkShaderCompilation(unsigned int shaderID, unsigned int type)
 {
     int  success;
     char infoLog[512];
@@ -106,7 +106,7 @@ bool ShaderProgram::checkShaderCompilation(unsigned int shaderID, unsigned int t
     return true;
 }
 
-bool ShaderProgram::checkProgramLinking(unsigned int programID)
+bool Shader::checkProgramLinking(unsigned int programID)
 {
     int success;
     char infoLog[512];
@@ -124,27 +124,27 @@ bool ShaderProgram::checkProgramLinking(unsigned int programID)
 
 
 
-void ShaderProgram::setUniformMat4(std::string name, glm::mat4 uniformMat4)
+void Shader::setUniformMat4(std::string name, glm::mat4 uniformMat4)
 {
     unsigned int uniformLoc = GL(glGetUniformLocation(m_shaderProgram, name.c_str()));
     GL(glUniformMatrix4fv(uniformLoc, 1, GL_FALSE, glm::value_ptr(uniformMat4)));
 }
 
-void ShaderProgram::setUniformVec3(std::string name, glm::vec3 uniformVec3)
+void Shader::setUniformVec3(std::string name, glm::vec3 uniformVec3)
 {
     // activate(); // es mejor activar antes de poner todos los uniforms
     unsigned int uniformLoc = GL(glGetUniformLocation(m_shaderProgram, name.c_str()));
     GL(glUniform3f(uniformLoc, uniformVec3.x, uniformVec3.y, uniformVec3.z));
 }
 
-void ShaderProgram::setUniformFloat(std::string name, float uniformFloat)
+void Shader::setUniformFloat(std::string name, float uniformFloat)
 {
     // activate(); // es mejor activar antes de poner todos los uniforms
     unsigned int uniformLoc = GL(glGetUniformLocation(m_shaderProgram, name.c_str()));
     GL(glUniform1f(uniformLoc, uniformFloat));
 }
 
-void ShaderProgram::setUniformInt(std::string name, int uniformInt)
+void Shader::setUniformInt(std::string name, int uniformInt)
 {
     // activate(); // es mejor activar antes de poner todos los uniforms
     unsigned int uniformLoc = GL(glGetUniformLocation(m_shaderProgram, name.c_str()));

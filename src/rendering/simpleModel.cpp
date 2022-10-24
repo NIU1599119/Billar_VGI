@@ -1,10 +1,10 @@
 
 #include "rendering/simpleModel.h"
 
-namespace Rendering {
+namespace RenderingTemp {
 
 
-    void SimpleModel::draw(ShaderProgram* shader, glm::mat4 view, glm::mat4 projection)
+    void SimpleModel::draw(Shader* shader, glm::mat4 view, glm::mat4 projection)
     {
         if (m_texture != nullptr)
             m_texture->activate();
@@ -28,7 +28,7 @@ namespace Rendering {
         m_mesh->draw();
     }
 
-    void SimpleModel::redraw(ShaderProgram* shader)
+    void SimpleModel::redraw(Shader* shader)
     {
 
         /*

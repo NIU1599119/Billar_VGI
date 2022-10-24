@@ -1,8 +1,8 @@
 #pragma once
 
-#include "mesh.h"
-#include "shader.h"
-#include "texture.h"
+#include "rendering/flexibleMesh.h"
+#include "rendering/shader.h"
+#include "rendering/texture.h"
 
 #include "debug.h"
 
