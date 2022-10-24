@@ -9,9 +9,9 @@
 #include "window.h"
 #include "gl_utils.h"
 
-#include "rendering/shaderProgram.h"
+#include "rendering/shader.h"
 #include "rendering/texture.h"
-#include "rendering/mesh.h"
+#include "rendering/flexibleMesh.h"
 
 #include "rendering/simpleModel.h"
 
@@ -150,7 +150,7 @@ int main()
     lightCubeMesh.setVertex(lightCubeVertices, 36, 3*sizeof(float), lightCubeAttributes);
     lightCubeMesh.create();
 
-    Rendering::SimpleModel lightCube(&lightCubeMesh);
+    RenderingTemp::SimpleModel lightCube(&lightCubeMesh);
     glm::vec3 lightCubePosition = glm::vec3( 0.7f,  0.2f,  2.0f);
     lightCube.scale(0.2f);
     lightCube.setPosition(&lightCubePosition);
@@ -235,18 +235,18 @@ int main()
         return 1;
     }
 
-    Rendering::SimpleModel cube(&cubeMesh);
+    RenderingTemp::SimpleModel cube(&cubeMesh);
 
 
 
-    ShaderProgram shaderProgram(vertexDir, fragmentDir);
-    if(!shaderProgram.compileShaders())
+    Shader basicShader(vertexDir, fragmentDir);
+    if(!basicShader.compileShaders())
     {
         LOG_ERROR("Failed compiling shader");
         return 1;
     }
 
-    ShaderProgram lightShader("shaders/light.vert", "shaders/light.frag");
+    Shader lightShader("shaders/light.vert", "shaders/light.frag");
     if(!lightShader.compileShaders())
     {
         LOG_ERROR("Failed compiling shader");
@@ -328,7 +328,7 @@ int main()
 
         // float timeValue = glfwGetTime();
         // float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
-        // int vertexColorLocation = glGetUniformLocation(shaderProgram.getProgram(), "ourColor");
+        // int vertexColorLocation = glGetUniformLocation(basicShader.getProgram(), "ourColor");
         // glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
 
         glm::vec3 cubePositions[] = {
@@ -353,55 +353,55 @@ int main()
         if (drawTriangles)
         {
             // texture.activate();
-            shaderProgram.activate();   // need to activate before setting uniforms
-            // shaderProgram.setUniformVec3("lightColor", lightCubeColor);
-            // shaderProgram.setUniformVec3("objectColor", glm::vec3(1.0f, 0.5f, 0.31f));
-            // shaderProgram.setUniformVec3("lightPos", lightCubePosition);
-            shaderProgram.setUniformVec3("viewPos", camera.getPosition());
+            basicShader.activate();   // need to activate before setting uniforms
+            // basicShader.setUniformVec3("lightColor", lightCubeColor);
+            // basicShader.setUniformVec3("objectColor", glm::vec3(1.0f, 0.5f, 0.31f));
+            // basicShader.setUniformVec3("lightPos", lightCubePosition);
+            basicShader.setUniformVec3("viewPos", camera.getPosition());
 
-            shaderProgram.setUniformVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
-            // shaderProgram.setUniformVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
-            shaderProgram.setUniformInt("material.diffuse", 0);
-            // shaderProgram.setUniformVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
-            shaderProgram.setUniformInt("material.specular", 1);
-            shaderProgram.setUniformInt("material.emission", 2);
-            shaderProgram.setUniformFloat("material.shininess", 32.0f);
+            basicShader.setUniformVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
+            // basicShader.setUniformVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
+            basicShader.setUniformInt("material.diffuse", 0);
+            // basicShader.setUniformVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+            basicShader.setUniformInt("material.specular", 1);
+            basicShader.setUniformInt("material.emission", 2);
+            basicShader.setUniformFloat("material.shininess", 32.0f);
 
             // point light loop
             for (int i = 0; i < 4; i++)
             {
-                shaderProgram.setUniformVec3("pointLights[" + std::to_string(i) + "].position", pointLightPositions[i]);
+                basicShader.setUniformVec3("pointLights[" + std::to_string(i) + "].position", pointLightPositions[i]);
 
-                shaderProgram.setUniformFloat("pointLights[" + std::to_string(i) + "].constant", 1.0f);
-                shaderProgram.setUniformFloat("pointLights[" + std::to_string(i) + "].linear", 0.09f);
-                shaderProgram.setUniformFloat("pointLights[" + std::to_string(i) + "].cuadratic", 0.0032f);
+                basicShader.setUniformFloat("pointLights[" + std::to_string(i) + "].constant", 1.0f);
+                basicShader.setUniformFloat("pointLights[" + std::to_string(i) + "].linear", 0.09f);
+                basicShader.setUniformFloat("pointLights[" + std::to_string(i) + "].cuadratic", 0.0032f);
                 
 
-                shaderProgram.setUniformVec3("pointLights[" + std::to_string(i) + "].ambient", glm::vec3(0.1f));
-                shaderProgram.setUniformVec3("pointLights[" + std::to_string(i) + "].diffuse", lightCubeColor * 0.5f);
-                shaderProgram.setUniformVec3("pointLights[" + std::to_string(i) + "].specular", lightCubeColor * 1.0f);
+                basicShader.setUniformVec3("pointLights[" + std::to_string(i) + "].ambient", glm::vec3(0.1f));
+                basicShader.setUniformVec3("pointLights[" + std::to_string(i) + "].diffuse", lightCubeColor * 0.5f);
+                basicShader.setUniformVec3("pointLights[" + std::to_string(i) + "].specular", lightCubeColor * 1.0f);
 
             }
             // directional light (the sun)
-            shaderProgram.setUniformVec3("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
+            basicShader.setUniformVec3("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
 
-            shaderProgram.setUniformVec3("dirLight.ambient", glm::vec3(0.1f));
-            shaderProgram.setUniformVec3("dirLight.diffuse", lightCubeColor * 0.5f);
-            shaderProgram.setUniformVec3("dirLight.specular", lightCubeColor * 1.0f);
+            basicShader.setUniformVec3("dirLight.ambient", glm::vec3(0.1f));
+            basicShader.setUniformVec3("dirLight.diffuse", lightCubeColor * 0.5f);
+            basicShader.setUniformVec3("dirLight.specular", lightCubeColor * 1.0f);
 
             // spot light (flashlight)
-            shaderProgram.setUniformVec3("spotLight.position", camera.getPosition());
-            shaderProgram.setUniformVec3("spotLight.direction", camera.getFront());
-            shaderProgram.setUniformFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
-            shaderProgram.setUniformFloat("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
+            basicShader.setUniformVec3("spotLight.position", camera.getPosition());
+            basicShader.setUniformVec3("spotLight.direction", camera.getFront());
+            basicShader.setUniformFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+            basicShader.setUniformFloat("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
 
-            shaderProgram.setUniformFloat("spotLight.constant", 1.0f);
-            shaderProgram.setUniformFloat("spotLight.linear", 0.09f);
-            shaderProgram.setUniformFloat("spotLight.quadratic", 0.0032f);
+            basicShader.setUniformFloat("spotLight.constant", 1.0f);
+            basicShader.setUniformFloat("spotLight.linear", 0.09f);
+            basicShader.setUniformFloat("spotLight.quadratic", 0.0032f);
 
-            shaderProgram.setUniformVec3("spotLight.ambient", glm::vec3(0.1f));
-            shaderProgram.setUniformVec3("spotLight.diffuse", lightCubeColor *1.0f);
-            shaderProgram.setUniformVec3("spotLight.specular", lightCubeColor * 1.0f);
+            basicShader.setUniformVec3("spotLight.ambient", glm::vec3(0.1f));
+            basicShader.setUniformVec3("spotLight.diffuse", lightCubeColor *1.0f);
+            basicShader.setUniformVec3("spotLight.specular", lightCubeColor * 1.0f);
 
             cube.setPosition(&cubePosition);
             cube.setOrientation(glm::radians(25.0f)*(float)glfwGetTime(), cubeDirection);
@@ -411,14 +411,14 @@ int main()
             specularTexture.activate(1);
             emissionTexture.activate(2);
 
-            cube.draw(&shaderProgram, view, projection);
+            cube.draw(&basicShader, view, projection);
 
             for (int i = 0; i < 9; i++)
             {
                 cube.setPosition(&cubePositions[i]);
                 cube.setOrientation(glm::radians(20.0f*i), glm::vec3(1.0f, 0.3f, 0.5f));
 
-                cube.redraw(&shaderProgram);  // cube was previously drawn so we can redraw here
+                cube.redraw(&basicShader);  // cube was previously drawn so we can redraw here
             }
 
             lightShader.activate();

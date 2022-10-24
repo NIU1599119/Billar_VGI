@@ -22,7 +22,16 @@ project "OpenGLBoilerPlate"
     targetdir "bin/%{cfg.buildcfg}"
     objdir "obj/%{cfg.buildcfg}"
 
-    includedirs { "include/", "libs/glad/include/", "libs/glfw/include/", "libs/glm/", "libs/imgui/", "libs/imgui/examples", "libs/stb/include" }
+    includedirs {
+        "include/",
+        "libs/glad/include/",
+        "libs/glfw/include/",
+        "libs/glm/",
+        "libs/imgui/",
+        "libs/imgui/examples",
+        "libs/stb/include",
+        "libs/assimp/include"
+    }
     
     files { "src/**.cpp" }
 
@@ -40,3 +49,4 @@ include "libs/glfw.lua"
 include "libs/glad.lua"
 include "libs/glm.lua"
 include "libs/imgui.lua"
+include "libs/assimp.lua"
