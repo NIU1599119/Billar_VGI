@@ -152,6 +152,7 @@ project '*'
 	}
 project 'assimp'
 	kind 'StaticLib'
+	architecture "x86_64"
 	warnings 'Off'
 	optimize 'Speed'
 
@@ -167,7 +168,8 @@ project 'assimp'
 		'assimp/contrib/unzip/',
 		'assimp/contrib/rapidjson/include/',
         -- 'assimp/contrib/pugixml/src/',		-- required for collada?
-		'assimp/code'
+		'assimp/code/',
+		'assimp/contrib/zlib/'
 	}
 	files {
 		-- Dependencies
@@ -262,4 +264,31 @@ project 'assimp'
 		'ASSIMP_BUILD_NO_ASSJSON_EXPORTER'
 	}
 
+	filter "system:linux"
+		pic "On"
 
+		systemversion "latest"
+		staticruntime "On"
+
+		defines
+		{
+			"_ASSIMP_X11"
+		}
+
+	filter "system:windows"
+		systemversion "latest"
+		staticruntime "On"
+
+		defines 
+		{ 
+			"_ASSIMP_WIN32",
+			"_CRT_SECURE_NO_WARNINGS"
+		}
+
+	filter "configurations:Debug"
+		runtime "Debug"
+		symbols "on"
+
+	filter "configurations:Release"
+		runtime "Release"
+		optimize "on"

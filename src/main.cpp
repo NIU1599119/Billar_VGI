@@ -307,7 +307,7 @@ int main()
 
 
     // here goes the backpack
-    Rendering::Model backpack("models/pool-table2/Pool table Cavicchi Leonardo 9FT N300818.3ds");
+    Rendering::Model backpack("models/backpack/backpack.obj");
 
 
     unsigned int nFrame = 0;
@@ -450,7 +450,7 @@ int main()
 
             modelShader.activate();
 
-            basicShader.setUniformVec3("viewPos", camera.getPosition());
+            modelShader.setUniformVec3("viewPos", camera.getPosition());
 
             // point light loop
             for (int i = 0; i < 4; i++)
@@ -489,7 +489,7 @@ int main()
             modelShader.setUniformVec3("spotLight.specular", lightCubeColor * 1.0f);
 
             glm::mat4 ballModel = glm::mat4(1.0f);
-            ballModel = glm::scale(ballModel, glm::vec3(0.002f, 0.002f, 0.002f));
+            //ballModel = glm::scale(ballModel, glm::vec3(0.002f, 0.002f, 0.002f));
             modelShader.setUniformMat4("model", ballModel);
             modelShader.setUniformMat4("normalRotation", glm::mat4(1.0f));  // only the rotation part of the model
             modelShader.setUniformMat4("view", view);
