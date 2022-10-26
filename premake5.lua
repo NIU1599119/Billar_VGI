@@ -35,7 +35,7 @@ project "OpenGLBoilerPlate"
     
     files { "src/**.cpp" }
 
-    links { "GLFW", "GLM", "GLAD", "ImGui" }
+    links { "GLFW", "GLM", "GLAD", "ImGui", "assimp" }
 
     filter "system:linux"
         links { "dl", "pthread" }

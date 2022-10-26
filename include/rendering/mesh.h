@@ -21,13 +21,14 @@ namespace Rendering {
     struct Texture {
         unsigned int id;
         std::string type;
+        std::string path;
     };
 
 
     class Mesh {
         public:
             Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
-            void Draw(Shader *shader);
+            void draw(Shader *shader);
 
         private:
             unsigned int m_VAO, m_VBO, m_EBO;

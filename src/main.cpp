@@ -15,6 +15,8 @@
 
 #include "rendering/simpleModel.h"
 
+#include "rendering/model.h"
+
 
 #include "camera/camera.h"
 // #include "input.h" // included in window
@@ -246,6 +248,13 @@ int main()
         return 1;
     }
 
+    Shader modelShader("shaders/model.vert", "shaders/model.frag");
+    if(!modelShader.compileShaders())
+    {
+        LOG_ERROR("Failed compiling shader");
+        return 1;
+    }
+
     Shader lightShader("shaders/light.vert", "shaders/light.frag");
     if(!lightShader.compileShaders())
     {
@@ -269,10 +278,11 @@ int main()
 
 
     bool drawTriangles = true;
-    glm::vec3 cubePosition = glm::vec3(0, 0, 0);
+    glm::vec3 cubePosition = glm::vec3(1.0f, 1.0f, 1.0f);
     glm::vec3 cubeDirection = glm::vec3(0.5f, 1.0f, 0.0f);
 
     cube.setPosition(&cubePosition);
+    cube.scale(0.4f);
 
 
     // input initialization
@@ -294,6 +304,10 @@ int main()
 
     CameraController* cameraController = new CameraControllerOrbit(&camera, 2.5f, 3.0f, &cubePosition);
     bindInputToController(input, cameraController);
+
+
+    // here goes the backpack
+    Rendering::Model backpack("models/pool-table2/Pool table Cavicchi Leonardo 9FT N300818.3ds");
 
 
     unsigned int nFrame = 0;
@@ -364,7 +378,7 @@ int main()
             basicShader.setUniformInt("material.diffuse", 0);
             // basicShader.setUniformVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
             basicShader.setUniformInt("material.specular", 1);
-            basicShader.setUniformInt("material.emission", 2);
+            // basicShader.setUniformInt("material.emission", 2);
             basicShader.setUniformFloat("material.shininess", 32.0f);
 
             // point light loop
@@ -422,6 +436,7 @@ int main()
             }
 
             lightShader.activate();
+            lightShader.setUniformVec3("viewPos", camera.getPosition());
             lightShader.setUniformVec3("lightColor", lightCubeColor);
 
             lightCube.setPosition(&pointLightPositions[0]);
@@ -432,6 +447,57 @@ int main()
                 lightCube.setPosition(&pointLightPositions[i]);
                 lightCube.redraw(&lightShader);
             }
+
+            modelShader.activate();
+
+            basicShader.setUniformVec3("viewPos", camera.getPosition());
+
+            // point light loop
+            for (int i = 0; i < 4; i++)
+            {
+                modelShader.setUniformVec3("pointLights[" + std::to_string(i) + "].position", pointLightPositions[i]);
+
+                modelShader.setUniformFloat("pointLights[" + std::to_string(i) + "].constant", 1.0f);
+                modelShader.setUniformFloat("pointLights[" + std::to_string(i) + "].linear", 0.09f);
+                modelShader.setUniformFloat("pointLights[" + std::to_string(i) + "].cuadratic", 0.0032f);
+                
+
+                modelShader.setUniformVec3("pointLights[" + std::to_string(i) + "].ambient", glm::vec3(0.1f));
+                modelShader.setUniformVec3("pointLights[" + std::to_string(i) + "].diffuse", lightCubeColor * 0.5f);
+                modelShader.setUniformVec3("pointLights[" + std::to_string(i) + "].specular", lightCubeColor * 1.0f);
+
+            }
+            // directional light (the sun)
+            modelShader.setUniformVec3("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
+
+            modelShader.setUniformVec3("dirLight.ambient", glm::vec3(0.1f));
+            modelShader.setUniformVec3("dirLight.diffuse", lightCubeColor * 0.5f);
+            modelShader.setUniformVec3("dirLight.specular", lightCubeColor * 1.0f);
+
+            // spot light (flashlight)
+            modelShader.setUniformVec3("spotLight.position", camera.getPosition());
+            modelShader.setUniformVec3("spotLight.direction", camera.getFront());
+            modelShader.setUniformFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+            modelShader.setUniformFloat("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
+
+            modelShader.setUniformFloat("spotLight.constant", 1.0f);
+            modelShader.setUniformFloat("spotLight.linear", 0.09f);
+            modelShader.setUniformFloat("spotLight.quadratic", 0.0032f);
+
+            modelShader.setUniformVec3("spotLight.ambient", glm::vec3(0.1f));
+            modelShader.setUniformVec3("spotLight.diffuse", lightCubeColor *1.0f);
+            modelShader.setUniformVec3("spotLight.specular", lightCubeColor * 1.0f);
+
+            glm::mat4 ballModel = glm::mat4(1.0f);
+            ballModel = glm::scale(ballModel, glm::vec3(0.002f, 0.002f, 0.002f));
+            modelShader.setUniformMat4("model", ballModel);
+            modelShader.setUniformMat4("normalRotation", glm::mat4(1.0f));  // only the rotation part of the model
+            modelShader.setUniformMat4("view", view);
+            modelShader.setUniformMat4("projection", projection);
+
+            modelShader.setUniformFloat("material.shininess", 32.0f);
+
+            backpack.draw(&modelShader);
 
         }
 
