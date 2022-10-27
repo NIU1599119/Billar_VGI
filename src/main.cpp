@@ -307,8 +307,8 @@ int main()
 
 
     // here goes the backpack
-    Rendering::Model backpack("models/backpack/backpack.obj");
-
+    //Rendering::Model backpack("models/backpack/backpack.obj");
+    Rendering::Model pooltable("models/pooltable/Pool table Cavicchi Leonardo 9FT N300818.3ds");
 
     unsigned int nFrame = 0;
     float deltaTime = 0.0f;	// Time between current frame and last frame
@@ -489,7 +489,7 @@ int main()
             modelShader.setUniformVec3("spotLight.specular", lightCubeColor * 1.0f);
 
             glm::mat4 ballModel = glm::mat4(1.0f);
-            //ballModel = glm::scale(ballModel, glm::vec3(0.002f, 0.002f, 0.002f));
+            ballModel = glm::scale(ballModel, glm::vec3(0.002f, 0.002f, 0.002f));
             modelShader.setUniformMat4("model", ballModel);
             modelShader.setUniformMat4("normalRotation", glm::mat4(1.0f));  // only the rotation part of the model
             modelShader.setUniformMat4("view", view);
@@ -497,8 +497,8 @@ int main()
 
             modelShader.setUniformFloat("material.shininess", 32.0f);
 
-            backpack.draw(&modelShader);
-
+            //backpack.draw(&modelShader);
+            pooltable.draw(&modelShader);
         }
 
 
