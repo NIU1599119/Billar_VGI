@@ -1,8 +1,8 @@
 #pragma once
 
-#include "mesh.h"
-#include "shaderProgram.h"
-#include "texture.h"
+#include "rendering/flexibleMesh.h"
+#include "rendering/shader.h"
+#include "rendering/texture.h"
 
 #include "debug.h"
 
@@ -15,7 +15,7 @@
 #include <vector>
 
 
-namespace Rendering {
+namespace RenderingTemp {
 
     class SimpleModel {
     /*
@@ -38,9 +38,9 @@ namespace Rendering {
 
         void scale(float scale) { m_scaling = glm::vec3(scale); };
 
-        void draw(ShaderProgram* shader, glm::mat4 view, glm::mat4 perspective);
+        void draw(Shader* shader, glm::mat4 view, glm::mat4 perspective);
 
-        void redraw(ShaderProgram* shader);
+        void redraw(Shader* shader);
 
 
     private:
