@@ -30,12 +30,13 @@ project "OpenGLBoilerPlate"
         "libs/imgui/",
         "libs/imgui/examples",
         "libs/stb/include",
-        "libs/assimp/include"
+        "libs/assimp/include",
+        "libs/bullet/src"
     }
 
     files { "src/**.cpp" }
 
-    links { "GLFW", "GLM", "GLAD", "ImGui", "assimp" }
+    links { "GLFW", "GLM", "GLAD", "ImGui", "assimp", "bullet" }
 
     filter "system:linux"
         pic "On"
@@ -66,3 +67,4 @@ include "libs/glad.lua"
 include "libs/glm.lua"
 include "libs/imgui.lua"
 include "libs/assimp.lua"
+include "libs/bullet.lua"
