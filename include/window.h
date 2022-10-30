@@ -30,6 +30,8 @@ public:
 
     bool shouldClose() { return glfwWindowShouldClose(m_window); };
 
+    void close() { glfwSetWindowShouldClose(m_window, true); }
+
     void setVSync(bool enabled);
 
     Input* getInput() { return &m_data.input; }

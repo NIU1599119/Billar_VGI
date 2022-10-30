@@ -3,9 +3,9 @@
 
 void Input::updateCursor(float newX, float newY)
 {
-    if (m_mouseLock)
+    if (!m_mouseCapture)
     {
-        // LOG_DEBUG("Mouse Locked (mouse should be free from the window)");
+        // LOG_DEBUG("Mouse not captured (mouse should be free from the window)");
         return;
     }
 

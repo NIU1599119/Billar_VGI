@@ -11,6 +11,7 @@ enum ACTIONS {
     MOVE_BACKWARDS,
     MOVE_LEFT,
     MOVE_RIGHT,
+    SWITCH_MOUSE,
     EXIT
 };
 
@@ -18,6 +19,10 @@ enum ACTIONS {
 class Input {
 public:
 
+    struct eventKey {
+        int key;
+        bool isPressed;
+    };
 
     ///////// KEYBOARD /////////
 
@@ -27,6 +32,13 @@ public:
         if (isPolling)
         {
             m_pollingKeys.push_back(key);
+        }
+        else// isEvent
+        {
+            eventKey ek;
+            ek.key = key;
+            ek.isPressed = false;
+            m_eventKeys.push_back(ek);
         }
     }
 
@@ -52,7 +64,8 @@ public:
 
     void removeActionFunction(ACTIONS action) { m_actions.erase(action); };
 
-    std::vector<int> getPollingKeys() { return m_pollingKeys; };
+    std::vector<int>* getPollingKeys() { return &m_pollingKeys; };
+    std::vector<eventKey>* getEventKeys() { return &m_eventKeys; };
 
     void pressKey(int key, float deltaTime) { m_actions[m_keys[key]](deltaTime); };
 
@@ -62,9 +75,11 @@ public:
 
     void setMouseCallback(std::function<void(float, float)> mouseCallback) { m_mouseCallback = mouseCallback; };
 
-    void lockMouse() { m_mouseLock = true; };
+    void captureMouse() { m_mouseCapture = true; };
 
-    void unlockMouse() { m_mouseLock = false; m_mouseReset = true; };
+    void uncaptureMouse() { m_mouseCapture = false; m_mouseReset = true; };
+
+    bool mouseIsCaptured() { return m_mouseCapture; };
 
 private:
     ///////// KEYBOARD /////////
@@ -78,6 +93,7 @@ private:
     // std::vector<ACTIONS> m_callbackKeys; // use this to iterate keys in callback function?
 
     std::vector<int> m_pollingKeys;
+    std::vector<eventKey> m_eventKeys;
 
     ////////// MOUSE ///////////
     float m_sensitivity = 0.1f;
@@ -86,15 +102,11 @@ private:
     float m_mouseY;
 
     bool m_mouseReset = true;
-    bool m_mouseLock = false;
+    bool m_mouseCapture = false;
     bool m_mouseOffset = true; // pass offset(true) or position(false)
 
     std::function<void(float, float)> m_mouseCallback;
 
 };
-
-
-
-
 
 

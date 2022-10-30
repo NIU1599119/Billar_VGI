@@ -30,56 +30,34 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-bool mouseCapture = false;
-bool pressing = true;
-
 
 // funciones
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
-    Input* input = &((WindowData *)glfwGetWindowUserPointer(window))->input;
-    input->updateCursor(xpos, ypos);
+    ((WindowData *)glfwGetWindowUserPointer(window))->input.updateCursor(xpos, ypos);
 }
 
-void processInput(GLFWwindow *window, Input* input, float deltaTime, CameraController* controller)
+void processInput(GLFWwindow *window, Input* input, float deltaTime)
 {
-
-    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS)
+    std::vector<Input::eventKey>* ekeys = input->getEventKeys();
+    for (int i = 0; i < ekeys->size(); i++)
     {
-        pressing = true;
-    }
-    else
-    {
-        if (pressing)
+        if (glfwGetKey(window, (*ekeys)[i].key) == GLFW_RELEASE && (*ekeys)[i].isPressed)
         {
-            if (mouseCapture)
-            {
-                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-                input->lockMouse();
-            }
-            else
-            {
-                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-                input->unlockMouse();
-            }
-            mouseCapture = !mouseCapture;
+            input->pressKey((*ekeys)[i].key, deltaTime);
+            (*ekeys)[i].isPressed = false;
         }
-        pressing = false;
+        else if (glfwGetKey(window, (*ekeys)[i].key) == GLFW_PRESS)
+            (*ekeys)[i].isPressed = true;
     }
 
-    if (glfwGetKey(window, GLFW_KEY_BACKSPACE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
-
-    std::vector<int> keys = input->getPollingKeys();
-    for (int i = 0; i < keys.size(); i++)
+    std::vector<int>* keys = input->getPollingKeys();
+    for (int i = 0; i < keys->size(); i++)
     {
-        if (glfwGetKey(window, keys[i]) == GLFW_PRESS)
-            input->pressKey(keys[i], deltaTime);
+        if (glfwGetKey(window, (*keys)[i]) == GLFW_PRESS)
+            input->pressKey((*keys)[i], deltaTime);
     }
-    controller->update();
 }
 
 
@@ -101,6 +79,9 @@ int main()
 
     // enables z-buffer
     glEnable(GL_DEPTH_TEST);
+
+
+    /////////// LIGHT CUBE ///////////
 
     float lightCubeVertices[] = {
         -0.5f, -0.5f, -0.5f,
@@ -159,7 +140,7 @@ int main()
     glm::vec3 lightCubeColor = glm::vec3(1.0f, 1.0f, 1.0f);
 
 
-
+    /////////// CUBE ///////////
 
     float cubeVertices[] = {
         // positions          // normals           // texture coords
@@ -206,9 +187,6 @@ int main()
         -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
     };
 
-
-
-
     std::vector<AttributeData> cubeAttributes;
     cubeAttributes.push_back(AttributeData(3, 0));
     cubeAttributes.push_back(AttributeData(3, (void*)(3*sizeof(float))));
@@ -217,6 +195,15 @@ int main()
     Mesh cubeMesh;
     cubeMesh.setVertex(cubeVertices, 36, 8*sizeof(float), cubeAttributes);
     cubeMesh.create();
+
+    RenderingTemp::SimpleModel cube(&cubeMesh);
+    glm::vec3 cubePosition = glm::vec3(1.0f, 1.0f, 1.0f);
+    glm::vec3 cubeDirection = glm::vec3(0.5f, 1.0f, 0.0f);
+    cube.setPosition(&cubePosition);
+    cube.scale(0.4f);
+
+
+    /// cube textures ///
 
     Texture diffuseTexture("textures/container2.png");
     if (!diffuseTexture.create())
@@ -237,9 +224,7 @@ int main()
         return 1;
     }
 
-    RenderingTemp::SimpleModel cube(&cubeMesh);
-
-
+    ///// loading shaders /////
 
     Shader basicShader(vertexDir, fragmentDir);
     if(!basicShader.compileShaders())
@@ -262,12 +247,8 @@ int main()
         return 1;
     }
 
-    Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
-    // camera perspective to screen
-    glm::mat4 projection = glm::perspective(45.0f, 1200.0f / 800.0f, 0.1f, 100.0f); /// this should be updated when window changes size
-
-
+    /////////// IMGUI init ///////////
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -278,14 +259,11 @@ int main()
 
 
     bool drawTriangles = true;
-    glm::vec3 cubePosition = glm::vec3(1.0f, 1.0f, 1.0f);
-    glm::vec3 cubeDirection = glm::vec3(0.5f, 1.0f, 0.0f);
-
-    cube.setPosition(&cubePosition);
-    cube.scale(0.4f);
 
 
-    // input initialization
+
+    /////////// INPUT init ///////////
+
     glfwSetCursorPosCallback(window.getGLFWwindow(), mouse_callback);
 
     Input* input = window.getInput();
@@ -294,6 +272,32 @@ int main()
     input->setKeyAction(MOVE_LEFT, GLFW_KEY_A);
     input->setKeyAction(MOVE_BACKWARDS, GLFW_KEY_S);
     input->setKeyAction(MOVE_RIGHT, GLFW_KEY_D);
+
+    input->setKeyAction(EXIT, GLFW_KEY_BACKSPACE, false);
+    input->setKeyAction(EXIT, GLFW_KEY_ESCAPE, false);
+    input->setActionFunction(EXIT, [&window](float delaTime) { window.close(); });
+
+    input->setKeyAction(SWITCH_MOUSE, GLFW_KEY_M, false);
+    input->setActionFunction(SWITCH_MOUSE, [&window, input](float deltaTime) {
+        if (input->mouseIsCaptured())
+        {
+            glfwSetInputMode(window.getGLFWwindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            input->uncaptureMouse();
+        }
+        else
+        {
+            glfwSetInputMode(window.getGLFWwindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);    // hides cursor and sets it to middle
+            input->captureMouse();
+        }
+    });
+
+    /////////// CAMERA ///////////
+
+    Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+
+    // camera perspective to screen
+    glm::mat4 projection = glm::perspective(45.0f, 1200.0f / 800.0f, 0.1f, 100.0f); /// this should be updated when window changes size
+
 
     enum CameraType {
         FLY,
@@ -307,8 +311,8 @@ int main()
 
 
     // here goes the backpack
-    //Rendering::Model backpack("models/backpack/backpack.obj");
-    Rendering::Model pooltable("models/pooltable/Pool table Cavicchi Leonardo 9FT N300818.3ds");
+    Rendering::Model backpack("models/backpack/backpack.obj");
+
 
     unsigned int nFrame = 0;
     float deltaTime = 0.0f;	// Time between current frame and last frame
@@ -325,13 +329,15 @@ int main()
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        // if (!io.WantCaptureMouse)
-        // {
-        //     // blocks anything here if mouse is over imgui
-        //     // input handling inside
-        // }
-        //     // physics update outside (also update the position of everything)
-        processInput(window.getGLFWwindow(), input, deltaTime, cameraController);   // this should be changed later
+        if (!io.WantCaptureMouse)
+        {
+            // blocks anything here if mouse is over imgui
+            // input handling inside
+            processInput(window.getGLFWwindow(), input, deltaTime);
+        }
+        // physics update outside (also update the position of everything)
+        cameraController->update();
+
 
         // // model transformations
         // model = glm::mat4(1.0f);
@@ -366,6 +372,8 @@ int main()
 
         if (drawTriangles)
         {
+            /////////// CUBE ///////////
+
             // texture.activate();
             basicShader.activate();   // need to activate before setting uniforms
             // basicShader.setUniformVec3("lightColor", lightCubeColor);
@@ -435,6 +443,9 @@ int main()
                 cube.redraw(&basicShader);  // cube was previously drawn so we can redraw here
             }
 
+
+            /////////// LIGHT CUBE ///////////
+
             lightShader.activate();
             lightShader.setUniformVec3("viewPos", camera.getPosition());
             lightShader.setUniformVec3("lightColor", lightCubeColor);
@@ -447,6 +458,9 @@ int main()
                 lightCube.setPosition(&pointLightPositions[i]);
                 lightCube.redraw(&lightShader);
             }
+
+
+            /////////// MODEL ///////////
 
             modelShader.activate();
 
@@ -488,26 +502,30 @@ int main()
             modelShader.setUniformVec3("spotLight.diffuse", lightCubeColor *1.0f);
             modelShader.setUniformVec3("spotLight.specular", lightCubeColor * 1.0f);
 
-            glm::mat4 ballModel = glm::mat4(1.0f);
-            ballModel = glm::scale(ballModel, glm::vec3(0.002f, 0.002f, 0.002f));
-            modelShader.setUniformMat4("model", ballModel);
+            glm::mat4 transform = glm::mat4(1.0f);
+            //transform = glm::scale(transform, glm::vec3(0.002f, 0.002f, 0.002f));
+            modelShader.setUniformMat4("model", transform);
             modelShader.setUniformMat4("normalRotation", glm::mat4(1.0f));  // only the rotation part of the model
             modelShader.setUniformMat4("view", view);
             modelShader.setUniformMat4("projection", projection);
 
             modelShader.setUniformFloat("material.shininess", 32.0f);
 
-            //backpack.draw(&modelShader);
-            pooltable.draw(&modelShader);
+            backpack.draw(&modelShader);
+
         }
 
 
+        /////////// ImGui ///////////
 
-        ImGui::Begin("My name is window, ImGUI window");
-        ImGui::Text("Cube Controls");
+        ImGui::Begin("Debug Window");
         ImGui::Checkbox("Draw Triangles", &drawTriangles);
+        ImGui::Separator();
+        ImGui::Text("Cube Controls");
         ImGui::SliderFloat3("Position", glm::value_ptr(cubePosition), -1.5f, 1.5f);
         ImGui::SliderFloat3("Direction", glm::value_ptr(cubeDirection), -1.0f, 1.0f);
+        ImGui::Separator();
+        ImGui::Text("Light Cube Controls");
         ImGui::SliderFloat3("Light Position", glm::value_ptr(lightCubePosition), -2.0f, 2.0f);
         ImGui::ColorEdit3("Light Color", glm::value_ptr(lightCubeColor));
         ImGui::Separator();
