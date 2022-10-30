@@ -7,3 +7,6 @@
 [submodule "libs/imgui"]
 	path = libs/imgui
 	url = https://github.com/ocornut/imgui.git
+[submodule "libs/bullet"]
+	path = libs/bullet
+	url = https://github.com/bulletphysics/bullet3.git

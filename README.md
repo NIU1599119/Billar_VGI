@@ -4,6 +4,11 @@
 Para clonar el repositorio:
 `git clone https://github.com/NIU1599119/Billar_VGI.git --recursive`
 
+### Actualizar submodulos (glfw, glm, imgui o bullet)
+Si en algun momento hay un submodulo con la carpeta vacia significa que no esta cargado (pasa si no se utiliza `--recursive` en el comando anterior)  
+En estos casos se utiliza el siguiente comando para actualizar y cargar los submodulos necesarios.
+`git submodule update`
+
 ## Compilar
 Utilizamos premake5 para generar los archivos de compilado con uno de los scripts siguientes segun nuestro sistema operativo
 
@@ -29,7 +34,8 @@ No se ha probado si funciona
 
 ## Ejecutables
 En la carpeta `bin` se encuentran todos los archivos ejecutables y compilaciones de librerias utilizadas.  
-En todo caso el ejecutable **de momento** no depende de ningun archivo de manera que se puede distribuir solo el ejecutable.
+~~En todo caso el ejecutable **de momento** no depende de ningun archivo de manera que se puede distribuir solo el ejecutable.~~  
+Desde que se ha implementado la importacion de modelos se deben poner el ejecutable y las carpetas de modelos.
 
 # Importante
 
