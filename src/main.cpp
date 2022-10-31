@@ -312,6 +312,7 @@ int main()
 
     // here goes the backpack
     Rendering::Model backpack("models/pooltable/Pool table Cavicchi Leonardo 9FT N300818.3ds");
+    Rendering::Model ball1("models/ball1/Project Name.obj");
 
     unsigned int nFrame = 0;
     float deltaTime = 0.0f;	// Time between current frame and last frame
@@ -513,6 +514,15 @@ int main()
 
             backpack.draw(&modelShader);
 
+            glm::mat4 transform2 = glm::mat4(1.0f);
+            transform2 = glm::translate(transform2, glm::vec3(0.0f, 0.5f, 0.0f));
+            transform2 = glm::scale(transform2, glm::vec3(0.001f, 0.001f, 0.001f));
+            modelShader.setUniformMat4("model", transform2);
+            modelShader.setUniformMat4("normalRotation", glm::mat4(1.0f));  // only the rotation part of the model
+            modelShader.setUniformMat4("view", view);
+            modelShader.setUniformMat4("projection", projection); 
+
+            ball1.draw(&modelShader);
         }
 
 
