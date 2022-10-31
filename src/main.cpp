@@ -134,7 +134,7 @@ int main()
     lightCubeMesh.create();
 
     RenderingTemp::SimpleModel lightCube(&lightCubeMesh);
-    glm::vec3 lightCubePosition = glm::vec3( 0.7f,  0.2f,  2.0f);
+    glm::vec3 lightCubePosition = glm::vec3( 0.7f,  1.2f,  2.0f);
     lightCube.scale(0.2f);
     lightCube.setPosition(&lightCubePosition);
     glm::vec3 lightCubeColor = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -311,8 +311,7 @@ int main()
 
 
     // here goes the backpack
-    Rendering::Model backpack("models/backpack/backpack.obj");
-
+    Rendering::Model backpack("models/pooltable/Pool table Cavicchi Leonardo 9FT N300818.3ds");
 
     unsigned int nFrame = 0;
     float deltaTime = 0.0f;	// Time between current frame and last frame
@@ -365,9 +364,9 @@ int main()
 
         glm::vec3 pointLightPositions[] = {
             lightCubePosition,
-            glm::vec3( 2.3f, -3.3f, -4.0f),
+            glm::vec3( 2.3f,  3.3f, -4.0f),
             glm::vec3(-4.0f,  2.0f, -12.0f),
-            glm::vec3( 0.0f,  0.0f, -3.0f)
+            glm::vec3( 0.0f,  6.0f, -6.0f)
         };
 
         if (drawTriangles)
@@ -503,7 +502,8 @@ int main()
             modelShader.setUniformVec3("spotLight.specular", lightCubeColor * 1.0f);
 
             glm::mat4 transform = glm::mat4(1.0f);
-            //transform = glm::scale(transform, glm::vec3(0.002f, 0.002f, 0.002f));
+            transform = glm::translate(transform, glm::vec3(0.0f, -0.5f, 0.0f));
+            transform = glm::scale(transform, glm::vec3(0.001f, 0.001f, 0.001f));
             modelShader.setUniformMat4("model", transform);
             modelShader.setUniformMat4("normalRotation", glm::mat4(1.0f));  // only the rotation part of the model
             modelShader.setUniformMat4("view", view);
