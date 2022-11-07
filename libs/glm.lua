@@ -1,6 +1,6 @@
 project "GLM"
 	kind "StaticLib"
-	language "C"
+	language "C++"
 	architecture "x86_64"
 
 	targetdir "../bin/%{cfg.buildcfg}"
@@ -27,7 +27,7 @@ project "GLM"
 	filter "system:macosx"
 		pic "On"
 
-		systemversion "latest"
+		systemversion "10.14"
 		staticruntime "On"
 
 		defines

@@ -151,6 +151,8 @@ project '*'
 		'assimp/include/',
 	}
 project 'assimp'
+	language "C++"
+	cppdialect "C++17"
 	kind 'StaticLib'
 	architecture "x86_64"
 	warnings 'Off'
@@ -278,7 +280,7 @@ project 'assimp'
 	filter "system:macosx"
 		pic "On"
 
-		systemversion "latest"
+		systemversion "10.14"
 		staticruntime "On"
 
 		defines

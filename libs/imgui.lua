@@ -34,7 +34,7 @@ project "ImGui"
 	filter "system:macosx"
 		pic "On"
 
-		systemversion "latest"
+		systemversion "10.14"
 		staticruntime "On"
 
 		defines

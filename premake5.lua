@@ -51,10 +51,10 @@ project "OpenGLBoilerPlate"
     filter "system:macosx"
         pic "On"
 
-        systemversion "latest"
+        systemversion "10.14"
         staticruntime "On"
 
-        links { "dl", "pthread" }
+        links { "dl", "pthread", "OpenGL.framework", "CoreFoundation.framework", "Carbon.framework", "ApplicationServices.framework", "IOKit.framework", "Cocoa.framework" }
 
         defines { "_COCOA" }
 

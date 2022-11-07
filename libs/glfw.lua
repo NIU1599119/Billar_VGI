@@ -49,7 +49,7 @@ project "GLFW"
 	filter "system:macosx"
 		pic "On"
 
-		systemversion "latest"
+		systemversion "10.14"
 		staticruntime "On"
 
 		files
