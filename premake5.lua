@@ -48,6 +48,16 @@ project "OpenGLBoilerPlate"
 
         defines { "_X11" }
 
+    filter "system:macosx"
+        pic "On"
+
+        systemversion "latest"
+        staticruntime "On"
+
+        links { "dl", "pthread" }
+
+        defines { "_COCOA" }
+
     filter "system:windows"
         systemversion "latest"
         staticruntime "On"

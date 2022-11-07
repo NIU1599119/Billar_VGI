@@ -275,6 +275,17 @@ project 'assimp'
 			"_ASSIMP_X11"
 		}
 
+	filter "system:macosx"
+		pic "On"
+
+		systemversion "latest"
+		staticruntime "On"
+
+		defines
+		{
+			"_ASSIMP_COCOA"
+		}
+
 	filter "system:windows"
 		systemversion "latest"
 		staticruntime "On"

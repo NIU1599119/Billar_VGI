@@ -24,6 +24,17 @@ project "GLM"
 			"_GLM_X11"
 		}
 
+	filter "system:macosx"
+		pic "On"
+
+		systemversion "latest"
+		staticruntime "On"
+
+		defines
+		{
+			"_GLM_COCOA"
+		}
+
 	filter "system:windows"
 		systemversion "latest"
 		staticruntime "On"

@@ -34,6 +34,17 @@ project "bullet"
 		{
 			"_BULLET_X11"
 		}
+	
+	filter "system:macosx"
+		pic "On"
+
+		systemversion "latest"
+		staticruntime "On"
+
+		defines
+		{
+			"_BULLET_COCOA"
+		}
 
 	filter "system:windows"
 		systemversion "latest"
