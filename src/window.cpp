@@ -2,6 +2,28 @@
 #include "debug.h"
 #include "gl_utils.h"
 
+void processInput(GLFWwindow* window, Input* input, float deltaTime)
+{
+    std::vector<Input::eventKey>* ekeys = input->getEventKeys();
+    for (int i = 0; i < ekeys->size(); i++)
+    {
+        if (glfwGetKey(window, (*ekeys)[i].key) == GLFW_RELEASE && (*ekeys)[i].isPressed)
+        {
+            input->pressKey((*ekeys)[i].key, deltaTime);
+            (*ekeys)[i].isPressed = false;
+        }
+        else if (glfwGetKey(window, (*ekeys)[i].key) == GLFW_PRESS)
+            (*ekeys)[i].isPressed = true;
+    }
+
+    std::vector<int>* keys = input->getPollingKeys();
+    for (int i = 0; i < keys->size(); i++)
+    {
+        if (glfwGetKey(window, (*keys)[i]) == GLFW_PRESS)
+            input->pressKey((*keys)[i], deltaTime);
+    }
+}
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     WindowData* data = (WindowData *)glfwGetWindowUserPointer(window);

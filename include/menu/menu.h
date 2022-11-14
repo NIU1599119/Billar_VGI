@@ -1,0 +1,1 @@
+int initMenu(int& opcio);

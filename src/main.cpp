@@ -30,34 +30,15 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+// menu
+#include "./menu/menu.h"
+
 
 // funciones
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
     ((WindowData *)glfwGetWindowUserPointer(window))->input.updateCursor(xpos, ypos);
-}
-
-void processInput(GLFWwindow *window, Input* input, float deltaTime)
-{
-    std::vector<Input::eventKey>* ekeys = input->getEventKeys();
-    for (int i = 0; i < ekeys->size(); i++)
-    {
-        if (glfwGetKey(window, (*ekeys)[i].key) == GLFW_RELEASE && (*ekeys)[i].isPressed)
-        {
-            input->pressKey((*ekeys)[i].key, deltaTime);
-            (*ekeys)[i].isPressed = false;
-        }
-        else if (glfwGetKey(window, (*ekeys)[i].key) == GLFW_PRESS)
-            (*ekeys)[i].isPressed = true;
-    }
-
-    std::vector<int>* keys = input->getPollingKeys();
-    for (int i = 0; i < keys->size(); i++)
-    {
-        if (glfwGetKey(window, (*keys)[i]) == GLFW_PRESS)
-            input->pressKey((*keys)[i], deltaTime);
-    }
 }
 
 
@@ -70,7 +51,9 @@ std::string fragmentDir = "shaders/default.frag";
 
 int main()
 {
-
+    int opcio = 0;
+    initMenu(opcio);
+    /*
     Window window(1200, 900, "Billar", true);
 
     if (!window.initWindow()) {
@@ -583,5 +566,6 @@ int main()
 
 
     glfwTerminate();
+    */
     return 0;
 }
