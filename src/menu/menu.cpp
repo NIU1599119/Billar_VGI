@@ -1,4 +1,9 @@
-#include "./menu/menu.h"
+#include "menu/menu.h"
+#include "menu/resource_manager.h"
+#include "menu/shader.h"
+#include "menu/texture.h"
+#include "menu/rendering/SpriteRenderer.h"
+
 #include "window.h"
 #include <iostream>
 
@@ -7,11 +12,14 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+SpriteRenderer* Renderer;
 
 int initMenu(int& opcio)
 {
     // Creació de ventana 
-    Window window(1200, 900, "Billar", true);
+    float Width = 1920;
+    float Height = 1080;
+    Window window(Width, Height, "Billar", true, true);
 
     if (!window.initWindow()) {
         return -1;
@@ -42,9 +50,19 @@ int initMenu(int& opcio)
     float deltaTime = 0.0f;	// Time between current frame and last frame
     float lastFrame = 0.0f; // Time of last frame
 
-    glm::mat4 projection = glm::ortho(0.0f, 800.0f, 600.0f, 0.0f, -1.0f, 1.0f);
-
     // Creació dels botons
+    // load shaders
+    ResourceManager::LoadShader("shaders/sprite.vs", "shaders/sprite.frag", nullptr, "sprite");
+    // configure shaders
+    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(Width),
+        static_cast<float>(Height), 0.0f, -1.0f, 1.0f);
+    ResourceManager::GetShader("sprite").Use().SetInteger("image", 0);
+    ResourceManager::GetShader("sprite").SetMatrix4("projection", projection);
+    // set render-specific controls
+    Renderer = new SpriteRenderer(ResourceManager::GetShader("sprite"));
+    // load textures
+    ResourceManager::LoadTexture("textures/minecraftmenu.png", true, "menu");
+    ResourceManager::LoadTexture("textures/container2.png", true, "menu2");
 
     // Creacio del bucle de la ventana
 
@@ -53,8 +71,10 @@ int initMenu(int& opcio)
         // Agafa els inputs
         processInput(window.getGLFWwindow(), input, deltaTime);
       
-
-
+        Renderer->DrawSprite(ResourceManager::GetTexture("menu"),
+            glm::vec2(0.0f, 0.0f), glm::vec2(Width, Height), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+        Renderer->DrawSprite(ResourceManager::GetTexture("menu2"),
+            glm::vec2(100.0f, 100.0f), glm::vec2(300, 200), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
 
         // Actualitza el frame
         window.update();

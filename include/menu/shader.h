@@ -6,8 +6,8 @@
 ** Creative Commons, either version 4 of the License, or (at your
 ** option) any later version.
 ******************************************************************/
-#ifndef SHADER_H
-#define SHADER_H
+#ifndef SHADER_MENU_H
+#define SHADER_MENU_H
 
 #include <string>
 
@@ -19,15 +19,15 @@
 // General purpsoe shader object. Compiles from file, generates
 // compile/link-time error messages and hosts several utility 
 // functions for easy management.
-class Shader
+class Shader_Menu
 {
 public:
     // state
     unsigned int ID;
     // constructor
-    Shader() { }
+    Shader_Menu() { }
     // sets the current shader as active
-    Shader& Use();
+    Shader_Menu& Use();
     // compiles the shader from given source code
     void    Compile(const char* vertexSource, const char* fragmentSource, const char* geometrySource = nullptr); // note: geometry source code is optional 
     // utility functions

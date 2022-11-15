@@ -35,13 +35,14 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     LOG_DEBUG("Resized window to %dx%d", width, height);
 }
 
-Window::Window(unsigned int width, unsigned int height, std::string title, bool vSync)
+Window::Window(unsigned int width, unsigned int height, std::string title, bool vSync, bool fullScreen)
 {
     m_data = WindowData{
         title,
         width,
         height,
         vSync,
+        fullScreen
     };
 }
 
@@ -65,7 +66,15 @@ bool Window::initWindow()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(m_data.width, m_data.height, m_data.title.c_str(), NULL, NULL);
+    GLFWwindow* window;
+
+    if(!m_data.fullScreen)
+        window = glfwCreateWindow(m_data.width, m_data.height, m_data.title.c_str(), NULL, NULL);
+    else
+    {
+        GLFWmonitor* primary = glfwGetPrimaryMonitor();
+        window = glfwCreateWindow(m_data.width, m_data.height, m_data.title.c_str(), primary, NULL);
+    }
 
     if (window == NULL)
     {
