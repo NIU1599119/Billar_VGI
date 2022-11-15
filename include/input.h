@@ -12,6 +12,7 @@ enum ACTIONS {
     MOVE_LEFT,
     MOVE_RIGHT,
     SWITCH_MOUSE,
+    LEFT_CLICK,
     EXIT
 };
 
@@ -73,7 +74,7 @@ public:
 
     void updateCursor(float newX, float newY);
 
-    void setMouseCallback(std::function<void(float, float)> mouseCallback) { m_mouseCallback = mouseCallback; };
+    void setMouseCallback(std::function<void(float, float)> mouseCallback, bool relative=true) { m_mouseCallback = mouseCallback; m_mouseOffset = relative; };
 
     void captureMouse() { m_mouseCapture = true; };
 

@@ -36,6 +36,7 @@ public:
     void setVSync(bool enabled);
 
     Input* getInput() { return &m_data.input; }
+    void processInput(float deltaTime);
 
 private:
     GLFWwindow* m_window;

@@ -2,27 +2,8 @@
 #include "debug.h"
 #include "gl_utils.h"
 
-void processInput(GLFWwindow* window, Input* input, float deltaTime)
-{
-    std::vector<Input::eventKey>* ekeys = input->getEventKeys();
-    for (int i = 0; i < ekeys->size(); i++)
-    {
-        if (glfwGetKey(window, (*ekeys)[i].key) == GLFW_RELEASE && (*ekeys)[i].isPressed)
-        {
-            input->pressKey((*ekeys)[i].key, deltaTime);
-            (*ekeys)[i].isPressed = false;
-        }
-        else if (glfwGetKey(window, (*ekeys)[i].key) == GLFW_PRESS)
-            (*ekeys)[i].isPressed = true;
-    }
 
-    std::vector<int>* keys = input->getPollingKeys();
-    for (int i = 0; i < keys->size(); i++)
-    {
-        if (glfwGetKey(window, (*keys)[i]) == GLFW_PRESS)
-            input->pressKey((*keys)[i], deltaTime);
-    }
-}
+// callbacks
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -34,6 +15,31 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
     LOG_DEBUG("Resized window to %dx%d", width, height);
 }
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    WindowData* data = (WindowData *)glfwGetWindowUserPointer(window);
+    Input* input = &data->input;
+
+    if (action == GLFW_RELEASE)
+        input->pressKey(key, 0.0f);
+}
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+    ((WindowData *)glfwGetWindowUserPointer(window))->input.updateCursor(xpos, ypos);
+}
+
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+    WindowData* data = (WindowData *)glfwGetWindowUserPointer(window);
+    Input* input = &data->input;
+
+    if (action == GLFW_RELEASE)
+        input->pressKey(button, 0.0f); // ?
+}
+
+// Window Class
 
 Window::Window(unsigned int width, unsigned int height, std::string title, bool vSync, bool fullScreen)
 {
@@ -86,6 +92,11 @@ bool Window::initWindow()
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
+    // input
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetKeyCallback(window, key_callback);
+    glfwSetMouseButtonCallback(window, mouse_button_callback);
+
     glfwMakeContextCurrent(window);
 
 
@@ -102,7 +113,29 @@ bool Window::initWindow()
     return true;
 }
 
+void Window::processInput(float deltaTime)
+{
+    Input* input = getInput();
 
+    // std::vector<Input::eventKey>* ekeys = input->getEventKeys();
+    // for (int i = 0; i < ekeys->size(); i++)
+    // {
+    //     if (glfwGetKey(m_window, (*ekeys)[i].key) == GLFW_RELEASE && (*ekeys)[i].isPressed)
+    //     {
+    //         input->pressKey((*ekeys)[i].key, deltaTime);
+    //         (*ekeys)[i].isPressed = false;
+    //     }
+    //     else if (glfwGetKey(m_window, (*ekeys)[i].key) == GLFW_PRESS)
+    //         (*ekeys)[i].isPressed = true;
+    // }
+
+    std::vector<int>* keys = input->getPollingKeys();
+    for (int i = 0; i < keys->size(); i++)
+    {
+        if (glfwGetKey(m_window, (*keys)[i]) == GLFW_PRESS)
+            input->pressKey((*keys)[i], deltaTime);
+    }
+}
 
 void Window::update()
 {

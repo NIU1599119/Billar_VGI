@@ -15,7 +15,7 @@
 #include <glad/glad.h>
 
 #include "texture.h"
-#include "./menu/shader.h"
+#include "menu/shader.h"
 
 
 // A static singleton ResourceManager class that hosts several
@@ -30,13 +30,13 @@ public:
     static std::map<std::string, Shader_Menu>    Shaders;
     static std::map<std::string, Texture2D> Textures;
     // loads (and generates) a shader program from file loading vertex, fragment (and geometry) shader's source code. If gShaderFile is not nullptr, it also loads a geometry shader
-    static Shader_Menu    LoadShader(const char* vShaderFile, const char* fShaderFile, const char* gShaderFile, std::string name);
+    static Shader_Menu&   LoadShader(const char* vShaderFile, const char* fShaderFile, const char* gShaderFile, std::string name);
     // retrieves a stored sader
-    static Shader_Menu    GetShader(std::string name);
+    static Shader_Menu&   GetShader(std::string name);
     // loads (and generates) a texture from file
-    static Texture2D LoadTexture(const char* file, bool alpha, std::string name);
+    static Texture2D& LoadTexture(const char* file, bool alpha, std::string name);
     // retrieves a stored texture
-    static Texture2D GetTexture(std::string name);
+    static Texture2D& GetTexture(std::string name);
     // properly de-allocates all loaded resources
     static void      Clear();
 private:

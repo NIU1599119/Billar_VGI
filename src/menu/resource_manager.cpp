@@ -6,7 +6,7 @@
 ** Creative Commons, either version 4 of the License, or (at your
 ** option) any later version.
 ******************************************************************/
-#include "./menu/resource_manager.h"
+#include "menu/resource_manager.h"
 
 #include <iostream>
 #include <sstream>
@@ -19,24 +19,24 @@ std::map<std::string, Texture2D>    ResourceManager::Textures;
 std::map<std::string, Shader_Menu>       ResourceManager::Shaders;
 
 
-Shader_Menu ResourceManager::LoadShader(const char* vShaderFile, const char* fShaderFile, const char* gShaderFile, std::string name)
+Shader_Menu& ResourceManager::LoadShader(const char* vShaderFile, const char* fShaderFile, const char* gShaderFile, std::string name)
 {
     Shaders[name] = loadShaderFromFile(vShaderFile, fShaderFile, gShaderFile);
     return Shaders[name];
 }
 
-Shader_Menu ResourceManager::GetShader(std::string name)
+Shader_Menu& ResourceManager::GetShader(std::string name)
 {
     return Shaders[name];
 }
 
-Texture2D ResourceManager::LoadTexture(const char* file, bool alpha, std::string name)
+Texture2D& ResourceManager::LoadTexture(const char* file, bool alpha, std::string name)
 {
     Textures[name] = loadTextureFromFile(file, alpha);
     return Textures[name];
 }
 
-Texture2D ResourceManager::GetTexture(std::string name)
+Texture2D& ResourceManager::GetTexture(std::string name)
 {
     return Textures[name];
 }

@@ -6,7 +6,7 @@
 ** Creative Commons, either version 4 of the License, or (at your
 ** option) any later version.
 ******************************************************************/
-#include "./menu/shader.h"
+#include "menu/shader.h"
 
 #include <iostream>
 

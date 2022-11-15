@@ -16,7 +16,7 @@ SpriteRenderer* Renderer;
 
 int initMenu(int& opcio)
 {
-    // Creació de ventana 
+    // Creaciï¿½ de ventana 
     float Width = 1920;
     float Height = 1080;
     Window window(Width, Height, "Billar", true, true);
@@ -27,30 +27,49 @@ int initMenu(int& opcio)
 
     Input* input = window.getInput();
 
-    // Creació de la detecció d'inputs
+    // Creaciï¿½ de la detecciï¿½ d'inputs
 
     input->setKeyAction(EXIT, GLFW_KEY_BACKSPACE, false);
     input->setKeyAction(EXIT, GLFW_KEY_ESCAPE, false);
     input->setActionFunction(EXIT, [&window](float delaTime) { window.close(); });
 
-    input->setKeyAction(SWITCH_MOUSE, GLFW_KEY_M, false);
-    input->setActionFunction(SWITCH_MOUSE, [&window, input](float deltaTime) {
-        if (input->mouseIsCaptured())
-        {
-            glfwSetInputMode(window.getGLFWwindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-            input->uncaptureMouse();
-        }
-        else
-        {
-            glfwSetInputMode(window.getGLFWwindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);    // hides cursor and sets it to middle
-            input->captureMouse();
-        }
+    //////// this is for 3d interaction, don't use SWITCH_MOUSE on menu
+    // input->setKeyAction(SWITCH_MOUSE, GLFW_KEY_M, false);
+    // input->setActionFunction(SWITCH_MOUSE, [&window, input](float deltaTime) {
+    //     if (input->mouseIsCaptured())
+    //     {
+    //         glfwSetInputMode(window.getGLFWwindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    //         input->uncaptureMouse();
+    //     }
+    //     else
+    //     {
+    //         glfwSetInputMode(window.getGLFWwindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);    // hides cursor and sets it to middle
+    //         input->captureMouse();
+    //     }
+    // });
+
+    // menu cursor
+    glfwSetInputMode(window.getGLFWwindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);      // let cursor free
+    input->captureMouse();                                                          // but capture the inputs (position)
+
+    glm::vec2 mousePosition = glm::vec2(0.0f);
+
+    // mouse input setup
+    input->setMouseCallback([&mousePosition](float posX, float posY) {
+        // LOG_DEBUG("Mouse is now at (%f, %f)", posX, posY);
+        mousePosition = glm::vec2(posX, posY);
+    }, false);  // false indica posicion absoluta para obtener la posicion en pixeles del cursor (en lugar de la posicion relativa que tiene que ver con el anterior frame)
+
+    input->setKeyAction(LEFT_CLICK, GLFW_MOUSE_BUTTON_LEFT, false);
+    input->setActionFunction(LEFT_CLICK, [&mousePosition](float deltaTime) {
+        LOG_DEBUG("Mouse clicked at (%f, %f)", mousePosition.x, mousePosition.y);
     });
+
 
     float deltaTime = 0.0f;	// Time between current frame and last frame
     float lastFrame = 0.0f; // Time of last frame
 
-    // Creació dels botons
+    // Creaciï¿½ dels botons
     // load shaders
     ResourceManager::LoadShader("shaders/sprite.vs", "shaders/sprite.frag", nullptr, "sprite");
     // configure shaders
@@ -69,7 +88,7 @@ int initMenu(int& opcio)
     while (!window.shouldClose())
     {
         // Agafa els inputs
-        processInput(window.getGLFWwindow(), input, deltaTime);
+        window.processInput(deltaTime);
       
         Renderer->DrawSprite(ResourceManager::GetTexture("menu"),
             glm::vec2(0.0f, 0.0f), glm::vec2(Width, Height), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));

@@ -31,15 +31,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 // menu
-#include "./menu/menu.h"
-
-
-// funciones
-
-void mouse_callback(GLFWwindow* window, double xpos, double ypos)
-{
-    ((WindowData *)glfwGetWindowUserPointer(window))->input.updateCursor(xpos, ypos);
-}
+#include "menu/menu.h"
 
 
 // shader files
