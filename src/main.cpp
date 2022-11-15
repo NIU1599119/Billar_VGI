@@ -225,13 +225,15 @@ int main()
 
     // here goes the models
     Rendering::Model poolTableModel("models/pooltable/Pool table Cavicchi Leonardo 9FT N300818.3ds");
-    Rendering::Model ball9Model("models/ball1/Project Name.obj");
+    Rendering::Model ball9Model("models/PoolBall/Pool.obj");
 
     Rendering::Object poolTable(&poolTableModel);
     Rendering::Object ball9(&ball9Model);
 
     // here goes the lights
-    Rendering::LightPoint lightPoint(0);
+    LOG_DEBUG("Loading lights...");
+    Rendering::LightPoint lightPoint(0, true);
+    LOG_DEBUG("Loaded lights");
 
     unsigned int nFrame = 0;
     float deltaTime = 0.0f;	// Time between current frame and last frame
@@ -264,6 +266,7 @@ int main()
         if (drawTriangles)
         {
             lightPoint.setPosition(lightCubePosition);
+            lightPoint.draw(&lightShader, view, projection);
             lightPoint.updateShader(&modelShader);
 
             glm::vec3 poolTablePosition = glm::vec3(0.0f);
@@ -276,7 +279,7 @@ int main()
 
             ball9.setPosition(controlledPosition);
             ball9.setOrientation(glm::radians(250.0f)*(float)glfwGetTime(), controlledPosition);
-            ball9.setScaling(0.001f);
+            ball9.setScaling(0.1f);
 
             ball9.draw(&modelShader, view, projection, camera.getPosition());
         }

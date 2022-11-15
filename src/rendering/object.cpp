@@ -2,7 +2,6 @@
 
 
 namespace Rendering {
-
     void Object::draw(Shader* shader, glm::mat4& view, glm::mat4& projection, glm::vec3 cameraPosition)
     {
         glm::mat4 translate = glm::mat4(1.0f);
@@ -22,5 +21,4 @@ namespace Rendering {
 
         m_model->draw(shader);
     }
-
 }
