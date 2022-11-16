@@ -81,7 +81,10 @@ int initMenu(int& opcio)
     Renderer = new SpriteRenderer(ResourceManager::GetShader("sprite"));
     // load textures
     ResourceManager::LoadTexture("textures/minecraftmenu.png", true, "menu");
-    ResourceManager::LoadTexture("textures/container2.png", true, "menu2");
+    ResourceManager::LoadTexture("textures/singleplayer.png", true, "button1");
+    ResourceManager::LoadTexture("textures/multiplayer.png", true, "button2");
+    ResourceManager::LoadTexture("textures/options.png", true, "button3");
+    ResourceManager::LoadTexture("textures/quit.png", true, "button4");
 
     // Creacio del bucle de la ventana
 
@@ -92,8 +95,51 @@ int initMenu(int& opcio)
       
         Renderer->DrawSprite(ResourceManager::GetTexture("menu"),
             glm::vec2(0.0f, 0.0f), glm::vec2(Width, Height), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
-        Renderer->DrawSprite(ResourceManager::GetTexture("menu2"),
-            glm::vec2(100.0f, 100.0f), glm::vec2(300, 200), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+
+        if ((mousePosition.x > 600.0f && mousePosition.y > 450.0f) && (mousePosition.x < 1400.0f && mousePosition.y < 530.0f))
+        {
+            Renderer->DrawSprite(ResourceManager::GetTexture("button1"),
+                glm::vec2(600.0f, 450.0f), glm::vec2(800, 80), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+        }
+        else
+        {
+            Renderer->DrawSprite(ResourceManager::GetTexture("button1"),
+                glm::vec2(600.0f, 450.0f), glm::vec2(800, 80), 0.0f, glm::vec3(0.8f, 0.8f, 0.8f));
+        }
+        
+        if ((mousePosition.x > 600.0f && mousePosition.y > 550.0f) && (mousePosition.x < 1400.0f && mousePosition.y < 630.0f))
+        {
+            Renderer->DrawSprite(ResourceManager::GetTexture("button2"),
+                glm::vec2(600.0f, 550.0f), glm::vec2(800, 80), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+        }
+        else
+        {
+            Renderer->DrawSprite(ResourceManager::GetTexture("button2"),
+                glm::vec2(600.0f, 550.0f), glm::vec2(800, 80), 0.0f, glm::vec3(0.8f, 0.8f, 0.8f));
+        }
+
+        if ((mousePosition.x > 600.0f && mousePosition.y > 750.0f) && (mousePosition.x < 975.0f && mousePosition.y < 830.0f))
+        {
+            Renderer->DrawSprite(ResourceManager::GetTexture("button3"),
+                glm::vec2(600.0f, 750.0f), glm::vec2(375, 80), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+        }
+        else
+        {
+            Renderer->DrawSprite(ResourceManager::GetTexture("button3"),
+                glm::vec2(600.0f, 750.0f), glm::vec2(375, 80), 0.0f, glm::vec3(0.8f, 0.8f, 0.8f));
+        }
+
+        if ((mousePosition.x > 1025.0f && mousePosition.y > 750.0f) && (mousePosition.x < 1400.0f && mousePosition.y < 830.0f))
+        {
+            Renderer->DrawSprite(ResourceManager::GetTexture("button4"),
+                glm::vec2(1025.0f, 750.0f), glm::vec2(375, 80), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+        }
+        else
+        {
+            Renderer->DrawSprite(ResourceManager::GetTexture("button4"),
+                glm::vec2(1025.0f, 750.0f), glm::vec2(375, 80), 0.0f, glm::vec3(0.8f, 0.8f, 0.8f));
+        }
+
 
         // Actualitza el frame
         window.update();
