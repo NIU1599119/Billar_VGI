@@ -1,5 +1,34 @@
 #include "input.h"
 
+void Input::pressKey(int key, float deltaTime)
+{
+    m_actions[m_keys[key]](deltaTime);
+};
+
+
+void Input::pressEventKey(int key, bool isPressed, float deltaTime)
+{
+    if (m_keys.find(key) != m_keys.end())
+    {
+        if (m_actionStatus[m_keys[key]] == RELEASED)
+        {
+            m_actionStatus[m_keys[key]] = isPressed ? PRESSED : RELEASED;
+        }
+        else if (m_actionStatus[m_keys[key]] == PRESSED)
+        {
+            if (!isPressed)
+            {
+                m_actionStatus[m_keys[key]] = DEPRESSED;
+                m_actions[m_keys[key]](deltaTime);
+            }
+        }
+        else if (m_actionStatus[m_keys[key]] == DEPRESSED)
+        {
+            m_actionStatus[m_keys[key]] = isPressed ? PRESSED : RELEASED;
+        }
+    }
+}
+
 
 void Input::updateCursor(float newX, float newY)
 {
