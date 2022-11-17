@@ -14,12 +14,12 @@
 
 SpriteRenderer* Renderer;
 
-int initMenu(int& opcio)
+int initMenu(int& opcio, Window& window)
 {
     // Creaci� de ventana 
     float Width = 1920;
     float Height = 1080;
-    Window window(Width, Height, "Billar", true, true);
+    window = Window(Width, Height, "Billar", true, true);
 
     if (!window.initWindow()) {
         return -1;
@@ -28,6 +28,8 @@ int initMenu(int& opcio)
     Input* input = window.getInput();
 
     // Creaci� de la detecci� d'inputs
+
+    bool clicked = false;
 
     input->setKeyAction(EXIT, GLFW_KEY_BACKSPACE, false);
     input->setKeyAction(EXIT, GLFW_KEY_ESCAPE, false);
@@ -61,8 +63,9 @@ int initMenu(int& opcio)
     }, false);  // false indica posicion absoluta para obtener la posicion en pixeles del cursor (en lugar de la posicion relativa que tiene que ver con el anterior frame)
 
     input->setKeyAction(LEFT_CLICK, GLFW_MOUSE_BUTTON_LEFT, false);
-    input->setActionFunction(LEFT_CLICK, [&mousePosition](float deltaTime) {
+    input->setActionFunction(LEFT_CLICK, [&mousePosition, &clicked](float deltaTime) {
         LOG_DEBUG("Mouse clicked at (%f, %f)", mousePosition.x, mousePosition.y);
+        clicked = true;
     });
 
 
@@ -91,15 +94,21 @@ int initMenu(int& opcio)
     while (!window.shouldClose())
     {
         // Agafa els inputs
+
+        clicked = false;
+
         window.processInput(deltaTime);
       
         Renderer->DrawSprite(ResourceManager::GetTexture("menu"),
             glm::vec2(0.0f, 0.0f), glm::vec2(Width, Height), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
 
+        opcio = 0;
+
         if ((mousePosition.x > 600.0f && mousePosition.y > 450.0f) && (mousePosition.x < 1400.0f && mousePosition.y < 530.0f))
         {
             Renderer->DrawSprite(ResourceManager::GetTexture("button1"),
                 glm::vec2(600.0f, 450.0f), glm::vec2(800, 80), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+            opcio = 1;
         }
         else
         {
@@ -111,6 +120,7 @@ int initMenu(int& opcio)
         {
             Renderer->DrawSprite(ResourceManager::GetTexture("button2"),
                 glm::vec2(600.0f, 550.0f), glm::vec2(800, 80), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+            opcio = 2;
         }
         else
         {
@@ -122,6 +132,7 @@ int initMenu(int& opcio)
         {
             Renderer->DrawSprite(ResourceManager::GetTexture("button3"),
                 glm::vec2(600.0f, 750.0f), glm::vec2(375, 80), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+            opcio = 3;
         }
         else
         {
@@ -133,6 +144,7 @@ int initMenu(int& opcio)
         {
             Renderer->DrawSprite(ResourceManager::GetTexture("button4"),
                 glm::vec2(1025.0f, 750.0f), glm::vec2(375, 80), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+            opcio = 4;
         }
         else
         {
@@ -140,13 +152,21 @@ int initMenu(int& opcio)
                 glm::vec2(1025.0f, 750.0f), glm::vec2(375, 80), 0.0f, glm::vec3(0.8f, 0.8f, 0.8f));
         }
 
-
         // Actualitza el frame
         window.update();
+
+        if (opcio != 0 && clicked)
+        {
+            if (opcio == 1)
+                return opcio;
+            else
+                window.close();
+        }
 
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
     }
 
+    return opcio;
 }

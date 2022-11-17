@@ -1,3 +1,5 @@
 #pragma once
 
-int initMenu(int& opcio);
+#include "window.h"
+
+int initMenu(int& opcio, Window& window);

@@ -1,33 +1,47 @@
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
+
+#include <stdio.h>
+#include <iostream>
+#include <math.h>
+
+#include "window.h"
+#include "gl_utils.h"
+
+#include "rendering/shader.h"
+#include "rendering/texture.h"
+#include "rendering/flexibleMesh.h"
+
+#include "rendering/simpleModel.h"
+
+#include "rendering/model.h"
+
+
+#include "camera/camera.h"
+// #include "input.h" // included in window
+#include "camera/camera_controller_fly.h"
+#include "camera/camera_controller_fps.h"
+#include "camera/camera_controller_orbit.h"
+
+
+// matrix operations
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 // menu
 #include "menu/menu.h"
 
-//game
+// game
 #include "game.h"
 
-//window
-#include "window.h"
+// shader files
+std::string vertexDir = "shaders/default.vert";
+std::string fragmentDir = "shaders/default.frag";
 
-// std::string textureDir = "textures/container2.png";
 
-
-int main()
-{
-    Window window;
-
-    int opcio = 0;
-    initMenu(opcio, window);
-
-    if (opcio == 1)
-        return Game(window);
-    else
-        return 0;
-    /*
-    Window window(1200, 900, "Billar", true);
-
-    if (!window.initWindow()) {
-        return 1;
-    }
+int Game(Window& window) {
 
     // enables z-buffer
     glEnable(GL_DEPTH_TEST);
@@ -82,11 +96,11 @@ int main()
     std::vector<AttributeData> lightCubeAttributes;
     lightCubeAttributes.push_back(AttributeData(3, 0));
     Mesh lightCubeMesh;
-    lightCubeMesh.setVertex(lightCubeVertices, 36, 3*sizeof(float), lightCubeAttributes);
+    lightCubeMesh.setVertex(lightCubeVertices, 36, 3 * sizeof(float), lightCubeAttributes);
     lightCubeMesh.create();
 
     RenderingTemp::SimpleModel lightCube(&lightCubeMesh);
-    glm::vec3 lightCubePosition = glm::vec3( 0.7f,  1.2f,  2.0f);
+    glm::vec3 lightCubePosition = glm::vec3(0.7f, 1.2f, 2.0f);
     lightCube.scale(0.2f);
     lightCube.setPosition(&lightCubePosition);
     glm::vec3 lightCubeColor = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -141,11 +155,11 @@ int main()
 
     std::vector<AttributeData> cubeAttributes;
     cubeAttributes.push_back(AttributeData(3, 0));
-    cubeAttributes.push_back(AttributeData(3, (void*)(3*sizeof(float))));
-    cubeAttributes.push_back(AttributeData(2, (void*)(6*sizeof(float))));
+    cubeAttributes.push_back(AttributeData(3, (void*)(3 * sizeof(float))));
+    cubeAttributes.push_back(AttributeData(2, (void*)(6 * sizeof(float))));
 
     Mesh cubeMesh;
-    cubeMesh.setVertex(cubeVertices, 36, 8*sizeof(float), cubeAttributes);
+    cubeMesh.setVertex(cubeVertices, 36, 8 * sizeof(float), cubeAttributes);
     cubeMesh.create();
 
     RenderingTemp::SimpleModel cube(&cubeMesh);
@@ -179,21 +193,21 @@ int main()
     ///// loading shaders /////
 
     Shader basicShader(vertexDir, fragmentDir);
-    if(!basicShader.compileShaders())
+    if (!basicShader.compileShaders())
     {
         LOG_ERROR("Failed compiling shader");
         return 1;
     }
 
     Shader modelShader("shaders/model.vert", "shaders/model.frag");
-    if(!modelShader.compileShaders())
+    if (!modelShader.compileShaders())
     {
         LOG_ERROR("Failed compiling shader");
         return 1;
     }
 
     Shader lightShader("shaders/light.vert", "shaders/light.frag");
-    if(!lightShader.compileShaders())
+    if (!lightShader.compileShaders())
     {
         LOG_ERROR("Failed compiling shader");
         return 1;
@@ -215,8 +229,6 @@ int main()
 
 
     /////////// INPUT init ///////////
-
-    glfwSetCursorPosCallback(window.getGLFWwindow(), mouse_callback);
 
     Input* input = window.getInput();
 
@@ -241,7 +253,7 @@ int main()
             glfwSetInputMode(window.getGLFWwindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);    // hides cursor and sets it to middle
             input->captureMouse();
         }
-    });
+        });
 
     /////////// CAMERA ///////////
 
@@ -270,7 +282,7 @@ int main()
     float deltaTime = 0.0f;	// Time between current frame and last frame
     float lastFrame = 0.0f; // Time of last frame
 
-    while(!window.shouldClose())
+    while (!window.shouldClose())
     {
         // rendering commands here
         GL(glClearColor(0.1f, 0.1f, 0.15f, 1.0f));
@@ -285,7 +297,8 @@ int main()
         {
             // blocks anything here if mouse is over imgui
             // input handling inside
-            processInput(window.getGLFWwindow(), input, deltaTime);
+            window.processInput(deltaTime);
+            //processInput(window.getGLFWwindow(), input, deltaTime);
         }
         // physics update outside (also update the position of everything)
         cameraController->update();
@@ -304,22 +317,22 @@ int main()
         // glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
 
         glm::vec3 cubePositions[] = {
-            glm::vec3( 2.0f,  5.0f, -15.0f),
+            glm::vec3(2.0f,  5.0f, -15.0f),
             glm::vec3(-1.5f, -2.2f, -2.5f),
             glm::vec3(-3.8f, -2.0f, -12.3f),
-            glm::vec3( 2.4f, -0.4f, -3.5f),
+            glm::vec3(2.4f, -0.4f, -3.5f),
             glm::vec3(-1.7f,  3.0f, -7.5f),
-            glm::vec3( 1.3f, -2.0f, -2.5f),
-            glm::vec3( 1.5f,  2.0f, -2.5f),
-            glm::vec3( 1.5f,  0.2f, -1.5f),
+            glm::vec3(1.3f, -2.0f, -2.5f),
+            glm::vec3(1.5f,  2.0f, -2.5f),
+            glm::vec3(1.5f,  0.2f, -1.5f),
             glm::vec3(-1.3f,  1.0f, -1.5f)
         };
 
         glm::vec3 pointLightPositions[] = {
             lightCubePosition,
-            glm::vec3( 2.3f,  3.3f, -4.0f),
+            glm::vec3(2.3f,  3.3f, -4.0f),
             glm::vec3(-4.0f,  2.0f, -12.0f),
-            glm::vec3( 0.0f,  6.0f, -6.0f)
+            glm::vec3(0.0f,  6.0f, -6.0f)
         };
 
         if (drawTriangles)
@@ -349,7 +362,7 @@ int main()
                 basicShader.setUniformFloat("pointLights[" + std::to_string(i) + "].constant", 1.0f);
                 basicShader.setUniformFloat("pointLights[" + std::to_string(i) + "].linear", 0.09f);
                 basicShader.setUniformFloat("pointLights[" + std::to_string(i) + "].cuadratic", 0.0032f);
-                
+
 
                 basicShader.setUniformVec3("pointLights[" + std::to_string(i) + "].ambient", glm::vec3(0.1f));
                 basicShader.setUniformVec3("pointLights[" + std::to_string(i) + "].diffuse", lightCubeColor * 0.5f);
@@ -374,11 +387,11 @@ int main()
             basicShader.setUniformFloat("spotLight.quadratic", 0.0032f);
 
             basicShader.setUniformVec3("spotLight.ambient", glm::vec3(0.1f));
-            basicShader.setUniformVec3("spotLight.diffuse", lightCubeColor *1.0f);
+            basicShader.setUniformVec3("spotLight.diffuse", lightCubeColor * 1.0f);
             basicShader.setUniformVec3("spotLight.specular", lightCubeColor * 1.0f);
 
             cube.setPosition(&cubePosition);
-            cube.setOrientation(glm::radians(25.0f)*(float)glfwGetTime(), cubeDirection);
+            cube.setOrientation(glm::radians(25.0f) * (float)glfwGetTime(), cubeDirection);
             // cube.rotate(glm::radians(10.0f)*deltaTime, cubeDirection);
 
             diffuseTexture.activate(0);
@@ -390,7 +403,7 @@ int main()
             for (int i = 0; i < 9; i++)
             {
                 cube.setPosition(&cubePositions[i]);
-                cube.setOrientation(glm::radians(20.0f*i), glm::vec3(1.0f, 0.3f, 0.5f));
+                cube.setOrientation(glm::radians(20.0f * i), glm::vec3(1.0f, 0.3f, 0.5f));
 
                 cube.redraw(&basicShader);  // cube was previously drawn so we can redraw here
             }
@@ -426,7 +439,7 @@ int main()
                 modelShader.setUniformFloat("pointLights[" + std::to_string(i) + "].constant", 1.0f);
                 modelShader.setUniformFloat("pointLights[" + std::to_string(i) + "].linear", 0.09f);
                 modelShader.setUniformFloat("pointLights[" + std::to_string(i) + "].cuadratic", 0.0032f);
-                
+
 
                 modelShader.setUniformVec3("pointLights[" + std::to_string(i) + "].ambient", glm::vec3(0.1f));
                 modelShader.setUniformVec3("pointLights[" + std::to_string(i) + "].diffuse", lightCubeColor * 0.5f);
@@ -451,7 +464,7 @@ int main()
             modelShader.setUniformFloat("spotLight.quadratic", 0.0032f);
 
             modelShader.setUniformVec3("spotLight.ambient", glm::vec3(0.1f));
-            modelShader.setUniformVec3("spotLight.diffuse", lightCubeColor *1.0f);
+            modelShader.setUniformVec3("spotLight.diffuse", lightCubeColor * 1.0f);
             modelShader.setUniformVec3("spotLight.specular", lightCubeColor * 1.0f);
 
             glm::mat4 transform = glm::mat4(1.0f);
@@ -472,7 +485,7 @@ int main()
             modelShader.setUniformMat4("model", transform2);
             modelShader.setUniformMat4("normalRotation", glm::mat4(1.0f));  // only the rotation part of the model
             modelShader.setUniformMat4("view", view);
-            modelShader.setUniformMat4("projection", projection); 
+            modelShader.setUniformMat4("projection", projection);
 
             ball1.draw(&modelShader);
         }
@@ -517,7 +530,7 @@ int main()
             bindInputToController(input, cameraController);
         }
         ImGui::Text("Frame number %u", nFrame);
-        ImGui::Text("FPS: %f", 1/deltaTime);
+        ImGui::Text("FPS: %f", 1 / deltaTime);
         ImGui::End();
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -535,6 +548,6 @@ int main()
 
 
     glfwTerminate();
-    */
+
     return 0;
 }
