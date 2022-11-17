@@ -83,11 +83,12 @@ int initMenu(int& opcio, Window& window)
     // set render-specific controls
     Renderer = new SpriteRenderer(ResourceManager::GetShader("sprite"));
     // load textures
-    ResourceManager::LoadTexture("textures/minecraftmenu.png", true, "menu");
+    ResourceManager::LoadTexture("textures/fondo3.png", true, "menu");
     ResourceManager::LoadTexture("textures/singleplayer.png", true, "button1");
     ResourceManager::LoadTexture("textures/multiplayer.png", true, "button2");
     ResourceManager::LoadTexture("textures/options.png", true, "button3");
     ResourceManager::LoadTexture("textures/quit.png", true, "button4");
+    ResourceManager::LoadTexture("textures/quit.png", true, "button5");
 
     // Creacio del bucle de la ventana
 
