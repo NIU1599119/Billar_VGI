@@ -43,5 +43,3 @@ private:
     bool fullScreen;
     WindowData m_data;
 };
-
-void processInput(GLFWwindow* window, Input* input, float deltaTime);

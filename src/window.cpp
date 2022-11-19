@@ -21,8 +21,14 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     WindowData* data = (WindowData *)glfwGetWindowUserPointer(window);
     Input* input = &data->input;
 
-    if (action == GLFW_RELEASE)
-        input->pressKey(key, 0.0f);
+    if (action == GLFW_PRESS)
+    {
+        input->pressEventKey(key, true, 0.0f);
+    }
+    else if (action == GLFW_RELEASE)
+    {
+        input->pressEventKey(key, false, 0.0f);
+    }
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
@@ -35,8 +41,14 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     WindowData* data = (WindowData *)glfwGetWindowUserPointer(window);
     Input* input = &data->input;
 
-    if (action == GLFW_RELEASE)
-        input->pressKey(button, 0.0f); // ?
+    if (action == GLFW_PRESS)
+    {
+        input->pressEventKey(button, true, 0.0f);
+    }
+    else if (action == GLFW_RELEASE)
+    {
+        input->pressEventKey(button, false, 0.0f);
+    }
 }
 
 // Window Class
@@ -116,18 +128,6 @@ bool Window::initWindow()
 void Window::processInput(float deltaTime)
 {
     Input* input = getInput();
-
-    // std::vector<Input::eventKey>* ekeys = input->getEventKeys();
-    // for (int i = 0; i < ekeys->size(); i++)
-    // {
-    //     if (glfwGetKey(m_window, (*ekeys)[i].key) == GLFW_RELEASE && (*ekeys)[i].isPressed)
-    //     {
-    //         input->pressKey((*ekeys)[i].key, deltaTime);
-    //         (*ekeys)[i].isPressed = false;
-    //     }
-    //     else if (glfwGetKey(m_window, (*ekeys)[i].key) == GLFW_PRESS)
-    //         (*ekeys)[i].isPressed = true;
-    // }
 
     std::vector<int>* keys = input->getPollingKeys();
     for (int i = 0; i < keys->size(); i++)

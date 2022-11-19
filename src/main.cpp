@@ -14,9 +14,11 @@
 int main()
 {
     Window window;
+    float x, y;
+    initResolution(x, y);
 
     int opcio = 0;
-    initMenu(opcio, window);
+    initMenu(opcio, window, x, y);
 
     if (opcio == 1)
         return Game(window);

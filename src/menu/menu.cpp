@@ -5,6 +5,7 @@
 #include "menu/rendering/SpriteRenderer.h"
 
 #include "window.h"
+#include "gl_utils.h"
 #include <iostream>
 
 // Matrix
@@ -12,13 +13,16 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+// Menu
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
+
 SpriteRenderer* Renderer;
 
-int initMenu(int& opcio, Window& window)
+int initMenu(int& opcio, Window& window, float& Width, float& Height)
 {
-    // Creaci� de ventana 
-    float Width = 1920;
-    float Height = 1080;
+    // Creaci� de ventana
     window = Window(Width, Height, "Billar", true, true);
 
     if (!window.initWindow()) {
@@ -170,4 +174,76 @@ int initMenu(int& opcio, Window& window)
     }
 
     return opcio;
+}
+
+int initResolution(float& x, float& y)
+{
+    Window window(700, 500, "Billar", true, false);
+
+    if (!window.initWindow()) {
+        return -1;
+    }
+
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGui::StyleColorsDark();
+    ImGui_ImplGlfw_InitForOpenGL(window.getGLFWwindow(), true);
+    ImGui_ImplOpenGL3_Init("#version 330");
+
+    while (!window.shouldClose())
+    {
+        // rendering commands here
+        GL(glClearColor(0.1f, 0.1f, 0.15f, 1.0f));
+        GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+
+        // ImGui newframe
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        ImGui::Begin("Debug Window");
+        ImGui::Text("Selecciona resolució");
+
+        if (ImGui::Button("720p"))
+        {
+            window.close();
+            x = 1280;
+            y = 720;
+        }
+
+        if (ImGui::Button("1080p"))
+        {
+            window.close();
+            x = 1920;
+            y = 1080;
+        }
+
+        if (ImGui::Button("1440p"))
+        {
+            window.close();
+            x = 2560;
+            y = 1440;
+        }
+
+        if (ImGui::Button("2160p"))
+        {
+            window.close();
+            x = 3840;
+            y = 2160;
+        }
+
+        ImGui::End();
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+
+        // check and call events and swap the buffers
+
+        window.update();
+    }
+
+    glfwTerminate();
+
+    return 0;
 }
