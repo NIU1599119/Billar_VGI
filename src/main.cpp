@@ -32,6 +32,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+// fisicas
+#include "btBulletDynamicsCommon.h"
 
 // funciones
 
@@ -229,11 +231,115 @@ int main()
 
     Rendering::Object poolTable(&poolTableModel);
     Rendering::Object ball9(&ball9Model);
+    Rendering::Object ballS(&ball9Model);
 
     // here goes the lights
     LOG_DEBUG("Loading lights...");
     Rendering::LightPoint lightPoint(0, true);
     LOG_DEBUG("Loaded lights");
+
+    //////////// FISICAS ////////////
+	///-----initialization_start-----
+
+	///collision configuration contains default setup for memory, collision setup. Advanced users can create their own configuration.
+	btDefaultCollisionConfiguration* collisionConfiguration = new btDefaultCollisionConfiguration();
+
+    ///use the default collision dispatcher. For parallel processing you can use a diffent dispatcher (see Extras/BulletMultiThreaded)
+	btCollisionDispatcher* dispatcher = new btCollisionDispatcher(collisionConfiguration);
+
+	///btDbvtBroadphase is a good general purpose broadphase. You can also try out btAxis3Sweep.
+	btBroadphaseInterface* overlappingPairCache = new btDbvtBroadphase();
+
+	///the default constraint solver. For parallel processing you can use a different solver (see Extras/BulletMultiThreaded)
+	btSequentialImpulseConstraintSolver* solver = new btSequentialImpulseConstraintSolver;
+
+    btDiscreteDynamicsWorld* dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
+
+    dynamicsWorld->setGravity(btVector3(0, -9.81, 0));
+	///-----initialization_end-----
+
+	//keep track of the shapes, we release memory at exit.
+	//make sure to re-use collision shapes among rigid bodies whenever possible!
+	btAlignedObjectArray<btCollisionShape*> collisionShapes;
+
+    //the ground is a cube of side 100 at position y = -56.
+	//the sphere will hit it at y = -6, with center at -5
+    std::vector<btVector3> wallPos;
+    std::vector<btVector3> wallSizes;
+    // 1 10 1
+    wallPos.push_back(btVector3(0, 0, 0));
+    wallSizes.push_back(btVector3(btScalar(10.), btScalar(1.), btScalar(10.)));
+    wallPos.push_back(btVector3(btScalar(3.5), btScalar(1.), btScalar(0.)));
+    wallSizes.push_back(btVector3(btScalar(1.), btScalar(2.), btScalar(10.)));
+
+    for (int i = 0; i < 2; i++)
+	{
+		btCollisionShape* groundShape = new btBoxShape(wallSizes[i]);
+
+		collisionShapes.push_back(groundShape);
+
+		btTransform groundTransform;
+		groundTransform.setIdentity();
+		groundTransform.setOrigin(wallPos[i]);
+
+		btScalar mass(0.);
+
+		//rigidbody is dynamic if and only if mass is non zero, otherwise static
+		bool isDynamic = (mass != 0.f);
+
+		btVector3 localInertia(0, 0, 0);
+		if (isDynamic)
+			groundShape->calculateLocalInertia(mass, localInertia);
+
+		//using motionstate is optional, it provides interpolation capabilities, and only synchronizes 'active' objects
+		btDefaultMotionState* myMotionState = new btDefaultMotionState(groundTransform);
+		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, groundShape, localInertia);
+		btRigidBody* body = new btRigidBody(rbInfo);
+
+		//add the body to the dynamics world
+		dynamicsWorld->addRigidBody(body);
+	}
+
+
+    for (int i = 0; i < 2; i++) // create 2 balls       // code should be at ball creation
+	{
+		//create a dynamic rigidbody
+
+		//btCollisionShape* colShape = new btBoxShape(btVector3(1,1,1));
+		btCollisionShape* colShape = new btSphereShape(btScalar(0.057));
+		collisionShapes.push_back(colShape);
+
+		/// Create Dynamic Objects
+		btTransform startTransform;
+		startTransform.setIdentity();
+
+		btScalar mass(0.5f);
+
+		//rigidbody is dynamic if and only if mass is non zero, otherwise static
+		bool isDynamic = (mass != 0.f);
+
+		btVector3 localInertia(0, 0, 0);
+		if (isDynamic)
+			colShape->calculateLocalInertia(mass, localInertia);
+
+		startTransform.setOrigin(btVector3(1+i, 10, 1));
+
+		//using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
+		btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
+		btRigidBody* body = new btRigidBody(rbInfo);
+
+		dynamicsWorld->addRigidBody(body);
+	}
+
+    input->setKeyAction(PUSH_BALL, GLFW_KEY_E);
+    input->setActionFunction(PUSH_BALL, [&dynamicsWorld](float deltaTime){
+        btCollisionObject* obj = dynamicsWorld->getCollisionObjectArray()[2];   // 1 should be ball
+        btRigidBody* body = btRigidBody::upcast(obj);
+        body->setActivationState(ACTIVE_TAG);
+        body->setLinearVelocity(btVector3(11.0, body->getLinearVelocity().y(), 0.0));
+    });
+
 
     unsigned int nFrame = 0;
     float deltaTime = 0.0f;	// Time between current frame and last frame
@@ -258,7 +364,24 @@ int main()
         }
         // physics update outside (also update the position of everything)
         cameraController->update();
+        dynamicsWorld->stepSimulation(deltaTime, 10);
 
+        // //print positions of all objects
+		// for (int j = dynamicsWorld->getNumCollisionObjects() - 1; j >= 0; j--)
+		// {
+		// 	btCollisionObject* obj = dynamicsWorld->getCollisionObjectArray()[j];
+		// 	btRigidBody* body = btRigidBody::upcast(obj);
+		// 	btTransform trans;
+		// 	if (body && body->getMotionState())
+		// 	{
+		// 		body->getMotionState()->getWorldTransform(trans);
+		// 	}
+		// 	else
+		// 	{
+		// 		trans = obj->getWorldTransform();
+		// 	}
+		// 	printf("world pos object %d = %f,%f,%f\n", j, float(trans.getOrigin().getX()), float(trans.getOrigin().getY()), float(trans.getOrigin().getZ()));
+		// }
 
         glm::mat4 view = camera.getViewMatrix();
 
@@ -277,11 +400,47 @@ int main()
 
             poolTable.draw(&modelShader, view, projection, camera.getPosition());
 
-            ball9.setPosition(controlledPosition);
-            ball9.setOrientation(glm::radians(250.0f)*(float)glfwGetTime(), controlledPosition);
-            ball9.setScaling(0.1f);
+            btCollisionObject* obj = dynamicsWorld->getCollisionObjectArray()[2];   // 2 should be ball
+			btRigidBody* body = btRigidBody::upcast(obj);
+			btTransform trans;
+			if (body && body->getMotionState())
+			{
+				body->getMotionState()->getWorldTransform(trans);
+			}
+			else
+			{
+				trans = obj->getWorldTransform();
+			}
+            // btVector3 pos = trans.getOrigin();
+            glm::vec3 pos = glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+            glm::quat orient = glm::quat(trans.getRotation().getW(), trans.getRotation().getX(), trans.getRotation().getY(), trans.getRotation().getZ());
+
+            ball9.setPosition(pos);
+            ball9.setOrientation(orient);
+            ball9.setScaling(0.057f);
 
             ball9.draw(&modelShader, view, projection, camera.getPosition());
+
+            obj = dynamicsWorld->getCollisionObjectArray()[3];   // 3 should be second ball
+			body = btRigidBody::upcast(obj);
+			// trans;
+			if (body && body->getMotionState())
+			{
+				body->getMotionState()->getWorldTransform(trans);
+			}
+			else
+			{
+				trans = obj->getWorldTransform();
+			}
+            // btVector3 pos = trans.getOrigin();
+            pos = glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+            orient = glm::quat(trans.getRotation().getW(), trans.getRotation().getX(), trans.getRotation().getY(), trans.getRotation().getZ());
+
+            ballS.setPosition(pos);
+            ballS.setOrientation(orient);
+            ballS.setScaling(0.057f);
+
+            ballS.draw(&modelShader, view, projection, camera.getPosition());
         }
 
 

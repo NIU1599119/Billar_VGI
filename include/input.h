@@ -12,6 +12,7 @@ enum ACTIONS {
     MOVE_LEFT,
     MOVE_RIGHT,
     SWITCH_MOUSE,
+    PUSH_BALL,
     EXIT
 };
 
