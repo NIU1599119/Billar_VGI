@@ -306,14 +306,14 @@ int main()
 		//create a dynamic rigidbody
 
 		//btCollisionShape* colShape = new btBoxShape(btVector3(1,1,1));
-		btCollisionShape* colShape = new btSphereShape(btScalar(0.057));
+		btCollisionShape* colShape = new btSphereShape(btScalar(0.05715));
 		collisionShapes.push_back(colShape);
 
 		/// Create Dynamic Objects
 		btTransform startTransform;
 		startTransform.setIdentity();
 
-		btScalar mass(0.5f);
+		btScalar mass(0.17f);   // 170 grams
 
 		//rigidbody is dynamic if and only if mass is non zero, otherwise static
 		bool isDynamic = (mass != 0.f);
@@ -417,7 +417,7 @@ int main()
 
             ball9.setPosition(pos);
             ball9.setOrientation(orient);
-            ball9.setScaling(0.057f);
+            ball9.setScaling(0.05715f);
 
             ball9.draw(&modelShader, view, projection, camera.getPosition());
 
