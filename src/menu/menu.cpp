@@ -24,6 +24,8 @@ int initMenu(int& opcio, Window& window, float& Width, float& Height)
 {
     Input* input = window.getInput();
 
+    float resFix = Width / 1920;
+
     // Creaci� de la detecci� d'inputs
 
     bool clicked = false;
@@ -101,16 +103,16 @@ int initMenu(int& opcio, Window& window, float& Width, float& Height)
 
         opcio = 0;
 
-        if ((mousePosition.x > 600.0f && mousePosition.y > 450.0f) && (mousePosition.x < 1400.0f && mousePosition.y < 530.0f))
+        if ((mousePosition.x > (600.0f*resFix) && mousePosition.y > (450.0f * resFix)) && (mousePosition.x < (1400.0f * resFix) && mousePosition.y < (530.0f * resFix)))
         {
             Renderer->DrawSprite(ResourceManager::GetTexture("button1"),
-                glm::vec2(600.0f, 450.0f), glm::vec2(800, 80), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+                glm::vec2(600.0f * resFix, 450.0f * resFix), glm::vec2(800 * resFix, 80 * resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
             opcio = 1;
         }
         else
         {
             Renderer->DrawSprite(ResourceManager::GetTexture("button1"),
-                glm::vec2(600.0f, 450.0f), glm::vec2(800, 80), 0.0f, glm::vec3(0.8f, 0.8f, 0.8f));
+                glm::vec2(600.0f * resFix, 450.0f * resFix), glm::vec2(800 * resFix, 80 * resFix), 0.0f, glm::vec3(0.8f, 0.8f, 0.8f));
         }
         
         if ((mousePosition.x > 600.0f && mousePosition.y > 550.0f) && (mousePosition.x < 1400.0f && mousePosition.y < 630.0f))
