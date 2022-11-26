@@ -37,6 +37,7 @@ public:
 
     Input* getInput() { return &m_data.input; }
     void processInput(float deltaTime);
+    void resizeWindow(GLFWwindow* window, int width, int height);
 
 private:
     GLFWwindow* m_window;

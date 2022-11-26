@@ -137,6 +137,11 @@ void Window::processInput(float deltaTime)
     }
 }
 
+void Window::resizeWindow(GLFWwindow* window, int width, int height)
+{
+    glfwSetWindowSize(window, width, height);
+}
+
 void Window::update()
 {
     glfwSwapBuffers(m_window);

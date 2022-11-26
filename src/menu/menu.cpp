@@ -22,13 +22,6 @@ SpriteRenderer* Renderer;
 
 int initMenu(int& opcio, Window& window, float& Width, float& Height)
 {
-    // Creaci� de ventana
-    window = Window(Width, Height, "Billar", true, true);
-
-    if (!window.initWindow()) {
-        return -1;
-    }
-
     Input* input = window.getInput();
 
     // Creaci� de la detecci� d'inputs
@@ -175,22 +168,11 @@ int initMenu(int& opcio, Window& window, float& Width, float& Height)
     return opcio;
 }
 
-int initResolution(float& x, float& y)
+int initResolution(float& x, float& y, Window& window)
 {
-    Window window(700, 500, "Billar", true, false);
+    bool selected = false;
 
-    if (!window.initWindow()) {
-        return -1;
-    }
-
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    ImGui::StyleColorsDark();
-    ImGui_ImplGlfw_InitForOpenGL(window.getGLFWwindow(), true);
-    ImGui_ImplOpenGL3_Init("#version 330");
-
-    while (!window.shouldClose())
+    while (!selected)
     {
         // rendering commands here
         GL(glClearColor(0.1f, 0.1f, 0.15f, 1.0f));
@@ -206,30 +188,30 @@ int initResolution(float& x, float& y)
 
         if (ImGui::Button("720p"))
         {
-            window.close();
             x = 1280;
             y = 720;
+            selected = true;
         }
 
         if (ImGui::Button("1080p"))
         {
-            window.close();
             x = 1920;
             y = 1080;
+            selected = true;
         }
 
         if (ImGui::Button("1440p"))
         {
-            window.close();
             x = 2560;
             y = 1440;
+            selected = true;
         }
 
         if (ImGui::Button("2160p"))
         {
-            window.close();
             x = 3840;
             y = 2160;
+            selected = true;
         }
 
         ImGui::End();
@@ -242,7 +224,8 @@ int initResolution(float& x, float& y)
         window.update();
     }
 
-    glfwTerminate();
+    window.resizeWindow(window.getGLFWwindow(), x, y);
+    window.update();
 
     return 0;
 }
