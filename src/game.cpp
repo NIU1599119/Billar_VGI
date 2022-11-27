@@ -11,9 +11,6 @@
 
 #include "rendering/shader.h"
 #include "rendering/texture.h"
-#include "rendering/flexibleMesh.h"
-
-#include "rendering/simpleModel.h"
 
 #include "rendering/model.h"
 #include "rendering/lightPoint.h"
@@ -32,47 +29,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-// menu
-#include "menu/menu.h"
-
-// game
-#include "game.h"
-
 // fisicas
 #include "btBulletDynamicsCommon.h"
 
-// shader files
-std::string vertexDir = "shaders/default.vert";
-std::string fragmentDir = "shaders/default.frag";
-
-// functions
-
-void mouse_callback(GLFWwindow* window, double xpos, double ypos)
-{
-    ((WindowData*)glfwGetWindowUserPointer(window))->input.updateCursor(xpos, ypos);
-}
-
-void processInput(GLFWwindow* window, Input* input, float deltaTime)
-{
-    std::vector<Input::eventKey>* ekeys = input->getEventKeys();
-    for (int i = 0; i < ekeys->size(); i++)
-    {
-        if (glfwGetKey(window, (*ekeys)[i].key) == GLFW_RELEASE && (*ekeys)[i].isPressed)
-        {
-            input->pressKey((*ekeys)[i].key, deltaTime);
-            (*ekeys)[i].isPressed = false;
-        }
-        else if (glfwGetKey(window, (*ekeys)[i].key) == GLFW_PRESS)
-            (*ekeys)[i].isPressed = true;
-    }
-
-    std::vector<int>* keys = input->getPollingKeys();
-    for (int i = 0; i < keys->size(); i++)
-    {
-        if (glfwGetKey(window, (*keys)[i]) == GLFW_PRESS)
-            input->pressKey((*keys)[i], deltaTime);
-    }
-}
+#include "rendering/collisionBox.h"
 
 
 int Game(Window& window) {
@@ -80,81 +40,30 @@ int Game(Window& window) {
     // enables z-buffer
     glEnable(GL_DEPTH_TEST);
 
-
-    /////////// LIGHT CUBE ///////////
-
-    float lightCubeVertices[] = {
-        -0.5f, -0.5f, -0.5f,
-        0.5f, -0.5f, -0.5f,
-        0.5f,  0.5f, -0.5f,
-        0.5f,  0.5f, -0.5f,
-        -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-
-        -0.5f, -0.5f,  0.5f,
-        0.5f, -0.5f,  0.5f,
-        0.5f,  0.5f,  0.5f,
-        0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-        -0.5f, -0.5f,  0.5f,
-
-        -0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-        -0.5f, -0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-
-        0.5f,  0.5f,  0.5f,
-        0.5f,  0.5f, -0.5f,
-        0.5f, -0.5f, -0.5f,
-        0.5f, -0.5f, -0.5f,
-        0.5f, -0.5f,  0.5f,
-        0.5f,  0.5f,  0.5f,
-
-        -0.5f, -0.5f, -0.5f,
-        0.5f, -0.5f, -0.5f,
-        0.5f, -0.5f,  0.5f,
-        0.5f, -0.5f,  0.5f,
-        -0.5f, -0.5f,  0.5f,
-        -0.5f, -0.5f, -0.5f,
-
-        -0.5f,  0.5f, -0.5f,
-        0.5f,  0.5f, -0.5f,
-        0.5f,  0.5f,  0.5f,
-        0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f, -0.5f
-    };
-
-    std::vector<AttributeData> lightCubeAttributes;
-    lightCubeAttributes.push_back(AttributeData(3, 0));
-    Mesh lightCubeMesh;
-    lightCubeMesh.setVertex(lightCubeVertices, 36, 3 * sizeof(float), lightCubeAttributes);
-    lightCubeMesh.create();
-
-    RenderingTemp::SimpleModel lightCube(&lightCubeMesh);
-    glm::vec3 lightCubePosition = glm::vec3(0.7f, 1.2f, 2.0f);
-    lightCube.scale(0.2f);
-    lightCube.setPosition(&lightCubePosition);
-    glm::vec3 lightCubeColor = glm::vec3(1.0f, 1.0f, 1.0f);
-
-
     ///// loading shaders /////
 
     Shader modelShader("shaders/model.vert", "shaders/model.frag");
-    if (!modelShader.compileShaders())
+    if(!modelShader.compileShaders())
     {
         LOG_ERROR("Failed compiling shader");
         return 1;
     }
 
     Shader lightShader("shaders/light.vert", "shaders/light.frag");
-    if (!lightShader.compileShaders())
+    if(!lightShader.compileShaders())
     {
         LOG_ERROR("Failed compiling shader");
         return 1;
     }
+
+    #ifdef DEBUG_SHADER
+    Shader debugShader("shaders/debug.vert", "shaders/debug.frag");
+    if(!debugShader.compileShaders())
+    {
+        LOG_ERROR("Failed compiling shader");
+        return 1;
+    }
+    #endif
 
 
     /////////// IMGUI init ///////////
@@ -165,10 +74,7 @@ int Game(Window& window) {
     glm::vec3 controlledPosition = glm::vec3(1.0f, 1.0f, 1.0f);
     glm::vec3 controlledDirection = glm::vec3(0.5f, 1.0f, 0.0f);
 
-
     /////////// INPUT init ///////////
-
-    glfwSetCursorPosCallback(window.getGLFWwindow(), mouse_callback);
 
     Input* input = window.getInput();
 
@@ -200,7 +106,7 @@ int Game(Window& window) {
     Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
     // camera perspective to screen
-    glm::mat4 projection = glm::perspective(45.0f, 1200.0f / 800.0f, 0.1f, 100.0f); /// this should be updated when window changes size
+    glm::mat4 projection = glm::perspective(45.0f, 16.0f / 9.0f, 0.1f, 100.0f); /// this should be updated when window changes size
 
 
     enum CameraType {
@@ -210,124 +116,173 @@ int Game(Window& window) {
     };
     CameraType currentType = ORBIT;
 
-    CameraController* cameraController = new CameraControllerOrbit(&camera, 2.5f, 3.0f, &controlledPosition);
+    CameraController* cameraController = new CameraControllerOrbit(&camera, 2.5f, 1.0f, &controlledPosition);
     bindInputToController(input, cameraController);
 
 
     // here goes the models
     Rendering::Model poolTableModel("models/pooltable/Pool table Cavicchi Leonardo 9FT N300818.3ds");
-    Rendering::Model ball9Model("models/PoolBall/Pool.obj");
+    Rendering::Model ball1Model("models/PoolBall1/Pool.obj");
+    Rendering::Model ball8Model("models/PoolBall/Pool.obj");
 
     Rendering::Object poolTable(&poolTableModel);
-    Rendering::Object ball9(&ball9Model);
-    Rendering::Object ballS(&ball9Model);
+    Rendering::Object ball1(&ball1Model);
+    Rendering::Object ball8(&ball8Model);
 
-    // here goes the lights
+    /////////// LIGHTS ///////////
+
+    glm::vec3 lightCubePosition = glm::vec3( 0.0f,  1.2f,  0.0f);
+    glm::vec3 lightCubeColor = glm::vec3(1.0f, 1.0f, 1.0f);
+
     LOG_DEBUG("Loading lights...");
-    Rendering::LightPoint lightPoint(0, true);
+    Rendering::LightPoint lightPoint(0);
     LOG_DEBUG("Loaded lights");
 
     //////////// FISICAS ////////////
-    ///-----initialization_start-----
+	///-----initialization_start-----
 
-    ///collision configuration contains default setup for memory, collision setup. Advanced users can create their own configuration.
-    btDefaultCollisionConfiguration* collisionConfiguration = new btDefaultCollisionConfiguration();
+	///collision configuration contains default setup for memory, collision setup. Advanced users can create their own configuration.
+	btDefaultCollisionConfiguration* collisionConfiguration = new btDefaultCollisionConfiguration();
 
     ///use the default collision dispatcher. For parallel processing you can use a diffent dispatcher (see Extras/BulletMultiThreaded)
-    btCollisionDispatcher* dispatcher = new btCollisionDispatcher(collisionConfiguration);
+	btCollisionDispatcher* dispatcher = new btCollisionDispatcher(collisionConfiguration);
 
-    ///btDbvtBroadphase is a good general purpose broadphase. You can also try out btAxis3Sweep.
-    btBroadphaseInterface* overlappingPairCache = new btDbvtBroadphase();
+	///btDbvtBroadphase is a good general purpose broadphase. You can also try out btAxis3Sweep.
+	btBroadphaseInterface* overlappingPairCache = new btDbvtBroadphase();
 
-    ///the default constraint solver. For parallel processing you can use a different solver (see Extras/BulletMultiThreaded)
-    btSequentialImpulseConstraintSolver* solver = new btSequentialImpulseConstraintSolver;
+	///the default constraint solver. For parallel processing you can use a different solver (see Extras/BulletMultiThreaded)
+	btSequentialImpulseConstraintSolver* solver = new btSequentialImpulseConstraintSolver;
 
     btDiscreteDynamicsWorld* dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
 
     dynamicsWorld->setGravity(btVector3(0, -9.81, 0));
-    ///-----initialization_end-----
+	///-----initialization_end-----
 
-    //keep track of the shapes, we release memory at exit.
-    //make sure to re-use collision shapes among rigid bodies whenever possible!
-    btAlignedObjectArray<btCollisionShape*> collisionShapes;
+	//keep track of the shapes, we release memory at exit.
+	//make sure to re-use collision shapes among rigid bodies whenever possible!
+	btAlignedObjectArray<btCollisionShape*> collisionShapes;
 
     //the ground is a cube of side 100 at position y = -56.
-    //the sphere will hit it at y = -6, with center at -5
-    std::vector<btVector3> wallPos;
-    std::vector<btVector3> wallSizes;
+	//the sphere will hit it at y = -6, with center at -5
+    std::vector<glm::vec3> wallPos;
+    std::vector<glm::vec3> wallSizes;
     // 1 10 1
-    wallPos.push_back(btVector3(0, 0, 0));
-    wallSizes.push_back(btVector3(btScalar(10.), btScalar(1.), btScalar(10.)));
-    wallPos.push_back(btVector3(btScalar(3.5), btScalar(1.), btScalar(0.)));
-    wallSizes.push_back(btVector3(btScalar(1.), btScalar(2.), btScalar(10.)));
 
-    for (int i = 0; i < 2; i++)
+    // wallPos.push_back(btVector3(btScalar(0.), btScalar(0.76/2), btScalar(0.)));   // table
+    // wallSizes.push_back(btVector3(btScalar(2.62), btScalar(0.76), btScalar(1.50)));
+    /*    ------------ X ------------
+        ┌──┬──────────┬─┬───────────┬─┐
+        │O └──────────┘O└───────────┘O│ |
+        ├┐                           ┌┤ |
+        ││                           ││ |
+        ││                           ││ |
+        ││                           ││ Y
+        ││                           ││ |
+        ││                           ││ |
+        ├┘                           └┤ |
+        │O┌───────────┐O┌───────────┐O│ |
+        └─┴───────────┴─┴───────────┴─┘
+    */
+
+    std::vector<Rendering::CollisionBox> rigidObjects;
+
+    Rendering::CollisionBox table;
+    table.setFriction(.8165);
+    table.setRestitution(.513);
+
+    table.setPosition(glm::vec3(0., 0.76/2.0, 0.));
+    table.setScale(glm::vec3(2.62, 0.76, 1.50));
+
+    rigidObjects.push_back(table);
+
+    Rendering::CollisionBox wallAux(table.getMesh());
+    wallAux.setFriction(.8165);             // all walls have this values
+    wallAux.setRestitution(.7695);          // restitucion real (se supone)
+    // wallAux.setRestitution(1.0);
+
+    // wall (front)
+    wallAux.setPosition(glm::vec3(0., 0.76, -(0.75-0.095)));
+    // posicion es el limite del tablero menos la mitad del ancho
+    wallAux.setScale(glm::vec3(2.62, 0.096, 0.19));
+    // 262-224 = 150-112 = 38 cm Anchura paredes -> 19 anchura 1 pared
+    // 81.3-76.5 = 4.8 cm Altura pared (comparado con el tablero)
+
+    rigidObjects.push_back(wallAux);
+
+    // wall (back)
+    wallAux.setPosition(glm::vec3(0., 0.76, +(0.75-0.095)));
+    wallAux.setScale(glm::vec3(2.62, 0.096, 0.19));
+
+    rigidObjects.push_back(wallAux);
+
+    // wall (left)
+    wallAux.setPosition(glm::vec3(-(1.31-0.095), 0.76, 0.));
+    wallAux.setScale(glm::vec3(0.19, 0.096, 1.50));
+
+    rigidObjects.push_back(wallAux);
+
+    // wall (right)
+    wallAux.setPosition(glm::vec3(+(1.31-0.095), 0.76, 0.));
+    wallAux.setScale(glm::vec3(0.19, 0.096, 1.50));
+
+    rigidObjects.push_back(wallAux);
+
+    for (int i = 0; i < rigidObjects.size(); i++)
     {
-        btCollisionShape* groundShape = new btBoxShape(wallSizes[i]);
-
-        collisionShapes.push_back(groundShape);
-
-        btTransform groundTransform;
-        groundTransform.setIdentity();
-        groundTransform.setOrigin(wallPos[i]);
-
-        btScalar mass(0.);
-
-        //rigidbody is dynamic if and only if mass is non zero, otherwise static
-        bool isDynamic = (mass != 0.f);
-
-        btVector3 localInertia(0, 0, 0);
-        if (isDynamic)
-            groundShape->calculateLocalInertia(mass, localInertia);
-
-        //using motionstate is optional, it provides interpolation capabilities, and only synchronizes 'active' objects
-        btDefaultMotionState* myMotionState = new btDefaultMotionState(groundTransform);
-        btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, groundShape, localInertia);
-        btRigidBody* body = new btRigidBody(rbInfo);
-
-        //add the body to the dynamics world
-        dynamicsWorld->addRigidBody(body);
+        rigidObjects[i].initializeBullet(collisionShapes, dynamicsWorld);
     }
 
 
+    int ballsIndex = collisionShapes.size();
     for (int i = 0; i < 2; i++) // create 2 balls       // code should be at ball creation
-    {
-        //create a dynamic rigidbody
+	{
+		//create a dynamic rigidbody
 
-        //btCollisionShape* colShape = new btBoxShape(btVector3(1,1,1));
-        btCollisionShape* colShape = new btSphereShape(btScalar(0.05715));
-        collisionShapes.push_back(colShape);
+		//btCollisionShape* colShape = new btBoxShape(btVector3(1,1,1));
+		btCollisionShape* colShape = new btSphereShape(btScalar(0.05715/2.0));  // 0.05715 is diameter, function takes radius
+		collisionShapes.push_back(colShape);
 
-        /// Create Dynamic Objects
-        btTransform startTransform;
-        startTransform.setIdentity();
+		/// Create Dynamic Objects
+		btTransform startTransform;
+		startTransform.setIdentity();
 
-        btScalar mass(0.17f);   // 170 grams
+		btScalar mass(0.17f);   // 170 grams
 
-        //rigidbody is dynamic if and only if mass is non zero, otherwise static
-        bool isDynamic = (mass != 0.f);
+		//rigidbody is dynamic if and only if mass is non zero, otherwise static
+		bool isDynamic = (mass != 0.f);
 
-        btVector3 localInertia(0, 0, 0);
-        if (isDynamic)
-            colShape->calculateLocalInertia(mass, localInertia);
+		btVector3 localInertia(0, 0, 0);
+		if (isDynamic)
+			colShape->calculateLocalInertia(mass, localInertia);
 
-        startTransform.setOrigin(btVector3(1 + i, 10, 1));
+		startTransform.setOrigin(btVector3(0+i, 3, 0));
 
-        //using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
-        btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
-        btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
-        btRigidBody* body = new btRigidBody(rbInfo);
+		//using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
+		btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
+		btRigidBody* body = new btRigidBody(rbInfo);
+    	body->setFriction(.245);
+        body->setRestitution(0.97468);
 
-        dynamicsWorld->addRigidBody(body);
-    }
+		dynamicsWorld->addRigidBody(body);
+	}
 
-    input->setKeyAction(PUSH_BALL, GLFW_KEY_E);
-    input->setActionFunction(PUSH_BALL, [&dynamicsWorld](float deltaTime) {
-        btCollisionObject* obj = dynamicsWorld->getCollisionObjectArray()[2];   // 1 should be ball
+    input->setKeyAction(PUSH_BALL, GLFW_KEY_F);
+    input->setActionFunction(PUSH_BALL, [&dynamicsWorld, &ballsIndex](float deltaTime){
+        btCollisionObject* obj = dynamicsWorld->getCollisionObjectArray()[ballsIndex];
         btRigidBody* body = btRigidBody::upcast(obj);
         body->setActivationState(ACTIVE_TAG);
-        body->setLinearVelocity(btVector3(11.0, body->getLinearVelocity().y(), 0.0));
-        });
+        body->setLinearVelocity(btVector3(1, body->getLinearVelocity().y(), 1));
+    });
+
+
+    input->setKeyAction(ACCELERATE_BALL, GLFW_KEY_E);
+    input->setActionFunction(ACCELERATE_BALL, [&dynamicsWorld, &ballsIndex](float deltaTime){
+        btCollisionObject* obj = dynamicsWorld->getCollisionObjectArray()[ballsIndex];
+        btRigidBody* body = btRigidBody::upcast(obj);
+        body->setActivationState(ACTIVE_TAG);
+        body->setLinearVelocity(btVector3(body->getLinearVelocity().x()*(1.01+deltaTime), body->getLinearVelocity().y(), body->getLinearVelocity().z()*(1.01+deltaTime)));
+    });
 
     unsigned int nFrame = 0;
     float deltaTime = 0.0f;	// Time between current frame and last frame
@@ -348,28 +303,11 @@ int Game(Window& window) {
         {
             // blocks anything here if mouse is over imgui
             // input handling inside
-            processInput(window.getGLFWwindow(), input, deltaTime);
+            window.processInput(deltaTime);
         }
         // physics update outside (also update the position of everything)
         cameraController->update();
-        dynamicsWorld->stepSimulation(deltaTime, 10);
-
-        // //print positions of all objects
-        // for (int j = dynamicsWorld->getNumCollisionObjects() - 1; j >= 0; j--)
-        // {
-        // 	btCollisionObject* obj = dynamicsWorld->getCollisionObjectArray()[j];
-        // 	btRigidBody* body = btRigidBody::upcast(obj);
-        // 	btTransform trans;
-        // 	if (body && body->getMotionState())
-        // 	{
-        // 		body->getMotionState()->getWorldTransform(trans);
-        // 	}
-        // 	else
-        // 	{
-        // 		trans = obj->getWorldTransform();
-        // 	}
-        // 	printf("world pos object %d = %f,%f,%f\n", j, float(trans.getOrigin().getX()), float(trans.getOrigin().getY()), float(trans.getOrigin().getZ()));
-        // }
+        dynamicsWorld->stepSimulation(deltaTime, 100, 0.001f);
 
         glm::mat4 view = camera.getViewMatrix();
 
@@ -388,7 +326,7 @@ int Game(Window& window) {
 
             poolTable.draw(&modelShader, view, projection, camera.getPosition());
 
-            btCollisionObject* obj = dynamicsWorld->getCollisionObjectArray()[2];   // 2 should be ball
+            btCollisionObject* obj = dynamicsWorld->getCollisionObjectArray()[ballsIndex];   // should be ball
             btRigidBody* body = btRigidBody::upcast(obj);
             btTransform trans;
             if (body && body->getMotionState())
@@ -401,15 +339,17 @@ int Game(Window& window) {
             }
             // btVector3 pos = trans.getOrigin();
             glm::vec3 pos = glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
-            glm::quat orient = glm::quat(trans.getRotation().getW(), trans.getRotation().getX(), trans.getRotation().getY(), trans.getRotation().getZ());
+            glm::quat orient = glm::quat(trans.getRotation().getW(), trans.getRotation().getX(), trans.getRotation().getY(), trans.getRotation().getZ()); // probar de cambiar esto de wxyz a xyzw por si bullet los tiene en ordenes distintos
 
-            ball9.setPosition(pos);
-            ball9.setOrientation(orient);
-            ball9.setScaling(0.05715f);
+            controlledPosition = pos;
 
-            ball9.draw(&modelShader, view, projection, camera.getPosition());
+            ball8.setPosition(pos);
+            ball8.setOrientation(orient);
+            ball8.setScaling(0.05715f/2);
 
-            obj = dynamicsWorld->getCollisionObjectArray()[3];   // 3 should be second ball
+            ball8.draw(&modelShader, view, projection, camera.getPosition());
+
+            obj = dynamicsWorld->getCollisionObjectArray()[ballsIndex+1];   // should be second ball
             body = btRigidBody::upcast(obj);
             // trans;
             if (body && body->getMotionState())
@@ -424,11 +364,18 @@ int Game(Window& window) {
             pos = glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
             orient = glm::quat(trans.getRotation().getW(), trans.getRotation().getX(), trans.getRotation().getY(), trans.getRotation().getZ());
 
-            ballS.setPosition(pos);
-            ballS.setOrientation(orient);
-            ballS.setScaling(0.057f);
+            ball1.setPosition(pos);
+            ball1.setOrientation(orient);
+            ball1.setScaling(0.05715f/2);
 
-            ballS.draw(&modelShader, view, projection, camera.getPosition());
+            ball1.draw(&modelShader, view, projection, camera.getPosition());
+
+            #ifdef DEBUG_SHADER
+            for (int i = 0; i < rigidObjects.size(); i++)
+            {
+                rigidObjects[i].draw(&debugShader, view, projection);
+            }
+            #endif
         }
 
 
@@ -467,7 +414,7 @@ int Game(Window& window) {
             unbindInputToController(input);
             if (cameraController != nullptr)
                 delete cameraController;
-            cameraController = new CameraControllerOrbit(&camera, 2.5f, 3.0f, &controlledPosition);
+            cameraController = new CameraControllerOrbit(&camera, 2.5f, 0.2f, &controlledPosition);
             bindInputToController(input, cameraController);
         }
         ImGui::Text("Frame number %u", nFrame);

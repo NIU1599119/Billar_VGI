@@ -55,6 +55,8 @@ namespace Rendering {
 
         bool hasNormals = mesh->HasNormals();
         bool hasTextures = false;
+        if (hasNormals)
+            LOG_DEBUG("HAS NORMALS");
 
 
         if(mesh->mTextureCoords[0]) hasTextures = true;
@@ -66,7 +68,11 @@ namespace Rendering {
             vertex.Position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
 
             if (hasNormals)
+            {
                 vertex.Normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
+
+                vertex.Tangent = glm::vec3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
+            }
 
             if (hasTextures)
                 vertex.TexCoords = glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
@@ -90,9 +96,13 @@ namespace Rendering {
             aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
             std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
             std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+            std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_NORMALS, "texture_normal");
+            std::vector<Texture> roughnessMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE_ROUGHNESS, "texture_roughness");
 
             textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
             textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+            textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+            textures.insert(textures.end(), roughnessMaps.begin(), roughnessMaps.end());
         }
 
         return Mesh(vertices, indices, textures);

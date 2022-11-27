@@ -21,6 +21,8 @@ namespace Rendering {
 
     void LightPoint::draw(Shader* shader, glm::mat4& view, glm::mat4& projection)
     {
+        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );    // wireframe rendering
+
         if (m_mesh == nullptr)
             return;
         glm::mat4 translate = glm::mat4(1.0f);
@@ -37,6 +39,9 @@ namespace Rendering {
         shader->setUniformMat4("projection", projection);
 
         m_mesh->draw(shader);
+
+        glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );    // disable wireframe rendering
+
     }
 
     void LightPoint::generateCubeMesh()

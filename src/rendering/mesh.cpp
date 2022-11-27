@@ -1,75 +1,8 @@
-#include "rendering/flexibleMesh.h"
 #include "rendering/mesh.h"
 #include "debug.h"
 #include "gl_utils.h"
 #include <cstdlib>
 
-void Mesh::setVertexData(float* vertexData, unsigned int nVertex)
-{
-    m_vertexData = vertexData;
-    m_nVertex = nVertex;
-}
-
-void Mesh::setVertexAtr(GLsizei stride, std::vector<AttributeData> attributeData)
-{
-    m_stride = stride;
-    m_attributeData = attributeData;
-}
-
-void Mesh::setVertex(float* vertexData, unsigned int nVertex, GLsizei stride, std::vector<AttributeData> attributeData)
-{
-    m_vertexData = vertexData;
-    m_nVertex = nVertex;
-    m_stride = stride;
-    m_attributeData = attributeData;
-}
-
-
-void Mesh::create()
-{
-    ASSERT(m_VAO == 0);
-    ASSERT(m_VBO == 0);
-    ASSERT(m_attributeData.size() > 0);
-
-    // generate VAO (Vertex Array Object)
-    unsigned int VAO;
-    GL(glGenVertexArrays(1, &VAO));
-    // Bind the VAO
-    GL(glBindVertexArray(VAO));
-
-    // generate VBO (Vertex Buffer Objects)
-    unsigned int VBO;
-    GL(glGenBuffers(1, &VBO));
-    // copy vertices to buffer
-    GL(glBindBuffer(GL_ARRAY_BUFFER, VBO));
-    GL(glBufferData(GL_ARRAY_BUFFER, m_nVertex*m_stride, m_vertexData, GL_STATIC_DRAW));
-
-
-    // GLint prevPos = 0;
-    for (int i = 0; i < m_attributeData.size(); i++)
-    {
-        void* offset = m_attributeData[i].offset;
-        GLint size = m_attributeData[i].size;
-        GL(glVertexAttribPointer(i, size, GL_FLOAT, GL_FALSE, m_stride, offset));
-        GL(glEnableVertexAttribArray(i));
-    }
-    
-    m_VAO = VAO;
-    m_VBO = VBO;
-
-}
-
-void Mesh::draw()
-{
-    GL(glBindVertexArray(m_VAO));                   // activate the VAO
-
-    redraw();
-}
-
-void Mesh::redraw()
-{
-    GL(glDrawArrays(GL_TRIANGLES, 0, m_nVertex));   // assume that the VAO has been activated previously and draw all triangles
-}
 
 namespace Rendering {
     Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
@@ -97,7 +30,7 @@ namespace Rendering {
 
         // vertex positions
         GL(glEnableVertexAttribArray(0));
-        GL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0));
+        GL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(Vertex, Position)));
 
         // vertex normals
         GL(glEnableVertexAttribArray(1));
@@ -107,6 +40,10 @@ namespace Rendering {
         GL(glEnableVertexAttribArray(2));
         GL(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(Vertex, TexCoords)));
 
+        // vertex tangent coords
+        GL(glEnableVertexAttribArray(3));
+        GL(glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(Vertex, Tangent)));
+
         // bind an invalid VAO
         GL(glBindVertexArray(0));
     }
@@ -115,6 +52,8 @@ namespace Rendering {
     {
         unsigned int diffuseNr = 0;
         unsigned int specularNr = 0;
+        unsigned int normalNr = 0;
+        unsigned int roughnessNr = 0;
         for (unsigned int i = 0; i < m_textures.size(); i++)
         {
             GL(glActiveTexture(GL_TEXTURE0 + i));   // activate texture
@@ -130,6 +69,16 @@ namespace Rendering {
             {
                 number = std::to_string(specularNr);
                 specularNr++;
+            }
+            else if (name == "texture_normal")
+            {
+                number = std::to_string(normalNr);
+                normalNr++;
+            }
+            else if (name == "texture_roughness")
+            {
+                number = std::to_string(roughnessNr);
+                roughnessNr++;
             }
             shader->setUniformInt(("material." + name + number).c_str(), i);
             GL(glBindTexture(GL_TEXTURE_2D, m_textures[i].id));
