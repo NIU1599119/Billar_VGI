@@ -16,6 +16,8 @@
 #include "rendering/simpleModel.h"
 
 #include "rendering/model.h"
+#include "rendering/lightPoint.h"
+#include "rendering/object.h"
 
 
 #include "camera/camera.h"
@@ -36,9 +38,41 @@
 // game
 #include "game.h"
 
+// fisicas
+#include "btBulletDynamicsCommon.h"
+
 // shader files
 std::string vertexDir = "shaders/default.vert";
 std::string fragmentDir = "shaders/default.frag";
+
+// functions
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+    ((WindowData*)glfwGetWindowUserPointer(window))->input.updateCursor(xpos, ypos);
+}
+
+void processInput(GLFWwindow* window, Input* input, float deltaTime)
+{
+    std::vector<Input::eventKey>* ekeys = input->getEventKeys();
+    for (int i = 0; i < ekeys->size(); i++)
+    {
+        if (glfwGetKey(window, (*ekeys)[i].key) == GLFW_RELEASE && (*ekeys)[i].isPressed)
+        {
+            input->pressKey((*ekeys)[i].key, deltaTime);
+            (*ekeys)[i].isPressed = false;
+        }
+        else if (glfwGetKey(window, (*ekeys)[i].key) == GLFW_PRESS)
+            (*ekeys)[i].isPressed = true;
+    }
+
+    std::vector<int>* keys = input->getPollingKeys();
+    for (int i = 0; i < keys->size(); i++)
+    {
+        if (glfwGetKey(window, (*keys)[i]) == GLFW_PRESS)
+            input->pressKey((*keys)[i], deltaTime);
+    }
+}
 
 
 int Game(Window& window) {
@@ -106,98 +140,7 @@ int Game(Window& window) {
     glm::vec3 lightCubeColor = glm::vec3(1.0f, 1.0f, 1.0f);
 
 
-    /////////// CUBE ///////////
-
-    float cubeVertices[] = {
-        // positions          // normals           // texture coords
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-        0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
-        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-        0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
-        0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-        0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-
-        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-        0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-        0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-        0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-        0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-        0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
-        0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-        0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
-        0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
-        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
-    };
-
-    std::vector<AttributeData> cubeAttributes;
-    cubeAttributes.push_back(AttributeData(3, 0));
-    cubeAttributes.push_back(AttributeData(3, (void*)(3 * sizeof(float))));
-    cubeAttributes.push_back(AttributeData(2, (void*)(6 * sizeof(float))));
-
-    Mesh cubeMesh;
-    cubeMesh.setVertex(cubeVertices, 36, 8 * sizeof(float), cubeAttributes);
-    cubeMesh.create();
-
-    RenderingTemp::SimpleModel cube(&cubeMesh);
-    glm::vec3 cubePosition = glm::vec3(1.0f, 1.0f, 1.0f);
-    glm::vec3 cubeDirection = glm::vec3(0.5f, 1.0f, 0.0f);
-    cube.setPosition(&cubePosition);
-    cube.scale(0.4f);
-
-
-    /// cube textures ///
-
-    Texture diffuseTexture("textures/container2.png");
-    if (!diffuseTexture.create())
-    {
-        LOG_ERROR("Failed creating the texture");
-        return 1;
-    }
-    Texture specularTexture("textures/container2_specular.png");
-    if (!specularTexture.create())
-    {
-        LOG_ERROR("Failed creating the texture");
-        return 1;
-    }
-    Texture emissionTexture("textures/matrix.jpg");
-    if (!emissionTexture.create())
-    {
-        LOG_ERROR("Failed creating the texture");
-        return 1;
-    }
-
     ///// loading shaders /////
-
-    Shader basicShader(vertexDir, fragmentDir);
-    if (!basicShader.compileShaders())
-    {
-        LOG_ERROR("Failed compiling shader");
-        return 1;
-    }
 
     Shader modelShader("shaders/model.vert", "shaders/model.frag");
     if (!modelShader.compileShaders())
@@ -217,12 +160,15 @@ int Game(Window& window) {
     /////////// IMGUI init ///////////
 
     ImGuiIO& io = ImGui::GetIO(); (void)io;
-
     bool drawTriangles = true;
 
+    glm::vec3 controlledPosition = glm::vec3(1.0f, 1.0f, 1.0f);
+    glm::vec3 controlledDirection = glm::vec3(0.5f, 1.0f, 0.0f);
 
 
     /////////// INPUT init ///////////
+
+    glfwSetCursorPosCallback(window.getGLFWwindow(), mouse_callback);
 
     Input* input = window.getInput();
 
@@ -264,13 +210,124 @@ int Game(Window& window) {
     };
     CameraType currentType = ORBIT;
 
-    CameraController* cameraController = new CameraControllerOrbit(&camera, 2.5f, 3.0f, &cubePosition);
+    CameraController* cameraController = new CameraControllerOrbit(&camera, 2.5f, 3.0f, &controlledPosition);
     bindInputToController(input, cameraController);
 
 
-    // here goes the backpack
-    Rendering::Model backpack("models/pooltable/Pool table Cavicchi Leonardo 9FT N300818.3ds");
-    Rendering::Model ball1("models/ball1/Project Name.obj");
+    // here goes the models
+    Rendering::Model poolTableModel("models/pooltable/Pool table Cavicchi Leonardo 9FT N300818.3ds");
+    Rendering::Model ball9Model("models/PoolBall/Pool.obj");
+
+    Rendering::Object poolTable(&poolTableModel);
+    Rendering::Object ball9(&ball9Model);
+    Rendering::Object ballS(&ball9Model);
+
+    // here goes the lights
+    LOG_DEBUG("Loading lights...");
+    Rendering::LightPoint lightPoint(0, true);
+    LOG_DEBUG("Loaded lights");
+
+    //////////// FISICAS ////////////
+    ///-----initialization_start-----
+
+    ///collision configuration contains default setup for memory, collision setup. Advanced users can create their own configuration.
+    btDefaultCollisionConfiguration* collisionConfiguration = new btDefaultCollisionConfiguration();
+
+    ///use the default collision dispatcher. For parallel processing you can use a diffent dispatcher (see Extras/BulletMultiThreaded)
+    btCollisionDispatcher* dispatcher = new btCollisionDispatcher(collisionConfiguration);
+
+    ///btDbvtBroadphase is a good general purpose broadphase. You can also try out btAxis3Sweep.
+    btBroadphaseInterface* overlappingPairCache = new btDbvtBroadphase();
+
+    ///the default constraint solver. For parallel processing you can use a different solver (see Extras/BulletMultiThreaded)
+    btSequentialImpulseConstraintSolver* solver = new btSequentialImpulseConstraintSolver;
+
+    btDiscreteDynamicsWorld* dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
+
+    dynamicsWorld->setGravity(btVector3(0, -9.81, 0));
+    ///-----initialization_end-----
+
+    //keep track of the shapes, we release memory at exit.
+    //make sure to re-use collision shapes among rigid bodies whenever possible!
+    btAlignedObjectArray<btCollisionShape*> collisionShapes;
+
+    //the ground is a cube of side 100 at position y = -56.
+    //the sphere will hit it at y = -6, with center at -5
+    std::vector<btVector3> wallPos;
+    std::vector<btVector3> wallSizes;
+    // 1 10 1
+    wallPos.push_back(btVector3(0, 0, 0));
+    wallSizes.push_back(btVector3(btScalar(10.), btScalar(1.), btScalar(10.)));
+    wallPos.push_back(btVector3(btScalar(3.5), btScalar(1.), btScalar(0.)));
+    wallSizes.push_back(btVector3(btScalar(1.), btScalar(2.), btScalar(10.)));
+
+    for (int i = 0; i < 2; i++)
+    {
+        btCollisionShape* groundShape = new btBoxShape(wallSizes[i]);
+
+        collisionShapes.push_back(groundShape);
+
+        btTransform groundTransform;
+        groundTransform.setIdentity();
+        groundTransform.setOrigin(wallPos[i]);
+
+        btScalar mass(0.);
+
+        //rigidbody is dynamic if and only if mass is non zero, otherwise static
+        bool isDynamic = (mass != 0.f);
+
+        btVector3 localInertia(0, 0, 0);
+        if (isDynamic)
+            groundShape->calculateLocalInertia(mass, localInertia);
+
+        //using motionstate is optional, it provides interpolation capabilities, and only synchronizes 'active' objects
+        btDefaultMotionState* myMotionState = new btDefaultMotionState(groundTransform);
+        btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, groundShape, localInertia);
+        btRigidBody* body = new btRigidBody(rbInfo);
+
+        //add the body to the dynamics world
+        dynamicsWorld->addRigidBody(body);
+    }
+
+
+    for (int i = 0; i < 2; i++) // create 2 balls       // code should be at ball creation
+    {
+        //create a dynamic rigidbody
+
+        //btCollisionShape* colShape = new btBoxShape(btVector3(1,1,1));
+        btCollisionShape* colShape = new btSphereShape(btScalar(0.05715));
+        collisionShapes.push_back(colShape);
+
+        /// Create Dynamic Objects
+        btTransform startTransform;
+        startTransform.setIdentity();
+
+        btScalar mass(0.17f);   // 170 grams
+
+        //rigidbody is dynamic if and only if mass is non zero, otherwise static
+        bool isDynamic = (mass != 0.f);
+
+        btVector3 localInertia(0, 0, 0);
+        if (isDynamic)
+            colShape->calculateLocalInertia(mass, localInertia);
+
+        startTransform.setOrigin(btVector3(1 + i, 10, 1));
+
+        //using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
+        btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+        btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
+        btRigidBody* body = new btRigidBody(rbInfo);
+
+        dynamicsWorld->addRigidBody(body);
+    }
+
+    input->setKeyAction(PUSH_BALL, GLFW_KEY_E);
+    input->setActionFunction(PUSH_BALL, [&dynamicsWorld](float deltaTime) {
+        btCollisionObject* obj = dynamicsWorld->getCollisionObjectArray()[2];   // 1 should be ball
+        btRigidBody* body = btRigidBody::upcast(obj);
+        body->setActivationState(ACTIVE_TAG);
+        body->setLinearVelocity(btVector3(11.0, body->getLinearVelocity().y(), 0.0));
+        });
 
     unsigned int nFrame = 0;
     float deltaTime = 0.0f;	// Time between current frame and last frame
@@ -291,197 +348,87 @@ int Game(Window& window) {
         {
             // blocks anything here if mouse is over imgui
             // input handling inside
-            window.processInput(deltaTime);
-            //processInput(window.getGLFWwindow(), input, deltaTime);
+            processInput(window.getGLFWwindow(), input, deltaTime);
         }
         // physics update outside (also update the position of everything)
         cameraController->update();
+        dynamicsWorld->stepSimulation(deltaTime, 10);
 
-
-        // // model transformations
-        // model = glm::mat4(1.0f);
-        // model = glm::translate(model, cubePosition);
-        // model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), cubeDirection);
+        // //print positions of all objects
+        // for (int j = dynamicsWorld->getNumCollisionObjects() - 1; j >= 0; j--)
+        // {
+        // 	btCollisionObject* obj = dynamicsWorld->getCollisionObjectArray()[j];
+        // 	btRigidBody* body = btRigidBody::upcast(obj);
+        // 	btTransform trans;
+        // 	if (body && body->getMotionState())
+        // 	{
+        // 		body->getMotionState()->getWorldTransform(trans);
+        // 	}
+        // 	else
+        // 	{
+        // 		trans = obj->getWorldTransform();
+        // 	}
+        // 	printf("world pos object %d = %f,%f,%f\n", j, float(trans.getOrigin().getX()), float(trans.getOrigin().getY()), float(trans.getOrigin().getZ()));
+        // }
 
         glm::mat4 view = camera.getViewMatrix();
 
-        // float timeValue = glfwGetTime();
-        // float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
-        // int vertexColorLocation = glGetUniformLocation(basicShader.getProgram(), "ourColor");
-        // glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
-
-        glm::vec3 cubePositions[] = {
-            glm::vec3(2.0f,  5.0f, -15.0f),
-            glm::vec3(-1.5f, -2.2f, -2.5f),
-            glm::vec3(-3.8f, -2.0f, -12.3f),
-            glm::vec3(2.4f, -0.4f, -3.5f),
-            glm::vec3(-1.7f,  3.0f, -7.5f),
-            glm::vec3(1.3f, -2.0f, -2.5f),
-            glm::vec3(1.5f,  2.0f, -2.5f),
-            glm::vec3(1.5f,  0.2f, -1.5f),
-            glm::vec3(-1.3f,  1.0f, -1.5f)
-        };
-
-        glm::vec3 pointLightPositions[] = {
-            lightCubePosition,
-            glm::vec3(2.3f,  3.3f, -4.0f),
-            glm::vec3(-4.0f,  2.0f, -12.0f),
-            glm::vec3(0.0f,  6.0f, -6.0f)
-        };
-
+        /////////// RENDERING ///////////
         if (drawTriangles)
         {
-            /////////// CUBE ///////////
+            lightPoint.setPosition(lightCubePosition);
+            lightPoint.draw(&lightShader, view, projection);
+            lightPoint.updateShader(&modelShader);
 
-            // texture.activate();
-            basicShader.activate();   // need to activate before setting uniforms
-            // basicShader.setUniformVec3("lightColor", lightCubeColor);
-            // basicShader.setUniformVec3("objectColor", glm::vec3(1.0f, 0.5f, 0.31f));
-            // basicShader.setUniformVec3("lightPos", lightCubePosition);
-            basicShader.setUniformVec3("viewPos", camera.getPosition());
+            glm::vec3 poolTablePosition = glm::vec3(0.0f);
+            poolTable.setPosition(poolTablePosition);
+            glm::vec3 poolTableOrientation = glm::vec3(0.0f, 1.0f, 0.0f);
+            poolTable.setOrientation(0.0f, poolTableOrientation);
+            poolTable.setScaling(0.001f);
 
-            basicShader.setUniformVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
-            // basicShader.setUniformVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
-            basicShader.setUniformInt("material.diffuse", 0);
-            // basicShader.setUniformVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
-            basicShader.setUniformInt("material.specular", 1);
-            // basicShader.setUniformInt("material.emission", 2);
-            basicShader.setUniformFloat("material.shininess", 32.0f);
+            poolTable.draw(&modelShader, view, projection, camera.getPosition());
 
-            // point light loop
-            for (int i = 0; i < 4; i++)
+            btCollisionObject* obj = dynamicsWorld->getCollisionObjectArray()[2];   // 2 should be ball
+            btRigidBody* body = btRigidBody::upcast(obj);
+            btTransform trans;
+            if (body && body->getMotionState())
             {
-                basicShader.setUniformVec3("pointLights[" + std::to_string(i) + "].position", pointLightPositions[i]);
-
-                basicShader.setUniformFloat("pointLights[" + std::to_string(i) + "].constant", 1.0f);
-                basicShader.setUniformFloat("pointLights[" + std::to_string(i) + "].linear", 0.09f);
-                basicShader.setUniformFloat("pointLights[" + std::to_string(i) + "].cuadratic", 0.0032f);
-
-
-                basicShader.setUniformVec3("pointLights[" + std::to_string(i) + "].ambient", glm::vec3(0.1f));
-                basicShader.setUniformVec3("pointLights[" + std::to_string(i) + "].diffuse", lightCubeColor * 0.5f);
-                basicShader.setUniformVec3("pointLights[" + std::to_string(i) + "].specular", lightCubeColor * 1.0f);
-
+                body->getMotionState()->getWorldTransform(trans);
             }
-            // directional light (the sun)
-            basicShader.setUniformVec3("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
-
-            basicShader.setUniformVec3("dirLight.ambient", glm::vec3(0.1f));
-            basicShader.setUniformVec3("dirLight.diffuse", lightCubeColor * 0.5f);
-            basicShader.setUniformVec3("dirLight.specular", lightCubeColor * 1.0f);
-
-            // spot light (flashlight)
-            basicShader.setUniformVec3("spotLight.position", camera.getPosition());
-            basicShader.setUniformVec3("spotLight.direction", camera.getFront());
-            basicShader.setUniformFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
-            basicShader.setUniformFloat("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
-
-            basicShader.setUniformFloat("spotLight.constant", 1.0f);
-            basicShader.setUniformFloat("spotLight.linear", 0.09f);
-            basicShader.setUniformFloat("spotLight.quadratic", 0.0032f);
-
-            basicShader.setUniformVec3("spotLight.ambient", glm::vec3(0.1f));
-            basicShader.setUniformVec3("spotLight.diffuse", lightCubeColor * 1.0f);
-            basicShader.setUniformVec3("spotLight.specular", lightCubeColor * 1.0f);
-
-            cube.setPosition(&cubePosition);
-            cube.setOrientation(glm::radians(25.0f) * (float)glfwGetTime(), cubeDirection);
-            // cube.rotate(glm::radians(10.0f)*deltaTime, cubeDirection);
-
-            diffuseTexture.activate(0);
-            specularTexture.activate(1);
-            emissionTexture.activate(2);
-
-            cube.draw(&basicShader, view, projection);
-
-            for (int i = 0; i < 9; i++)
+            else
             {
-                cube.setPosition(&cubePositions[i]);
-                cube.setOrientation(glm::radians(20.0f * i), glm::vec3(1.0f, 0.3f, 0.5f));
-
-                cube.redraw(&basicShader);  // cube was previously drawn so we can redraw here
+                trans = obj->getWorldTransform();
             }
+            // btVector3 pos = trans.getOrigin();
+            glm::vec3 pos = glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+            glm::quat orient = glm::quat(trans.getRotation().getW(), trans.getRotation().getX(), trans.getRotation().getY(), trans.getRotation().getZ());
 
+            ball9.setPosition(pos);
+            ball9.setOrientation(orient);
+            ball9.setScaling(0.05715f);
 
-            /////////// LIGHT CUBE ///////////
+            ball9.draw(&modelShader, view, projection, camera.getPosition());
 
-            lightShader.activate();
-            lightShader.setUniformVec3("viewPos", camera.getPosition());
-            lightShader.setUniformVec3("lightColor", lightCubeColor);
-
-            lightCube.setPosition(&pointLightPositions[0]);
-            lightCube.draw(&lightShader, view, projection);
-
-            for (int i = 1; i < 4; i++)
+            obj = dynamicsWorld->getCollisionObjectArray()[3];   // 3 should be second ball
+            body = btRigidBody::upcast(obj);
+            // trans;
+            if (body && body->getMotionState())
             {
-                lightCube.setPosition(&pointLightPositions[i]);
-                lightCube.redraw(&lightShader);
+                body->getMotionState()->getWorldTransform(trans);
             }
-
-
-            /////////// MODEL ///////////
-
-            modelShader.activate();
-
-            modelShader.setUniformVec3("viewPos", camera.getPosition());
-
-            // point light loop
-            for (int i = 0; i < 4; i++)
+            else
             {
-                modelShader.setUniformVec3("pointLights[" + std::to_string(i) + "].position", pointLightPositions[i]);
-
-                modelShader.setUniformFloat("pointLights[" + std::to_string(i) + "].constant", 1.0f);
-                modelShader.setUniformFloat("pointLights[" + std::to_string(i) + "].linear", 0.09f);
-                modelShader.setUniformFloat("pointLights[" + std::to_string(i) + "].cuadratic", 0.0032f);
-
-
-                modelShader.setUniformVec3("pointLights[" + std::to_string(i) + "].ambient", glm::vec3(0.1f));
-                modelShader.setUniformVec3("pointLights[" + std::to_string(i) + "].diffuse", lightCubeColor * 0.5f);
-                modelShader.setUniformVec3("pointLights[" + std::to_string(i) + "].specular", lightCubeColor * 1.0f);
-
+                trans = obj->getWorldTransform();
             }
-            // directional light (the sun)
-            modelShader.setUniformVec3("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
+            // btVector3 pos = trans.getOrigin();
+            pos = glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+            orient = glm::quat(trans.getRotation().getW(), trans.getRotation().getX(), trans.getRotation().getY(), trans.getRotation().getZ());
 
-            modelShader.setUniformVec3("dirLight.ambient", glm::vec3(0.1f));
-            modelShader.setUniformVec3("dirLight.diffuse", lightCubeColor * 0.5f);
-            modelShader.setUniformVec3("dirLight.specular", lightCubeColor * 1.0f);
+            ballS.setPosition(pos);
+            ballS.setOrientation(orient);
+            ballS.setScaling(0.057f);
 
-            // spot light (flashlight)
-            modelShader.setUniformVec3("spotLight.position", camera.getPosition());
-            modelShader.setUniformVec3("spotLight.direction", camera.getFront());
-            modelShader.setUniformFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
-            modelShader.setUniformFloat("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
-
-            modelShader.setUniformFloat("spotLight.constant", 1.0f);
-            modelShader.setUniformFloat("spotLight.linear", 0.09f);
-            modelShader.setUniformFloat("spotLight.quadratic", 0.0032f);
-
-            modelShader.setUniformVec3("spotLight.ambient", glm::vec3(0.1f));
-            modelShader.setUniformVec3("spotLight.diffuse", lightCubeColor * 1.0f);
-            modelShader.setUniformVec3("spotLight.specular", lightCubeColor * 1.0f);
-
-            glm::mat4 transform = glm::mat4(1.0f);
-            transform = glm::translate(transform, glm::vec3(0.0f, -0.5f, 0.0f));
-            transform = glm::scale(transform, glm::vec3(0.001f, 0.001f, 0.001f));
-            modelShader.setUniformMat4("model", transform);
-            modelShader.setUniformMat4("normalRotation", glm::mat4(1.0f));  // only the rotation part of the model
-            modelShader.setUniformMat4("view", view);
-            modelShader.setUniformMat4("projection", projection);
-
-            modelShader.setUniformFloat("material.shininess", 32.0f);
-
-            backpack.draw(&modelShader);
-
-            glm::mat4 transform2 = glm::mat4(1.0f);
-            transform2 = glm::translate(transform2, glm::vec3(0.0f, 0.5f, 0.0f));
-            transform2 = glm::scale(transform2, glm::vec3(0.001f, 0.001f, 0.001f));
-            modelShader.setUniformMat4("model", transform2);
-            modelShader.setUniformMat4("normalRotation", glm::mat4(1.0f));  // only the rotation part of the model
-            modelShader.setUniformMat4("view", view);
-            modelShader.setUniformMat4("projection", projection);
-
-            ball1.draw(&modelShader);
+            ballS.draw(&modelShader, view, projection, camera.getPosition());
         }
 
 
@@ -491,12 +438,12 @@ int Game(Window& window) {
         ImGui::Checkbox("Draw Triangles", &drawTriangles);
         ImGui::Separator();
         ImGui::Text("Cube Controls");
-        ImGui::SliderFloat3("Position", glm::value_ptr(cubePosition), -1.5f, 1.5f);
-        ImGui::SliderFloat3("Direction", glm::value_ptr(cubeDirection), -1.0f, 1.0f);
+        ImGui::SliderFloat3("Position", glm::value_ptr(controlledPosition), -1.5f, 1.5f);
+        ImGui::SliderFloat3("Direction", glm::value_ptr(controlledDirection), -1.0f, 1.0f);
         ImGui::Separator();
         ImGui::Text("Light Cube Controls");
         ImGui::SliderFloat3("Light Position", glm::value_ptr(lightCubePosition), -2.0f, 2.0f);
-        ImGui::ColorEdit3("Light Color", glm::value_ptr(lightCubeColor));
+        ImGui::ColorEdit3("Light Color", glm::value_ptr(*lightPoint.getColor()));
         ImGui::Separator();
         ImGui::Text("Camera Controls");
         if (ImGui::Button("Camera fly"))
@@ -520,7 +467,7 @@ int Game(Window& window) {
             unbindInputToController(input);
             if (cameraController != nullptr)
                 delete cameraController;
-            cameraController = new CameraControllerOrbit(&camera, 2.5f, 3.0f, &cubePosition);
+            cameraController = new CameraControllerOrbit(&camera, 2.5f, 3.0f, &controlledPosition);
             bindInputToController(input, cameraController);
         }
         ImGui::Text("Frame number %u", nFrame);
