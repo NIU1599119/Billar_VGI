@@ -1,15 +1,18 @@
 #pragma once
 
-#include "rendering/shader.h"
+// general
 #include <glm/glm.hpp>
 
+// renderizado
+#include "rendering/shader.h"
 #include "rendering/mesh.h"
+
 
 namespace Rendering {
     class LightPoint
     {
     public:
-        LightPoint(int id, bool generateMesh = false) : m_lightID(id), m_mesh(nullptr) { if(generateMesh) generateCubeMesh(); };
+        LightPoint(int id, Mesh* mesh = nullptr) : m_lightID(id), m_mesh(mesh) { if(mesh == nullptr) generateCubeMesh();};
 
         void draw(Shader* lightRenderingShader, glm::mat4& view, glm::mat4& projection);
 
