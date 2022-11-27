@@ -105,65 +105,65 @@ int initMenu(int& opcio, Window& window, float& Width, float& Height)
         opcio = 0;
 
         std::cout << mousePosition.x << ", " << mousePosition.y << std::endl;
-        if ((mousePosition.x > 180.0f && mousePosition.y > 400.0f) && (mousePosition.x < 575.0f && mousePosition.y < 730.0f))
+        if ((mousePosition.x > (180.0f*resFix) && mousePosition.y > (350.0f * resFix)) && (mousePosition.x < (580.0f * resFix) && mousePosition.y < (700.0f * resFix)))
         {
             Renderer->DrawSprite(ResourceManager::GetTexture("button1"),
-                glm::vec2(275.0f, 550.0f), glm::vec2(600, 450), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+                glm::vec2(180.0f * resFix, 350.0f * resFix), glm::vec2(400 * resFix, 350 * resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
             opcio = 1;
         }
         else
         {
             Renderer->DrawSprite(ResourceManager::GetTexture("button1"),
-                glm::vec2(275.0f, 550.0f), glm::vec2(600, 450), 0.0f, glm::vec3(0.7f, 0.7f, 0.7f));
+                glm::vec2(180.0f * resFix, 350.0f * resFix), glm::vec2(400 * resFix, 350 * resFix), 0.0f, glm::vec3(0.7f, 0.7f, 0.7f));
 
         }
         
-        if ((mousePosition.x > 650.0f && mousePosition.y > 400.0f) && (mousePosition.x < 1040.0f && mousePosition.y < 730.0f))
+        if ((mousePosition.x > (760.0f * resFix) && mousePosition.y > (350.0f * resFix)) && (mousePosition.x < (1160.0f * resFix) && mousePosition.y < (700.0f * resFix)))
         {
             Renderer->DrawSprite(ResourceManager::GetTexture("button2"),
-                glm::vec2(990.0f, 550.0f), glm::vec2(600, 450), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+                glm::vec2(760.0f * resFix, 350.0f * resFix), glm::vec2(400 * resFix, 350 * resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
             opcio = 2;
         }
         else
         {
             Renderer->DrawSprite(ResourceManager::GetTexture("button2"),
-                glm::vec2(990.0f, 550.0f), glm::vec2(600, 450), 0.0f, glm::vec3(0.7f, 0.7f, 0.7f));
+                glm::vec2(760.0f * resFix, 350.0f * resFix), glm::vec2(400 * resFix, 350 * resFix), 0.0f, glm::vec3(0.7f, 0.7f, 0.7f));
         }
 
-        if ((mousePosition.x > 1120.0f && mousePosition.y > 400.0f) && (mousePosition.x < 1510.0f && mousePosition.y < 730.0f))
+        if ((mousePosition.x > (1340.0f * resFix) && mousePosition.y > (350.0f * resFix)) && (mousePosition.x < (1740.0f * resFix) && mousePosition.y < (700.0f * resFix)))
         {
             Renderer->DrawSprite(ResourceManager::GetTexture("button3"),
-                glm::vec2(1700.0f, 550.0f), glm::vec2(600, 450), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+                glm::vec2(1340.0f * resFix, 350.0f * resFix), glm::vec2(400 * resFix, 350 * resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
             opcio = 3;
         }
         else
         {
             Renderer->DrawSprite(ResourceManager::GetTexture("button3"),
-                glm::vec2(1700.0f, 550.0f), glm::vec2(600, 450), 0.0f, glm::vec3(0.7f, 0.7f, 0.7f));
+                glm::vec2(1340.0f * resFix, 350.0f * resFix), glm::vec2(400 * resFix, 350 * resFix), 0.0f, glm::vec3(0.7f, 0.7f, 0.7f));
         }
 
-        if ((mousePosition.x > 430.0f && mousePosition.y > 850.0f) && (mousePosition.x < 615.0f && mousePosition.y < 922.0f))
+        if ((mousePosition.x > (440.0f * resFix)) && mousePosition.y > (900.0f * resFix) && (mousePosition.x < (740.0f * resFix) && mousePosition.y < (1025.0f * resFix)))
         {
             Renderer->DrawSprite(ResourceManager::GetTexture("button4"),
-                glm::vec2(650.0f, 1150.0f), glm::vec2(300, 125), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+                glm::vec2(440.0f * resFix, 900.0f * resFix), glm::vec2(300 * resFix, 125 * resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
             opcio = 4;
         }
         else
         {
             Renderer->DrawSprite(ResourceManager::GetTexture("button4"),
-                glm::vec2(650.0f, 1150.0f), glm::vec2(300, 125), 0.0f, glm::vec3(0.7f, 0.7f, 0.7f));
+                glm::vec2(440.0f * resFix, 900.0f * resFix), glm::vec2(300 * resFix, 125 * resFix), 0.0f, glm::vec3(0.7f, 0.7f, 0.7f));
         }
 
-        if ((mousePosition.x > 1025.0f && mousePosition.y > 850.0f) && (mousePosition.x < 1205.0f && mousePosition.y < 922.0f))
+        if ((mousePosition.x > (1180.0f * resFix) && mousePosition.y > (900.0f * resFix)) && (mousePosition.x < (1480.0f * resFix) && mousePosition.y < (1025.0f * resFix)))
         {
             Renderer->DrawSprite(ResourceManager::GetTexture("button5"),
-                glm::vec2(1550.0f, 1150.0f), glm::vec2(300, 125), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+                glm::vec2(1180.0f * resFix, 900.0f * resFix), glm::vec2(300 * resFix, 125 * resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
             opcio = 4;
         }
         else
         {
             Renderer->DrawSprite(ResourceManager::GetTexture("button5"),
-                glm::vec2(1550.0f, 1150.0f), glm::vec2(300, 125), 0.0f, glm::vec3(0.7f, 0.7f, 0.7f));
+                glm::vec2(1180.0f * resFix, 900.0f * resFix), glm::vec2(300 * resFix, 125 * resFix), 0.0f, glm::vec3(0.7f, 0.7f, 0.7f));
         }
 
         // Actualitza el frame
