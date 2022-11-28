@@ -319,19 +319,23 @@ int Game(Window& window) {
 
 
     input->setKeyAction(PUSH_BALL, GLFW_KEY_F);
-    input->setActionFunction(PUSH_BALL, [&dynamicsWorld, &ballsIndex](float deltaTime){
+    input->setActionFunction(PUSH_BALL, [&dynamicsWorld, &camera, &ballsIndex](float deltaTime){
         btCollisionObject* obj = dynamicsWorld->getCollisionObjectArray()[ballsIndex];
         btRigidBody* body = btRigidBody::upcast(obj);
         body->setActivationState(ACTIVE_TAG);
-        body->setLinearVelocity(btVector3(4, body->getLinearVelocity().y(), 0));
+        glm::vec3 front = camera.getPlaneFront();
+        front = front * 4.0f;
+        body->setLinearVelocity(btVector3(front.x, body->getLinearVelocity().y(), front.z));
     });
 
 
     input->setKeyAction(ACCELERATE_BALL, GLFW_KEY_E);
-    input->setActionFunction(ACCELERATE_BALL, [&dynamicsWorld, &ballsIndex](float deltaTime){
+    input->setActionFunction(ACCELERATE_BALL, [&dynamicsWorld, &camera, &ballsIndex](float deltaTime){
         btCollisionObject* obj = dynamicsWorld->getCollisionObjectArray()[ballsIndex];
         btRigidBody* body = btRigidBody::upcast(obj);
         body->setActivationState(ACTIVE_TAG);
+        glm::vec3 front = camera.getPlaneFront();
+        front = front * 4.0f;
         body->setLinearVelocity(btVector3(body->getLinearVelocity().x()*(1.01+deltaTime), body->getLinearVelocity().y(), body->getLinearVelocity().z()*(1.01+deltaTime)));
     });
 
@@ -754,7 +758,15 @@ int Game(Window& window) {
             cameraController = new CameraControllerFps(&camera);
             bindInputToController(input, cameraController);
         }
-        if (ImGui::Button("Camera orbit"))
+        if (ImGui::Button("Camera orbit (far)"))
+        {
+            unbindInputToController(input);
+            if (cameraController != nullptr)
+                delete cameraController;
+            cameraController = new CameraControllerOrbit(&camera, 2.5f, 1.0f, &controlledPosition);
+            bindInputToController(input, cameraController);
+        }
+        if (ImGui::Button("Camera orbit (close)"))
         {
             unbindInputToController(input);
             if (cameraController != nullptr)
