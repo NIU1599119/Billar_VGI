@@ -88,6 +88,7 @@ int initMenu(int& opcio, Window& window, float& Width, float& Height)
     ResourceManager::LoadTexture("textures/menu/4.png", true, "button3");
     ResourceManager::LoadTexture("textures/menu/5_sinfondo.png", true, "button4");
     ResourceManager::LoadTexture("textures/menu/6_sinfondo.png", true, "button5");
+    ResourceManager::LoadTexture("textures/menu/loading.png", true, "loading");
 
     // Creacio del bucle de la ventana
 
@@ -172,7 +173,13 @@ int initMenu(int& opcio, Window& window, float& Width, float& Height)
         if (opcio != 0 && clicked)
         {
             if (opcio == 1)
+            {
+                Renderer->DrawSprite(ResourceManager::GetTexture("loading"),
+                    glm::vec2(0.0f, 0.0f), glm::vec2(Width, Height), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+                window.update();
+
                 return opcio;
+            }
             else
                 window.close();
         }
