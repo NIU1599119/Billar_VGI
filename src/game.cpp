@@ -34,6 +34,7 @@
 
 #include "rendering/collisionBox.h"
 
+//#include <vector>
 
 int Game(Window& window) {
 
@@ -126,8 +127,22 @@ int Game(Window& window) {
     Rendering::Model ball8Model("models/PoolBall/Pool.obj");
 
     Rendering::Object poolTable(&poolTableModel);
+    Rendering::Object ball(&ball8Model);
     Rendering::Object ball1(&ball1Model);
-    Rendering::Object ball8(&ball8Model);
+    Rendering::Object ball8(&ball1Model);
+    Rendering::Object ball2(&ball1Model);
+    Rendering::Object ball3(&ball1Model);
+    Rendering::Object ball4(&ball1Model);
+    Rendering::Object ball5(&ball1Model);
+    Rendering::Object ball6(&ball1Model);
+    Rendering::Object ball7(&ball1Model);
+    Rendering::Object ball9(&ball1Model);
+    Rendering::Object ball10(&ball1Model);
+    Rendering::Object ball11(&ball1Model);
+    Rendering::Object ball12(&ball1Model);
+    Rendering::Object ball13(&ball1Model);
+    Rendering::Object ball14(&ball1Model);
+    Rendering::Object ball15(&ball1Model);
 
     /////////// LIGHTS ///////////
 
@@ -235,7 +250,38 @@ int Game(Window& window) {
 
 
     int ballsIndex = collisionShapes.size();
-    for (int i = 0; i < 2; i++) // create 2 balls       // code should be at ball creation
+
+    std::vector<btVector3> vectorPosicions;
+
+    // Bola blanca
+    vectorPosicions.push_back(btVector3(0, 3, 0));
+
+    // Fila 1
+    vectorPosicions.push_back(btVector3(0.7, 3, 0));
+
+    // Fila 2
+    vectorPosicions.push_back(btVector3(0.75, 3, 0.03));
+    vectorPosicions.push_back(btVector3(0.75, 3, -0.03));
+
+    // Fila 3
+    vectorPosicions.push_back(btVector3(0.8, 3, 0));
+    vectorPosicions.push_back(btVector3(0.8, 3, 0.06));
+    vectorPosicions.push_back(btVector3(0.8, 3, -0.06));
+
+    // Fila 4
+    vectorPosicions.push_back(btVector3(0.85, 3, 0.09));
+    vectorPosicions.push_back(btVector3(0.85, 3, 0.03));
+    vectorPosicions.push_back(btVector3(0.85, 3, -0.03));
+    vectorPosicions.push_back(btVector3(0.85, 3, -0.09));
+
+    // Fila 5
+    vectorPosicions.push_back(btVector3(0.9, 3, 0.12));
+    vectorPosicions.push_back(btVector3(0.9, 3, 0.06));
+    vectorPosicions.push_back(btVector3(0.9, 3, 0));
+    vectorPosicions.push_back(btVector3(0.9, 3, -0.06));
+    vectorPosicions.push_back(btVector3(0.9, 3, -0.12));
+
+    for (int i = 0; i < 16; i++) // create 2 balls       // code should be at ball creation
 	{
 		//create a dynamic rigidbody
 
@@ -256,7 +302,7 @@ int Game(Window& window) {
 		if (isDynamic)
 			colShape->calculateLocalInertia(mass, localInertia);
 
-		startTransform.setOrigin(btVector3(0+i, 3, 0));
+		startTransform.setOrigin(vectorPosicions[i]);
 
 		//using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
 		btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
@@ -269,13 +315,15 @@ int Game(Window& window) {
         body->setRollingFriction(0.0001);
 		dynamicsWorld->addRigidBody(body);
 	}
-    
+
+
+
     input->setKeyAction(PUSH_BALL, GLFW_KEY_F);
     input->setActionFunction(PUSH_BALL, [&dynamicsWorld, &ballsIndex](float deltaTime){
         btCollisionObject* obj = dynamicsWorld->getCollisionObjectArray()[ballsIndex];
         btRigidBody* body = btRigidBody::upcast(obj);
         body->setActivationState(ACTIVE_TAG);
-        body->setLinearVelocity(btVector3(1, body->getLinearVelocity().y(), 1));
+        body->setLinearVelocity(btVector3(4, body->getLinearVelocity().y(), 0));
     });
 
 
@@ -346,11 +394,11 @@ int Game(Window& window) {
 
             controlledPosition = pos;
 
-            ball8.setPosition(pos);
-            ball8.setOrientation(orient);
-            ball8.setScaling(0.05715f/2);
+            ball.setPosition(pos);
+            ball.setOrientation(orient);
+            ball.setScaling(0.05715f/2);
 
-            ball8.draw(&modelShader, view, projection, camera.getPosition());
+            ball.draw(&modelShader, view, projection, camera.getPosition());
 
             obj = dynamicsWorld->getCollisionObjectArray()[ballsIndex+1];   // should be second ball
             body = btRigidBody::upcast(obj);
@@ -372,6 +420,300 @@ int Game(Window& window) {
             ball1.setScaling(0.05715f/2);
 
             ball1.draw(&modelShader, view, projection, camera.getPosition());
+
+            obj = dynamicsWorld->getCollisionObjectArray()[ballsIndex + 2];   // should be third ball
+            body = btRigidBody::upcast(obj);
+            // trans;
+            if (body && body->getMotionState())
+            {
+                body->getMotionState()->getWorldTransform(trans);
+            }
+            else
+            {
+                trans = obj->getWorldTransform();
+            }
+            // btVector3 pos = trans.getOrigin();
+            pos = glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+            orient = glm::quat(trans.getRotation().getW(), trans.getRotation().getX(), trans.getRotation().getY(), trans.getRotation().getZ());
+
+            ball2.setPosition(pos);
+            ball2.setOrientation(orient);
+            ball2.setScaling(0.05715f / 2);
+
+            ball2.draw(&modelShader, view, projection, camera.getPosition());
+
+            obj = dynamicsWorld->getCollisionObjectArray()[ballsIndex + 3];   // should be second ball
+            body = btRigidBody::upcast(obj);
+            // trans;
+            if (body && body->getMotionState())
+            {
+                body->getMotionState()->getWorldTransform(trans);
+            }
+            else
+            {
+                trans = obj->getWorldTransform();
+            }
+            // btVector3 pos = trans.getOrigin();
+            pos = glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+            orient = glm::quat(trans.getRotation().getW(), trans.getRotation().getX(), trans.getRotation().getY(), trans.getRotation().getZ());
+
+            ball3.setPosition(pos);
+            ball3.setOrientation(orient);
+            ball3.setScaling(0.05715f / 2);
+
+            ball3.draw(&modelShader, view, projection, camera.getPosition());
+
+            obj = dynamicsWorld->getCollisionObjectArray()[ballsIndex + 4];   // should be second ball
+            body = btRigidBody::upcast(obj);
+            // trans;
+            if (body && body->getMotionState())
+            {
+                body->getMotionState()->getWorldTransform(trans);
+            }
+            else
+            {
+                trans = obj->getWorldTransform();
+            }
+            // btVector3 pos = trans.getOrigin();
+            pos = glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+            orient = glm::quat(trans.getRotation().getW(), trans.getRotation().getX(), trans.getRotation().getY(), trans.getRotation().getZ());
+
+            ball4.setPosition(pos);
+            ball4.setOrientation(orient);
+            ball4.setScaling(0.05715f / 2);
+
+            ball4.draw(&modelShader, view, projection, camera.getPosition());
+
+            obj = dynamicsWorld->getCollisionObjectArray()[ballsIndex + 5];   // should be second ball
+            body = btRigidBody::upcast(obj);
+            // trans;
+            if (body && body->getMotionState())
+            {
+                body->getMotionState()->getWorldTransform(trans);
+            }
+            else
+            {
+                trans = obj->getWorldTransform();
+            }
+            // btVector3 pos = trans.getOrigin();
+            pos = glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+            orient = glm::quat(trans.getRotation().getW(), trans.getRotation().getX(), trans.getRotation().getY(), trans.getRotation().getZ());
+
+            ball5.setPosition(pos);
+            ball5.setOrientation(orient);
+            ball5.setScaling(0.05715f / 2);
+
+            ball5.draw(&modelShader, view, projection, camera.getPosition());
+
+            obj = dynamicsWorld->getCollisionObjectArray()[ballsIndex + 6];   // should be second ball
+            body = btRigidBody::upcast(obj);
+            // trans;
+            if (body && body->getMotionState())
+            {
+                body->getMotionState()->getWorldTransform(trans);
+            }
+            else
+            {
+                trans = obj->getWorldTransform();
+            }
+            // btVector3 pos = trans.getOrigin();
+            pos = glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+            orient = glm::quat(trans.getRotation().getW(), trans.getRotation().getX(), trans.getRotation().getY(), trans.getRotation().getZ());
+
+            ball6.setPosition(pos);
+            ball6.setOrientation(orient);
+            ball6.setScaling(0.05715f / 2);
+
+            ball6.draw(&modelShader, view, projection, camera.getPosition());
+
+            obj = dynamicsWorld->getCollisionObjectArray()[ballsIndex + 7];   // should be second ball
+            body = btRigidBody::upcast(obj);
+            // trans;
+            if (body && body->getMotionState())
+            {
+                body->getMotionState()->getWorldTransform(trans);
+            }
+            else
+            {
+                trans = obj->getWorldTransform();
+            }
+            // btVector3 pos = trans.getOrigin();
+            pos = glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+            orient = glm::quat(trans.getRotation().getW(), trans.getRotation().getX(), trans.getRotation().getY(), trans.getRotation().getZ());
+
+            ball7.setPosition(pos);
+            ball7.setOrientation(orient);
+            ball7.setScaling(0.05715f / 2);
+
+            ball7.draw(&modelShader, view, projection, camera.getPosition());
+
+            obj = dynamicsWorld->getCollisionObjectArray()[ballsIndex + 8];   // should be second ball
+            body = btRigidBody::upcast(obj);
+            // trans;
+            if (body && body->getMotionState())
+            {
+                body->getMotionState()->getWorldTransform(trans);
+            }
+            else
+            {
+                trans = obj->getWorldTransform();
+            }
+            // btVector3 pos = trans.getOrigin();
+            pos = glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+            orient = glm::quat(trans.getRotation().getW(), trans.getRotation().getX(), trans.getRotation().getY(), trans.getRotation().getZ());
+
+            ball8.setPosition(pos);
+            ball8.setOrientation(orient);
+            ball8.setScaling(0.05715f / 2);
+
+            ball8.draw(&modelShader, view, projection, camera.getPosition());
+
+            obj = dynamicsWorld->getCollisionObjectArray()[ballsIndex + 9];   // should be second ball
+            body = btRigidBody::upcast(obj);
+            // trans;
+            if (body && body->getMotionState())
+            {
+                body->getMotionState()->getWorldTransform(trans);
+            }
+            else
+            {
+                trans = obj->getWorldTransform();
+            }
+            // btVector3 pos = trans.getOrigin();
+            pos = glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+            orient = glm::quat(trans.getRotation().getW(), trans.getRotation().getX(), trans.getRotation().getY(), trans.getRotation().getZ());
+
+            ball9.setPosition(pos);
+            ball9.setOrientation(orient);
+            ball9.setScaling(0.05715f / 2);
+
+            ball9.draw(&modelShader, view, projection, camera.getPosition());
+
+            obj = dynamicsWorld->getCollisionObjectArray()[ballsIndex + 10];   // should be second ball
+            body = btRigidBody::upcast(obj);
+            // trans;
+            if (body && body->getMotionState())
+            {
+                body->getMotionState()->getWorldTransform(trans);
+            }
+            else
+            {
+                trans = obj->getWorldTransform();
+            }
+            // btVector3 pos = trans.getOrigin();
+            pos = glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+            orient = glm::quat(trans.getRotation().getW(), trans.getRotation().getX(), trans.getRotation().getY(), trans.getRotation().getZ());
+
+            ball10.setPosition(pos);
+            ball10.setOrientation(orient);
+            ball10.setScaling(0.05715f / 2);
+
+            ball10.draw(&modelShader, view, projection, camera.getPosition());
+
+            obj = dynamicsWorld->getCollisionObjectArray()[ballsIndex + 11];   // should be second ball
+            body = btRigidBody::upcast(obj);
+            // trans;
+            if (body && body->getMotionState())
+            {
+                body->getMotionState()->getWorldTransform(trans);
+            }
+            else
+            {
+                trans = obj->getWorldTransform();
+            }
+            // btVector3 pos = trans.getOrigin();
+            pos = glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+            orient = glm::quat(trans.getRotation().getW(), trans.getRotation().getX(), trans.getRotation().getY(), trans.getRotation().getZ());
+
+            ball11.setPosition(pos);
+            ball11.setOrientation(orient);
+            ball11.setScaling(0.05715f / 2);
+
+            ball11.draw(&modelShader, view, projection, camera.getPosition());
+
+            obj = dynamicsWorld->getCollisionObjectArray()[ballsIndex + 12];   // should be second ball
+            body = btRigidBody::upcast(obj);
+            // trans;
+            if (body && body->getMotionState())
+            {
+                body->getMotionState()->getWorldTransform(trans);
+            }
+            else
+            {
+                trans = obj->getWorldTransform();
+            }
+            // btVector3 pos = trans.getOrigin();
+            pos = glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+            orient = glm::quat(trans.getRotation().getW(), trans.getRotation().getX(), trans.getRotation().getY(), trans.getRotation().getZ());
+
+            ball12.setPosition(pos);
+            ball12.setOrientation(orient);
+            ball12.setScaling(0.05715f / 2);
+
+            ball12.draw(&modelShader, view, projection, camera.getPosition());
+
+            obj = dynamicsWorld->getCollisionObjectArray()[ballsIndex + 13];   // should be second ball
+            body = btRigidBody::upcast(obj);
+            // trans;
+            if (body && body->getMotionState())
+            {
+                body->getMotionState()->getWorldTransform(trans);
+            }
+            else
+            {
+                trans = obj->getWorldTransform();
+            }
+            // btVector3 pos = trans.getOrigin();
+            pos = glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+            orient = glm::quat(trans.getRotation().getW(), trans.getRotation().getX(), trans.getRotation().getY(), trans.getRotation().getZ());
+
+            ball13.setPosition(pos);
+            ball13.setOrientation(orient);
+            ball13.setScaling(0.05715f / 2);
+
+            ball13.draw(&modelShader, view, projection, camera.getPosition());
+
+            obj = dynamicsWorld->getCollisionObjectArray()[ballsIndex + 14];   // should be second ball
+            body = btRigidBody::upcast(obj);
+            // trans;
+            if (body && body->getMotionState())
+            {
+                body->getMotionState()->getWorldTransform(trans);
+            }
+            else
+            {
+                trans = obj->getWorldTransform();
+            }
+            // btVector3 pos = trans.getOrigin();
+            pos = glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+            orient = glm::quat(trans.getRotation().getW(), trans.getRotation().getX(), trans.getRotation().getY(), trans.getRotation().getZ());
+
+            ball14.setPosition(pos);
+            ball14.setOrientation(orient);
+            ball14.setScaling(0.05715f / 2);
+
+            ball14.draw(&modelShader, view, projection, camera.getPosition());
+
+            obj = dynamicsWorld->getCollisionObjectArray()[ballsIndex + 15];   // should be second ball
+            body = btRigidBody::upcast(obj);
+            // trans;
+            if (body && body->getMotionState())
+            {
+                body->getMotionState()->getWorldTransform(trans);
+            }
+            else
+            {
+                trans = obj->getWorldTransform();
+            }
+            // btVector3 pos = trans.getOrigin();
+            pos = glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+            orient = glm::quat(trans.getRotation().getW(), trans.getRotation().getX(), trans.getRotation().getY(), trans.getRotation().getZ());
+
+            ball15.setPosition(pos);
+            ball15.setOrientation(orient);
+            ball15.setScaling(0.05715f / 2);
+
+            ball15.draw(&modelShader, view, projection, camera.getPosition());
 
             #ifdef DEBUG_SHADER
             for (int i = 0; i < rigidObjects.size(); i++)
