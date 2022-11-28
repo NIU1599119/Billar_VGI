@@ -152,6 +152,7 @@ int Game(Window& window) {
 
 	///the default constraint solver. For parallel processing you can use a different solver (see Extras/BulletMultiThreaded)
 	btSequentialImpulseConstraintSolver* solver = new btSequentialImpulseConstraintSolver;
+    
 
     btDiscreteDynamicsWorld* dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
 
@@ -199,7 +200,7 @@ int Game(Window& window) {
     wallAux.setFriction(.8165);             // all walls have this values
     wallAux.setRestitution(.7695);          // restitucion real (se supone)
     // wallAux.setRestitution(1.0);
-
+    
     // wall (front)
     wallAux.setPosition(glm::vec3(0., 0.76, -(0.75-0.095)));
     // posicion es el limite del tablero menos la mitad del ancho
@@ -263,10 +264,12 @@ int Game(Window& window) {
 		btRigidBody* body = new btRigidBody(rbInfo);
     	body->setFriction(.245);
         body->setRestitution(0.97468);
-
+        body->setContactProcessingThreshold(0);// ESTE ERA EL THRESHOLD DIOOOOOOS
+        body->setSpinningFriction(1);
+        body->setRollingFriction(0.0001);
 		dynamicsWorld->addRigidBody(body);
 	}
-
+    
     input->setKeyAction(PUSH_BALL, GLFW_KEY_F);
     input->setActionFunction(PUSH_BALL, [&dynamicsWorld, &ballsIndex](float deltaTime){
         btCollisionObject* obj = dynamicsWorld->getCollisionObjectArray()[ballsIndex];
