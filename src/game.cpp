@@ -122,7 +122,8 @@ int Game(Window& window) {
 
 
     // here goes the models
-    Rendering::Model poolTableModel("models/pooltable/Pool table Cavicchi Leonardo 9FT N300818.3ds");
+    // Rendering::Model poolTableModel("models/pooltable/Pool table Cavicchi Leonardo 9FT N300818.3ds");
+    Rendering::Model poolTableModel("models/pool_table/scene.gltf");
     Rendering::Model ball1Model("models/PoolBall1/Pool.obj");
     Rendering::Model ball8Model("models/PoolBall/Pool.obj");
 
@@ -377,7 +378,7 @@ int Game(Window& window) {
             poolTable.setPosition(poolTablePosition);
             glm::vec3 poolTableOrientation = glm::vec3(0.0f, 1.0f, 0.0f);
             poolTable.setOrientation(0.0f, poolTableOrientation);
-            poolTable.setScaling(0.001f);
+            poolTable.setScaling(0.1245);
 
             poolTable.draw(&modelShader, view, projection, camera.getPosition());
 
@@ -774,6 +775,7 @@ int Game(Window& window) {
             cameraController = new CameraControllerOrbit(&camera, 2.5f, 0.2f, &controlledPosition);
             bindInputToController(input, cameraController);
         }
+        ImGui::Separator();
         ImGui::Text("Frame number %u", nFrame);
         ImGui::Text("FPS: %f", 1 / deltaTime);
         ImGui::End();
