@@ -35,8 +35,6 @@
 
 //musica
 #include <iostream>
-#include <irrKlang.h>
-using namespace irrklang;
 
 
 int Game(Window& window) {

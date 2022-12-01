@@ -1,6 +1,6 @@
-workspace "OpenGLBoilerPlate"
+workspace "GameEngine"
     configurations { "Debug", "Release" }
-    startproject "OpenGLBoilerPlate"
+    startproject "Billar"
 
     flags { "MultiProcessorCompile" }
 
@@ -13,7 +13,7 @@ workspace "OpenGLBoilerPlate"
         optimize "Speed"
         flags { "LinkTimeOptimization" }
 
-project "OpenGLBoilerPlate"
+project "Billar"
     kind "ConsoleApp"
     language "C++"
     cppdialect "C++17"
@@ -31,7 +31,8 @@ project "OpenGLBoilerPlate"
         "libs/imgui/examples",
         "libs/stb/include",
         "libs/assimp/include",
-        "libs/bullet/src"
+        "libs/bullet/src",
+        "libs/irrKlang/include"
     }
 
     files { "src/**.cpp" }
@@ -44,7 +45,14 @@ project "OpenGLBoilerPlate"
         systemversion "latest"
         staticruntime "On"
 
-        links { "dl", "pthread" }
+        links { "dl", "pthread" }   -- platform specific libraries
+
+        links { "IrrKlang" }
+        linkoptions {"-L./bin/%{cfg.buildcfg}/shared/ \'-Wl,-rpath,$$ORIGIN/shared/\'"}
+        prebuildcommands {
+            "mkdir bin/shared/ -p",
+            "{COPY} libs/irrKlang/bin/linux-gcc-64/* bin/%{cfg.buildcfg}/shared/"
+        }
 
         defines { "_X11" }
 
