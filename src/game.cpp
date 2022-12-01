@@ -31,13 +31,29 @@
 
 // fisicas
 #include "btBulletDynamicsCommon.h"
-
 #include "rendering/collisionBox.h"
 
-//#include <vector>
+//musica
+#include <iostream>
+#include <irrKlang.h>
+using namespace irrklang;
+
 
 int Game(Window& window) {
 
+    //musica
+    /*
+    ISoundEngine* engine = createIrrKlangDevice();
+    if (!engine) {
+        return 0;
+    }
+    engine->play2D("media/blues.ogg", true);
+    while (true)
+    {
+
+    }
+    engine->drop();*/
+    
     // enables z-buffer
     glEnable(GL_DEPTH_TEST);
 
