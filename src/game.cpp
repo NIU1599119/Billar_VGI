@@ -31,13 +31,11 @@
 
 // fisicas
 #include "btBulletDynamicsCommon.h"
-
 #include "rendering/collisionBox.h"
 
-//#include <vector>
 
 int Game(Window& window) {
-
+    
     // enables z-buffer
     glEnable(GL_DEPTH_TEST);
 

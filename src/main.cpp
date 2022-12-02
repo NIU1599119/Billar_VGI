@@ -13,6 +13,8 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
+#include "audio.h"
+
 int main()
 {
     Window window;
@@ -32,6 +34,13 @@ int main()
     float x, y;
     initResolution(x, y, window);
 
+    if (Audio::initAudio() != 0)
+    {
+        return 1; // error inicializando audio
+    }
+
+    Audio::engine->play2D("media/blues.ogg", true);
+
     int opcio = 0;
     initMenu(opcio, window, x, y);
 
@@ -39,6 +48,8 @@ int main()
         return Game(window);
     else
         return 0;
+
+    Audio::deleteAudio();
 
     return 0;
 }
