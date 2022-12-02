@@ -171,7 +171,7 @@ int initMenu(int& opcio, Window& window, float& Width, float& Height)
         window.update();
 
         if (opcio != 0 && clicked)
-        {
+        {           
             if (opcio == 1)
             {
                 Renderer->DrawSprite(ResourceManager::GetTexture("loading"),
@@ -182,6 +182,7 @@ int initMenu(int& opcio, Window& window, float& Width, float& Height)
             }
             else
                 window.close();
+
         }
 
         float currentFrame = glfwGetTime();

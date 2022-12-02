@@ -1,7 +1,10 @@
 #pragma once
 
 #include "debug.h"
-#include <irrKlang.h>
+#include <iostream>
+#include <../irrKlang/include/irrKlang.h>
+
+
 
 namespace Audio
 {
