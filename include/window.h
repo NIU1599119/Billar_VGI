@@ -12,6 +12,7 @@ struct WindowData
     unsigned int width;
     unsigned int height;
     bool vSync;
+    bool fullScreen;
 
     Input input;
     // input is passed to glfw as it only has window user pointer
@@ -20,7 +21,7 @@ struct WindowData
 
 class Window { 
 public:
-    Window(unsigned int width=800, unsigned int height=600, std::string title="Default", bool vSync=true);
+    Window(unsigned int width=800, unsigned int height=600, std::string title="Default", bool vSync=true, bool fullScreen=false);
     ~Window();
     bool initWindow();
 
@@ -35,9 +36,11 @@ public:
     void setVSync(bool enabled);
 
     Input* getInput() { return &m_data.input; }
+    void processInput(float deltaTime);
+    void resizeWindow(GLFWwindow* window, int width, int height);
 
 private:
     GLFWwindow* m_window;
-
+    bool fullScreen;
     WindowData m_data;
 };

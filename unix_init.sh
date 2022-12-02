@@ -1,2 +1,2 @@
 #!/bin/bash
-./vendor/premake/linux/premake5 gmake
+./vendor/premake/linux/premake5 gmake2

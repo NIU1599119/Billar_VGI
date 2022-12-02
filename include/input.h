@@ -12,33 +12,42 @@ enum ACTIONS {
     MOVE_LEFT,
     MOVE_RIGHT,
     SWITCH_MOUSE,
+    LEFT_CLICK,
+    PUSH_BALL,
+    ACCELERATE_BALL,
     EXIT
 };
 
+enum STATUS {
+    PRESSED,
+    DEPRESSED,  // usually executes an event
+    RELEASED
+};
 
 class Input {
 public:
 
-    struct eventKey {
-        int key;
-        bool isPressed;
-    };
+    // struct eventKey {
+    //     int key;
+    //     bool isPressed;
+    // };
 
     ///////// KEYBOARD /////////
 
     void setKeyAction(ACTIONS action, int key, bool isPolling = true)
     {
         m_keys[key] = action;
+        m_actionStatus[action] = RELEASED;
         if (isPolling)
         {
             m_pollingKeys.push_back(key);
         }
         else// isEvent
         {
-            eventKey ek;
-            ek.key = key;
-            ek.isPressed = false;
-            m_eventKeys.push_back(ek);
+            // eventKey ek;
+            // ek.key = key;
+            // ek.isPressed = false;
+            // m_eventKeys.push_back(ek);
         }
     }
 
@@ -65,15 +74,20 @@ public:
     void removeActionFunction(ACTIONS action) { m_actions.erase(action); };
 
     std::vector<int>* getPollingKeys() { return &m_pollingKeys; };
-    std::vector<eventKey>* getEventKeys() { return &m_eventKeys; };
+    // std::vector<eventKey>* getEventKeys() { return &m_eventKeys; };
 
-    void pressKey(int key, float deltaTime) { m_actions[m_keys[key]](deltaTime); };
+    void pressKey(int key, float deltaTime);
+
+    void pressEventKey(int key, bool isPressed, float deltaTime);
+
+    void setActionStatus(ACTIONS action, STATUS status) { m_actionStatus[action] = status; };
+    STATUS getActionStatus(ACTIONS action) { return m_actionStatus[action]; };
 
     ////////// MOUSE ///////////
 
     void updateCursor(float newX, float newY);
 
-    void setMouseCallback(std::function<void(float, float)> mouseCallback) { m_mouseCallback = mouseCallback; };
+    void setMouseCallback(std::function<void(float, float)> mouseCallback, bool relative=true) { m_mouseCallback = mouseCallback; m_mouseOffset = relative; };
 
     void captureMouse() { m_mouseCapture = true; };
 
@@ -93,7 +107,10 @@ private:
     // std::vector<ACTIONS> m_callbackKeys; // use this to iterate keys in callback function?
 
     std::vector<int> m_pollingKeys;
-    std::vector<eventKey> m_eventKeys;
+
+    std::map<ACTIONS, STATUS> m_actionStatus;
+
+    // std::vector<eventKey> m_eventKeys;
 
     ////////// MOUSE ///////////
     float m_sensitivity = 0.1f;
