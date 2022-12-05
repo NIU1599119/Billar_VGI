@@ -18,7 +18,7 @@
 int main()
 {
     Window window;
-    window = Window(1280, 720, "Billar", true, true);
+    window = Window(1280, 720, "Billar", false, false);
 
     if (!window.initWindow()) {
         return -1;
@@ -38,7 +38,7 @@ int main()
     {
         return 1; // error inicializando audio
     }
-
+    Audio::engine->setSoundVolume(0.1f);
     Audio::engine->play2D("media/blues.ogg", true);
 
     int opcio = 0;

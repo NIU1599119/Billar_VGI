@@ -24,6 +24,7 @@ namespace Rendering {
     class Model {
     public:
         Model(const std::string &path, bool gamma = false) : m_gammaCorrection(gamma) { loadModel(path); };
+        Model(Mesh& mesh, bool gamma = false) : m_gammaCorrection(gamma) { m_meshes.push_back(mesh); };
         void draw(Shader *shader);
     private:
         // model data

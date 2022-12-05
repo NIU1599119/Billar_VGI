@@ -85,6 +85,11 @@ namespace Rendering {
         }
         GL(glActiveTexture(GL_TEXTURE0));
 
+        shader->setUniformBool("material.hasDiffuse",   diffuseNr   > 0);
+        shader->setUniformBool("material.hasSpecular",  specularNr  > 0);
+        shader->setUniformBool("material.hasNormal",    normalNr    > 0);
+        shader->setUniformBool("material.hasRoughness", roughnessNr > 0);
+
         // draw mesh
         GL(glBindVertexArray(m_VAO));
         GL(glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, 0));

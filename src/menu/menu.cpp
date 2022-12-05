@@ -249,7 +249,7 @@ int initResolution(float& x, float& y, Window& window)
         window.update();
     }
 
-    window.resizeWindow(window.getGLFWwindow(), x, y);
+    window.resizeWindow(x, y);
     window.update();
 
     return 0;

@@ -33,14 +33,15 @@ public:
 
     void close() { glfwSetWindowShouldClose(m_window, true); }
 
-    void setVSync(bool enabled);
+    void setVSync(bool enable);
+    void setFullscreen(bool enable);
 
     Input* getInput() { return &m_data.input; }
     void processInput(float deltaTime);
-    void resizeWindow(GLFWwindow* window, int width, int height);
+    void resizeWindow(int width, int height);
 
 private:
     GLFWwindow* m_window;
-    bool fullScreen;
+    GLFWmonitor* m_monitor;
     WindowData m_data;
 };

@@ -20,6 +20,7 @@ namespace Rendering {
         //////// RENDERING ////////
 
         void draw(Shader* collisionRenderingShader, glm::mat4& view, glm::mat4& projection);
+        void draw(Shader* collisionRenderingShader);
 
         void setPosition(glm::vec3 position) { m_position = position; };
         void setScale(glm::vec3 scale) { m_scale = scale; };
