@@ -467,6 +467,8 @@ int Game(Window& window) {
         lastFrame = currentFrame;
     }
 
+    if (cameraController != nullptr)
+        delete cameraController;
 
     glfwTerminate();
 
