@@ -6,7 +6,7 @@
 #include "game.h"
 
 //window
-#include "window.h"
+//#include "window.h"
 
 // std::string textureDir = "textures/container2.png";
 #include <imgui.h>

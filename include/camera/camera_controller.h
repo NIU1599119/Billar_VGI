@@ -1,4 +1,5 @@
 #pragma once
+
 #include "camera/camera.h"
 #include "input.h"
 #include "debug.h"
@@ -31,7 +32,7 @@ protected:
 };
 
 
-void bindInputToController(Input* input, CameraController* controller)
+inline void bindInputToController(Input* input, CameraController* controller)
 {
     input->setActionFunction(MOVE_FORWARDS, [controller](float deltaTime){
         controller->move(controller->UP, deltaTime);
@@ -57,7 +58,7 @@ void bindInputToController(Input* input, CameraController* controller)
 
 };
 
-void unbindInputToController(Input* input)
+inline void unbindInputToController(Input* input)
 {
     input->removeActionFunction(MOVE_FORWARDS);
     input->removeActionFunction(MOVE_BACKWARDS);
