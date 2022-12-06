@@ -18,6 +18,7 @@ namespace Rendering {
 	{
 	public:
 		RenderEngine3D(Camera* camera, Rendering::Shader defaultShader, Rendering::Shader* lightShader = nullptr, Rendering::Shader* debugShader = nullptr);
+		~RenderEngine3D();
 
 		/////// CAMERA & PROJECTION ///////
 		void setCameraFOV(double fov) { m_cameraFOV = fov; updateProjection(); };	// vertical

@@ -66,6 +66,7 @@ Window::Window(unsigned int width, unsigned int height, std::string title, bool 
 
 Window::~Window()
 {
+    glfwTerminate();
     if (m_window != nullptr)
         glfwDestroyWindow(m_window);
 }

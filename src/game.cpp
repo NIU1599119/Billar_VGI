@@ -38,9 +38,6 @@
 
 int Game(Window& window) {
     
-    // enables z-buffer
-    glEnable(GL_DEPTH_TEST);
-
     ///// loading shaders /////
 
     Rendering::Shader modelShader("shaders/model.vert", "shaders/model.frag");
@@ -111,9 +108,10 @@ int Game(Window& window) {
     input->setKeyAction(MOVE_BACKWARDS, GLFW_KEY_S);
     input->setKeyAction(MOVE_RIGHT, GLFW_KEY_D);
 
+    bool shouldExit = false;
     input->setKeyAction(EXIT, GLFW_KEY_BACKSPACE, false);
     input->setKeyAction(EXIT, GLFW_KEY_ESCAPE, false);
-    input->setActionFunction(EXIT, [&window](float delaTime) { window.close(); });
+    input->setActionFunction(EXIT, [&shouldExit](float delaTime) { shouldExit = true; });
 
     input->setKeyAction(SWITCH_MOUSE, GLFW_KEY_M, false);
     input->setActionFunction(SWITCH_MOUSE, [&window, input](float deltaTime) {
@@ -344,7 +342,7 @@ int Game(Window& window) {
     float deltaTime = 0.0f;	// Time between current frame and last frame
     float lastFrame = 0.0f; // Time of last frame
 
-    while (!window.shouldClose())
+    while (!window.shouldClose() && !shouldExit)
     {
         // rendering commands here
         GL(glClearColor(0.1f, 0.1f, 0.15f, 1.0f));
@@ -470,7 +468,5 @@ int Game(Window& window) {
     if (cameraController != nullptr)
         delete cameraController;
 
-    glfwTerminate();
-
-    return 0;
+    return (shouldExit ? 0 : 1); // 0 si se cierra correctamente, 1 si se cierra mal
 }

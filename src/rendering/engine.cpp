@@ -11,6 +11,12 @@ namespace Rendering {
 	{
 		m_debugBoxModel = Primitives::getNewCubeModel();
 		updateProjection();
+		glEnable(GL_DEPTH_TEST);
+	}
+
+	RenderEngine3D::~RenderEngine3D()
+	{
+		glDisable(GL_DEPTH_TEST);
 	}
 
 	/////// CAMERA & PROJECTION ///////
