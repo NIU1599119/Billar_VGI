@@ -12,12 +12,15 @@ namespace Rendering {
         void draw(Shader* shader);
 
         void setPosition(glm::vec3& position) { m_position = position; };
+        glm::vec3 getPosition() { return m_position; };
 
         void setOrientation(glm::quat& orientation) { m_orientation = glm::normalize(orientation); };    // usar esto si bullet tiene quaterniones
         void setOrientation(float radians, glm::vec3& direction) { m_orientation = glm::normalize(glm::angleAxis(radians, direction)); /* radians is the angle in radians */ };
+        glm::quat getOrientation() { return m_orientation; };
 
         void setScaling(double scale) { m_scaling = glm::vec3(scale); };
         void setScaling(glm::vec3 scale) { m_scaling = scale; };
+        glm::vec3 getScaling() { return m_scaling; };
 
         void rotate(float radians, glm::vec3& direction) { // angle is in radians
             glm::quat rotation = glm::angleAxis(radians, direction);

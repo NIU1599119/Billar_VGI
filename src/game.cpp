@@ -18,6 +18,7 @@
 
 #include "rendering/engine.h"
 
+#include "rendering/editor.h"
 
 //#include "camera/camera.h"
 // #include "input.h" // included in window
@@ -109,7 +110,7 @@ int Game(Window& window) {
     input->setKeyAction(MOVE_RIGHT, GLFW_KEY_D);
 
     bool shouldExit = false;
-    input->setKeyAction(EXIT, GLFW_KEY_BACKSPACE, false);
+    //input->setKeyAction(EXIT, GLFW_KEY_BACKSPACE, false);
     input->setKeyAction(EXIT, GLFW_KEY_ESCAPE, false);
     input->setActionFunction(EXIT, [&shouldExit](float delaTime) { shouldExit = true; });
 
@@ -317,30 +318,32 @@ int Game(Window& window) {
     }
 
 
-    input->setKeyAction(PUSH_BALL, GLFW_KEY_F);
-    input->setActionFunction(PUSH_BALL, [&dynamicsWorld, &camera, &ballsIndex](float deltaTime){
-        btCollisionObject* obj = dynamicsWorld->getCollisionObjectArray()[ballsIndex];
-        btRigidBody* body = btRigidBody::upcast(obj);
-        body->setActivationState(ACTIVE_TAG);
-        glm::vec3 front = camera.getPlaneFront();
-        front = front * 4.0f;
-        body->setLinearVelocity(btVector3(front.x, body->getLinearVelocity().y(), front.z));
-    });
+    //input->setKeyAction(PUSH_BALL, GLFW_KEY_F);
+    //input->setActionFunction(PUSH_BALL, [&dynamicsWorld, &camera, &ballsIndex](float deltaTime){
+    //    btCollisionObject* obj = dynamicsWorld->getCollisionObjectArray()[ballsIndex];
+    //    btRigidBody* body = btRigidBody::upcast(obj);
+    //    body->setActivationState(ACTIVE_TAG);
+    //    glm::vec3 front = camera.getPlaneFront();
+    //    front = front * 4.0f;
+    //    body->setLinearVelocity(btVector3(front.x, body->getLinearVelocity().y(), front.z));
+    //});
 
 
-    input->setKeyAction(ACCELERATE_BALL, GLFW_KEY_E);
-    input->setActionFunction(ACCELERATE_BALL, [&dynamicsWorld, &camera, &ballsIndex](float deltaTime){
-        btCollisionObject* obj = dynamicsWorld->getCollisionObjectArray()[ballsIndex];
-        btRigidBody* body = btRigidBody::upcast(obj);
-        body->setActivationState(ACTIVE_TAG);
-        glm::vec3 front = camera.getPlaneFront();
-        front = front * 4.0f;
-        body->setLinearVelocity(btVector3(body->getLinearVelocity().x()*(1.01+deltaTime), body->getLinearVelocity().y(), body->getLinearVelocity().z()*(1.01+deltaTime)));
-    });
+    //input->setKeyAction(ACCELERATE_BALL, GLFW_KEY_E);
+    //input->setActionFunction(ACCELERATE_BALL, [&dynamicsWorld, &camera, &ballsIndex](float deltaTime){
+    //    btCollisionObject* obj = dynamicsWorld->getCollisionObjectArray()[ballsIndex];
+    //    btRigidBody* body = btRigidBody::upcast(obj);
+    //    body->setActivationState(ACTIVE_TAG);
+    //    glm::vec3 front = camera.getPlaneFront();
+    //    front = front * 4.0f;
+    //    body->setLinearVelocity(btVector3(body->getLinearVelocity().x()*(1.01+deltaTime), body->getLinearVelocity().y(), body->getLinearVelocity().z()*(1.01+deltaTime)));
+    //});
 
     unsigned int nFrame = 0;
     float deltaTime = 0.0f;	// Time between current frame and last frame
     float lastFrame = 0.0f; // Time of last frame
+
+    Rendering::RuntimeModelEditor runtimeModelEditor(&renderEngine);
 
     while (!window.shouldClose() && !shouldExit)
     {
@@ -451,6 +454,9 @@ int Game(Window& window) {
         ImGui::Text("Frame number %u", nFrame);
         ImGui::Text("FPS: %f", 1 / deltaTime);
         ImGui::End();
+
+        runtimeModelEditor.update();
+
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 

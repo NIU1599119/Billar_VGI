@@ -30,7 +30,7 @@ int initMenu(int& opcio, Window& window, float& Width, float& Height)
 
     bool clicked = false;
 
-    input->setKeyAction(EXIT, GLFW_KEY_BACKSPACE, false);
+    //input->setKeyAction(EXIT, GLFW_KEY_BACKSPACE, false);
     input->setKeyAction(EXIT, GLFW_KEY_ESCAPE, false);
     input->setActionFunction(EXIT, [&window](float delaTime) { window.close(); });
 

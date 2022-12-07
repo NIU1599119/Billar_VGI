@@ -46,6 +46,10 @@ namespace Rendering {
 		void updateObjectScaling(int id, glm::vec3 scaling);	// escala relativa (poner 2 significa que sera 2 veces mas grande, sin importar la escala introducida al inicializar)
 		void updateObjectScaling(int id, double scaling);	// escala relativa (poner 2 significa que sera 2 veces mas grande, sin importar la escala introducida al inicializar)
 
+		glm::vec3 getObjectPosition(int id) { return m_objects[id].getPosition(); };
+		glm::quat getObjectOrientation(int id) { return m_objects[id].getOrientation(); };
+		glm::vec3 getObjectScaling(int id) { return m_objects[id].getScaling(); };
+
 		void draw(int id);
 		void drawAll();
 
