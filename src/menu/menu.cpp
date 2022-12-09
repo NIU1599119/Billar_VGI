@@ -180,12 +180,12 @@ int initMenu(int& opcio, Window& window, float& Width, float& Height)
                     glm::vec2(0.0f, 0.0f), glm::vec2(Width, Height), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
                 window.update();
 
-                return opcio;
+                break;
             }
             else
-                return opcio;
-                //window.close();
-
+            {
+                break;
+            }
         }
 
         float currentFrame = glfwGetTime();
@@ -193,6 +193,8 @@ int initMenu(int& opcio, Window& window, float& Width, float& Height)
         lastFrame = currentFrame;
     }
 
+    input->removeActionFunction(LEFT_CLICK);
+    input->removeKeyAction(GLFW_MOUSE_BUTTON_LEFT);
     return opcio;
 }
 

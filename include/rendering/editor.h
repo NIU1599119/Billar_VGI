@@ -14,10 +14,11 @@ namespace Rendering
 		RuntimeModelEditor(Rendering::RenderEngine3D* engine) : m_engine(engine) {};
 		void update();
 	private:
-		std::string m_directory = "";
-		double m_scale = 1.0;
+		std::string m_directory = "models/pool_table/scene.gltf";
+		double m_scale = 0.1246;
 		std::vector<int> m_runtimeModels;
 		std::vector<std::string> m_runtimeModelsDirectories;
+		std::vector<glm::vec3> m_modelRotations;
 
 		Rendering::RenderEngine3D* m_engine;
 	};
@@ -41,8 +42,9 @@ namespace Rendering
 			int loadedModelID = m_engine->createObject(m_directory, m_scale);
 			m_runtimeModels.push_back(loadedModelID);
 			m_runtimeModelsDirectories.push_back(directory);
+			m_modelRotations.push_back(glm::vec3(0.0));
 
-			m_directory = "";
+			m_directory = "models/";
 			m_scale = 1.0;
 		}
 		ImGui::Separator();
@@ -54,16 +56,19 @@ namespace Rendering
 			{
 				ImGui::Indent(8);
 				glm::vec3 position = m_engine->getObjectPosition(m_runtimeModels[i]);
-				glm::quat orientation = m_engine->getObjectOrientation(m_runtimeModels[i]);
-				orientation = glm::normalize(orientation);
-				glm::vec3 euler = glm::degrees(glm::eulerAngles(orientation));
+				//glm::quat orientation = m_engine->getObjectOrientation(m_runtimeModels[i]);
+				//orientation = glm::normalize(orientation);
+				//glm::vec3 euler = glm::degrees(glm::eulerAngles(orientation));
+				glm::vec3& euler = m_modelRotations[i];
 				glm::vec3 scaling = m_engine->getObjectScaling(m_runtimeModels[i]);
+				glm::quat orientation = glm::quat(glm::radians(euler));
 
 				ImGui::DragFloat3("Position", glm::value_ptr(position), 0.001);
 				ImGui::Text("Orientation");
 				ImGui::DragFloat("x", &euler.x, 1.0, -180, 180);
-				ImGui::DragFloat("y", &euler.y, 1.0, -90, 90);
+				ImGui::DragFloat("y", &euler.y, 1.0, -180, 180);
 				ImGui::DragFloat("z", &euler.z, 1.0, -180, 180);
+				ImGui::Text("Resulting quaternion w:%f, x:%f, y:%f, z:%f", orientation.w, orientation.x, orientation.y, orientation.z);
 				//ImGui::DragFloat3("Orientation", glm::value_ptr(euler), 1.0, -180.0, 180);
 				ImGui::Spacing();
 				ImGui::DragFloat3("Scaling", glm::value_ptr(scaling), 0.001);
@@ -77,16 +82,16 @@ namespace Rendering
 					ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 1, 0.0, 0.0, 1.0});
 					if (ImGui::Button("Confirm"))
 					{
-						m_engine->deleteObject(m_runtimeModels[i]);
 						m_runtimeModels.erase(std::find(m_runtimeModels.begin(), m_runtimeModels.end(), m_runtimeModels[i]));
 						m_runtimeModelsDirectories.erase(std::find(m_runtimeModelsDirectories.begin(), m_runtimeModelsDirectories.end(), m_runtimeModelsDirectories[i]));
+						m_runtimeModels.erase(std::find(m_runtimeModels.begin(), m_runtimeModels.end(), m_runtimeModels[i]));
+						m_engine->deleteObject(m_runtimeModels[i]);
 					}
 					ImGui::PopStyleColor(3);
 					ImGui::Unindent(8);
 				}
 				else
 				{
-					orientation = glm::quat(glm::radians(euler));
 					m_engine->updateObject(m_runtimeModels[i], position, orientation);
 					m_engine->updateObjectScaling(m_runtimeModels[i], scaling);
 				}
