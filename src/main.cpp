@@ -1,3 +1,4 @@
+#pragma once
 
 // menu
 #include "menu/menu.h"
@@ -34,12 +35,15 @@ int main()
     float x, y;
     initResolution(x, y, window);
 
+    /* GENIOS
     if (Audio::initAudio() != 0)
     {
         return 1; // error inicializando audio
     }
 
-    Audio::engine->play2D("media/blues.ogg", true);
+    Audio::engine->play2D("media/blues.ogg", true);*/
+
+    Audio::AUDIO_FUNCTIONS.play2D("media/blues.ogg", true, false);
 
     int opcio = 0;
     initMenu(opcio, window, x, y);
@@ -49,7 +53,7 @@ int main()
     else
         return 0;
 
-    Audio::deleteAudio();
+    //Audio::deleteAudio(); GENIOS
 
     return 0;
 }

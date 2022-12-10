@@ -33,6 +33,7 @@
 #include "btBulletDynamicsCommon.h"
 #include "rendering/collisionBox.h"
 
+#include "audio.h"
 
 int Game(Window& window) {
     
@@ -197,6 +198,7 @@ int Game(Window& window) {
         │O┌───────────┐O┌───────────┐O│ |
         └─┴───────────┴─┴───────────┴─┘
     */
+
 
     std::vector<Rendering::CollisionBox> rigidObjects;
 
@@ -716,6 +718,7 @@ int Game(Window& window) {
             ball15.setScaling(0.05715f / 2);
 
             ball15.draw(&modelShader, view, projection, camera.getPosition());
+      
 
             #ifdef DEBUG_SHADER
             for (int i = 0; i < rigidObjects.size(); i++)
@@ -723,6 +726,7 @@ int Game(Window& window) {
                 rigidObjects[i].draw(&debugShader, view, projection);
             }
             #endif
+
         }
 
 

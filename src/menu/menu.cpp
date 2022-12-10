@@ -18,6 +18,8 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
+#include "audio.h"
+
 SpriteRenderer* Renderer;
 
 int initMenu(int& opcio, Window& window, float& Width, float& Height)
@@ -99,14 +101,14 @@ int initMenu(int& opcio, Window& window, float& Width, float& Height)
         clicked = false;
 
         window.processInput(deltaTime);
-      
+
         Renderer->DrawSprite(ResourceManager::GetTexture("menu"),
             glm::vec2(0.0f, 0.0f), glm::vec2(Width, Height), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
 
         opcio = 0;
 
         std::cout << mousePosition.x << ", " << mousePosition.y << std::endl;
-        if ((mousePosition.x > (180.0f*resFix) && mousePosition.y > (350.0f * resFix)) && (mousePosition.x < (580.0f * resFix) && mousePosition.y < (700.0f * resFix)))
+        if ((mousePosition.x > (180.0f * resFix) && mousePosition.y > (350.0f * resFix)) && (mousePosition.x < (580.0f * resFix) && mousePosition.y < (700.0f * resFix)))
         {
             Renderer->DrawSprite(ResourceManager::GetTexture("button1"),
                 glm::vec2(180.0f * resFix, 350.0f * resFix), glm::vec2(400 * resFix, 350 * resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
@@ -118,7 +120,7 @@ int initMenu(int& opcio, Window& window, float& Width, float& Height)
                 glm::vec2(180.0f * resFix, 350.0f * resFix), glm::vec2(400 * resFix, 350 * resFix), 0.0f, glm::vec3(0.7f, 0.7f, 0.7f));
 
         }
-        
+
         if ((mousePosition.x > (760.0f * resFix) && mousePosition.y > (350.0f * resFix)) && (mousePosition.x < (1160.0f * resFix) && mousePosition.y < (700.0f * resFix)))
         {
             Renderer->DrawSprite(ResourceManager::GetTexture("button2"),
@@ -169,6 +171,10 @@ int initMenu(int& opcio, Window& window, float& Width, float& Height)
 
         // Actualitza el frame
         window.update();
+
+        if (clicked){
+            Audio::AUDIO_FUNCTIONS.play2D("media/menu_click.ogg", false, false);
+        }
 
         if (opcio != 0 && clicked)
         {           
