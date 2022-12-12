@@ -47,7 +47,11 @@ struct SpotLight {
     vec3 specular;
 };
 
+<<<<<<< HEAD
 #define NR_POINT_LIGHTS 5
+=======
+#define NR_POINT_LIGHTS 1
+>>>>>>> Edicion-de-modelos
 
 
 in vec3 FragPos;
@@ -58,7 +62,10 @@ in mat3 TBN;
 uniform vec3 viewPos;
 // uniform DirLight dirLight;
 uniform PointLight pointLights[NR_POINT_LIGHTS];
+<<<<<<< HEAD
 uniform int n_pointLights;
+=======
+>>>>>>> Edicion-de-modelos
 // uniform SpotLight spotLight;
 uniform Material material;
 

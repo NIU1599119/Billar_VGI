@@ -55,6 +55,8 @@ namespace Rendering {
 
         bool hasNormals = mesh->HasNormals();
         bool hasTextures = false;
+        if (hasNormals)
+            LOG_DEBUG("HAS NORMALS");
 
         if(mesh->mTextureCoords[0]) hasTextures = true;
 
