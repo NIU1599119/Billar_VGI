@@ -30,7 +30,7 @@ int initMenu(int& opcio, Window& window, float& Width, float& Height)
 
     bool clicked = false;
 
-    input->setKeyAction(EXIT, GLFW_KEY_BACKSPACE, false);
+    //input->setKeyAction(EXIT, GLFW_KEY_BACKSPACE, false);
     input->setKeyAction(EXIT, GLFW_KEY_ESCAPE, false);
     input->setActionFunction(EXIT, [&window](float delaTime) { window.close(); });
 
@@ -94,6 +94,8 @@ int initMenu(int& opcio, Window& window, float& Width, float& Height)
 
     while (!window.shouldClose())
     {
+        GL(glClearColor(0.1f, 0.1f, 0.15f, 1.0f));
+        GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
         // Agafa els inputs
 
         clicked = false;
@@ -105,7 +107,7 @@ int initMenu(int& opcio, Window& window, float& Width, float& Height)
 
         opcio = 0;
 
-        std::cout << mousePosition.x << ", " << mousePosition.y << std::endl;
+        //std::cout << mousePosition.x << ", " << mousePosition.y << std::endl;
         if ((mousePosition.x > (180.0f*resFix) && mousePosition.y > (350.0f * resFix)) && (mousePosition.x < (580.0f * resFix) && mousePosition.y < (700.0f * resFix)))
         {
             Renderer->DrawSprite(ResourceManager::GetTexture("button1"),
@@ -178,11 +180,12 @@ int initMenu(int& opcio, Window& window, float& Width, float& Height)
                     glm::vec2(0.0f, 0.0f), glm::vec2(Width, Height), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
                 window.update();
 
-                return opcio;
+                break;
             }
             else
-                window.close();
-
+            {
+                break;
+            }
         }
 
         float currentFrame = glfwGetTime();
@@ -190,6 +193,8 @@ int initMenu(int& opcio, Window& window, float& Width, float& Height)
         lastFrame = currentFrame;
     }
 
+    input->removeActionFunction(LEFT_CLICK);
+    input->removeKeyAction(GLFW_MOUSE_BUTTON_LEFT);
     return opcio;
 }
 
@@ -210,7 +215,7 @@ int initResolution(float& x, float& y, Window& window)
 
         ImGui::Begin("Debug Window");
         ImGui::Text("Selecciona resolució");
-
+        ImGui::BeginGroup();
         if (ImGui::Button("720p"))
         {
             x = 1280;
@@ -238,6 +243,20 @@ int initResolution(float& x, float& y, Window& window)
             y = 2160;
             selected = true;
         }
+        ImGui::EndGroup();
+
+        ImGui::SameLine();
+
+        ImGui::BeginGroup();
+        if (ImGui::Button("Fullscreen"))
+        {
+            window.setFullscreen(true);
+        }
+        if (ImGui::Button("Windowed"))
+        {
+            window.setFullscreen(false);
+        }
+        ImGui::EndGroup();
 
         ImGui::End();
         ImGui::Render();
@@ -249,7 +268,7 @@ int initResolution(float& x, float& y, Window& window)
         window.update();
     }
 
-    window.resizeWindow(window.getGLFWwindow(), x, y);
+    window.resizeWindow(x, y);
     window.update();
 
     return 0;

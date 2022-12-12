@@ -63,7 +63,10 @@ public:
                 break;
             }
         }
-        m_pollingKeys.erase(iter);
+        if (iter != m_pollingKeys.end())
+        {
+            m_pollingKeys.erase(iter);
+        }
         m_keys.erase(key);
     }
 

@@ -55,9 +55,6 @@ namespace Rendering {
 
         bool hasNormals = mesh->HasNormals();
         bool hasTextures = false;
-        if (hasNormals)
-            LOG_DEBUG("HAS NORMALS");
-
 
         if(mesh->mTextureCoords[0]) hasTextures = true;
 
@@ -162,6 +159,8 @@ namespace Rendering {
                 format = GL_RGB;
             else if (nrChannels == 4)
                 format = GL_RGBA;
+            else
+                format = 0; // invalid (let it crash)
     
             GL(glBindTexture(GL_TEXTURE_2D, textureID));
             GL(glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data));

@@ -66,6 +66,7 @@ Window::Window(unsigned int width, unsigned int height, std::string title, bool 
 
 Window::~Window()
 {
+    glfwTerminate();
     if (m_window != nullptr)
         glfwDestroyWindow(m_window);
 }
@@ -85,13 +86,14 @@ bool Window::initWindow()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     GLFWwindow* window;
+    m_monitor = glfwGetPrimaryMonitor();
 
     if(!m_data.fullScreen)
         window = glfwCreateWindow(m_data.width, m_data.height, m_data.title.c_str(), NULL, NULL);
     else
     {
-        GLFWmonitor* primary = glfwGetPrimaryMonitor();
-        window = glfwCreateWindow(m_data.width, m_data.height, m_data.title.c_str(), primary, NULL);
+        const GLFWvidmode* mode = glfwGetVideoMode(m_monitor);
+        window = glfwCreateWindow(mode->width, mode->height, m_data.title.c_str(), m_monitor, NULL);
     }
 
     if (window == NULL)
@@ -137,9 +139,9 @@ void Window::processInput(float deltaTime)
     }
 }
 
-void Window::resizeWindow(GLFWwindow* window, int width, int height)
+void Window::resizeWindow(int width, int height)
 {
-    glfwSetWindowSize(window, width, height);
+    glfwSetWindowSize(m_window, width, height);
 }
 
 void Window::update()
@@ -149,12 +151,26 @@ void Window::update()
 }
 
 
-void Window::setVSync(bool enabled)
+void Window::setVSync(bool enable)
 {
-    if (enabled)
+    if (enable)
         glfwSwapInterval(1);
     else
         glfwSwapInterval(0);
     
-    m_data.vSync = enabled;
+    m_data.vSync = enable;
+}
+
+void Window::setFullscreen(bool enable)
+{
+    if (enable)
+    {
+        const GLFWvidmode* mode = glfwGetVideoMode(m_monitor);
+        glfwSetWindowMonitor(m_window, m_monitor, 0, 0, mode->width, mode->height, 0);
+    }
+    else
+    {
+        glfwSetWindowMonitor(m_window, nullptr, 0, 0, m_data.width, m_data.height, 0);
+    }
+    m_data.fullScreen = enable;
 }

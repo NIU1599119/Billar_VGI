@@ -35,7 +35,7 @@ project "Billar"
         "libs/irrKlang/include"
     }
 
-    files { "src/**.cpp" }
+    files { "src/**.cpp", "include/**.h", "include/**.hpp" }
 
     links { "GLFW", "GLM", "GLAD", "ImGui", "assimp", "bullet" }
 

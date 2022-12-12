@@ -18,7 +18,7 @@
 int main()
 {
     Window window;
-    window = Window(1280, 720, "Billar", true, true);
+    window = Window(1280, 720, "Billar", true, false);
 
     if (!window.initWindow()) {
         return -1;
@@ -38,18 +38,29 @@ int main()
     {
         return 1; // error inicializando audio
     }
-
+    Audio::engine->setSoundVolume(0.1f);
     Audio::engine->play2D("media/blues.ogg", true);
 
-    int opcio = 0;
-    initMenu(opcio, window, x, y);
+    bool continuarJugando = true;
+    while(continuarJugando) {
+        int opcio = 0;
+        initMenu(opcio, window, x, y);
 
-    if (opcio == 1)
-        return Game(window);
-    else
-        return 0;
+        if (opcio == 1)
+        {
+            continuarJugando = (Game(window) == 0);
+            if (!continuarJugando)
+            {
+                LOG_ERROR("El juego ha crasheado o no ha podido cargar");
+                return 1;
+            }
+        }
+        else
+            continuarJugando = false;
+    }
 
     Audio::deleteAudio();
+    window.close();
 
     return 0;
 }
