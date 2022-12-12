@@ -8,7 +8,7 @@ namespace Rendering {
     public:
         Object(Model* model, glm::vec3 scale = glm::vec3(1.0f)) : m_model(model), m_modelScaling(scale) {};
 
-        void draw(Shader* shader, glm::mat4& view, glm::mat4& projection, glm::vec3 cameraPosition);
+        void draw(Shader* shader, glm::mat4& view, glm::mat4& projection, glm::vec3& cameraPosition);
         void draw(Shader* shader);
 
         void setPosition(glm::vec3& position) { m_position = position; };

@@ -124,12 +124,12 @@ int Game(Window& window) {
     //////////// FISICAS ////////////
     ///-----initialization_start-----
 
-    EntityControllerSystem ECS(CLASSIC, input, &camera, &renderEngine, ballsRenderIDs);
+    EntityControllerSystem ECS(CLASSIC, input, &camera, &renderEngine, ballsRenderIDs, 100, 0.001);
 
 
     ///// INPUTS FOR BALL //////
 
-    btDiscreteDynamicsWorld* dynamicsWorld = ECS.getDynamicsWorld();
+    // btDiscreteDynamicsWorld* dynamicsWorld = ECS.getDynamicsWorld();
     // int ballsIndex = ECS.getBallsIndex();
 
 
@@ -159,7 +159,8 @@ int Game(Window& window) {
         // physics update outside (also update the position of everything)
         cameraController->update();
 
-        ECS.StepSimulation(deltaTime, 100, 0.001f);
+        // ECS.StepSimulation(deltaTime, 100, 0.001f);
+        ECS.update(deltaTime);
         // dynamicsWorld->stepSimulation(deltaTime, 100, 0.001f);
 
         //glm::mat4 view = camera.getViewMatrix();
@@ -196,10 +197,11 @@ int Game(Window& window) {
             renderEngine.drawLights();
 
             #ifdef DEBUG_SHADER
-            for (int i = 0; i < rigidObjects.size(); i++)
+            std::vector<Rendering::CollisionBox>* p_rigidObjects = ECS.getCollisionsBoxPtr();
+            for (int i = 0; i < (*p_rigidObjects).size(); i++)
             {
                 //rigidObjects[i].draw(&debugShader, view, projection);
-                rigidObjects[i].draw(renderEngine.getDebuggingShader());
+                (*p_rigidObjects)[i].draw(renderEngine.getDebuggingShader());
             }
             #endif
         }

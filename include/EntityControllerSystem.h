@@ -39,14 +39,18 @@ enum GAMEMODE {
 class EntityControllerSystem {
 public:
     // EntityControllerSystem(int mode, Input* input, Camera* camera);
-    EntityControllerSystem(GAMEMODE mode, Input* input, Camera* camera, Rendering::RenderEngine3D* renderingEngine, std::vector<int>& ballRenderIDs);
+    EntityControllerSystem(GAMEMODE mode, Input* input, Camera* camera, Rendering::RenderEngine3D* renderingEngine, std::vector<int>& ballRenderIDs, int maxSubSteps = 100, double fixedTimeStep = 0.001);
     
     void StepSimulation(btScalar timeStep, int maxSubSteps, btScalar fixedTimeStep);
+    void update(double deltaTime);
 
     // void draw(Shader* modelShader, Camera* camera, glm::mat4& projection, glm::vec3& controlledPosition, Shader* debugShader);
 
-    btDiscreteDynamicsWorld* getDynamicsWorld() { return m_dynamicsWorld;  }
+    // btDiscreteDynamicsWorld* getDynamicsWorld() { return m_dynamicsWorld;  }
     // int getBallsIndex() { return m_ballsIndex; }
+
+    // temporal function
+    std::vector<Rendering::CollisionBox>* getCollisionsBoxPtr() { return &m_EntityPool; }
 
 private:
     btDefaultCollisionConfiguration* m_collisionConfiguration;
@@ -54,13 +58,17 @@ private:
     btBroadphaseInterface* m_overlappingPairCache;
     btSequentialImpulseConstraintSolver* m_solver;
     btDiscreteDynamicsWorld* m_dynamicsWorld;
+
+    int m_maxSubSteps;
+    double m_fixedTimeStep;
+
     btAlignedObjectArray<btCollisionShape*> m_collisionShapes;
 
     std::vector<Rendering::CollisionBox> m_EntityPool;
-    std::vector<btVector3> m_EntityBallPositions;
+    // std::vector<btVector3> m_EntityBallPositions;
     // std::vector<Rendering::Object> m_EntityBallObjects;
     // std::vector<Rendering::Model> m_EntityBallModels;
-    // int m_ballsIndex;
+    int m_ballsIndex;
 
     Rendering::RenderEngine3D* m_renderEngine;
     std::vector<int> m_ballRenderIDs;

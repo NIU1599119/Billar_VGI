@@ -240,8 +240,11 @@
 
 // }
 
-EntityControllerSystem::EntityControllerSystem(GAMEMODE mode, Input* input, Camera* camera, Rendering::RenderEngine3D* renderingEngine, std::vector<int>& ballRenderIDs)
-    : m_renderEngine(renderingEngine),
+EntityControllerSystem::EntityControllerSystem(GAMEMODE mode, Input* input, Camera* camera, Rendering::RenderEngine3D* renderingEngine, std::vector<int>& ballRenderIDs, int maxSubSteps, double fixedTimeStep)
+    : // simple initial constructors
+    m_maxSubSteps(maxSubSteps),
+    m_fixedTimeStep(fixedTimeStep),
+    m_renderEngine(renderingEngine),
     m_ballRenderIDs(ballRenderIDs)
 {
     ///collision configuration contains default setup for memory, collision setup. Advanced users can create their own configuration.
@@ -347,6 +350,8 @@ EntityControllerSystem::EntityControllerSystem(GAMEMODE mode, Input* input, Came
 
     m_ballsIndex = m_collisionShapes.size();
 
+    std::vector<btVector3> entityBallPositions;
+
 
     switch (mode)
     {
@@ -358,32 +363,32 @@ EntityControllerSystem::EntityControllerSystem(GAMEMODE mode, Input* input, Came
         }
 
         // Bola blanca
-        m_EntityBallPositions.push_back(btVector3(0, 3, 0));
+        entityBallPositions.push_back(btVector3(0, 3, 0));
 
         // Fila 1
-        m_EntityBallPositions.push_back(btVector3(0.7, 3, 0));
+        entityBallPositions.push_back(btVector3(0.7, 3, 0));
 
         // Fila 2
-        m_EntityBallPositions.push_back(btVector3(0.75, 3, 0.03));
-        m_EntityBallPositions.push_back(btVector3(0.75, 3, -0.03));
+        entityBallPositions.push_back(btVector3(0.75, 3, 0.03));
+        entityBallPositions.push_back(btVector3(0.75, 3, -0.03));
 
         // Fila 3
-        m_EntityBallPositions.push_back(btVector3(0.8, 3, 0));
-        m_EntityBallPositions.push_back(btVector3(0.8, 3, 0.06));
-        m_EntityBallPositions.push_back(btVector3(0.8, 3, -0.06));
+        entityBallPositions.push_back(btVector3(0.8, 3, 0));
+        entityBallPositions.push_back(btVector3(0.8, 3, 0.06));
+        entityBallPositions.push_back(btVector3(0.8, 3, -0.06));
 
         // Fila 4
-        m_EntityBallPositions.push_back(btVector3(0.85, 3, 0.09));
-        m_EntityBallPositions.push_back(btVector3(0.85, 3, 0.03));
-        m_EntityBallPositions.push_back(btVector3(0.85, 3, -0.03));
-        m_EntityBallPositions.push_back(btVector3(0.85, 3, -0.09));
+        entityBallPositions.push_back(btVector3(0.85, 3, 0.09));
+        entityBallPositions.push_back(btVector3(0.85, 3, 0.03));
+        entityBallPositions.push_back(btVector3(0.85, 3, -0.03));
+        entityBallPositions.push_back(btVector3(0.85, 3, -0.09));
 
         // Fila 5
-        m_EntityBallPositions.push_back(btVector3(0.9, 3, 0.12));
-        m_EntityBallPositions.push_back(btVector3(0.9, 3, 0.06));
-        m_EntityBallPositions.push_back(btVector3(0.9, 3, 0));
-        m_EntityBallPositions.push_back(btVector3(0.9, 3, -0.06));
-        m_EntityBallPositions.push_back(btVector3(0.9, 3, -0.12));
+        entityBallPositions.push_back(btVector3(0.9, 3, 0.12));
+        entityBallPositions.push_back(btVector3(0.9, 3, 0.06));
+        entityBallPositions.push_back(btVector3(0.9, 3, 0));
+        entityBallPositions.push_back(btVector3(0.9, 3, -0.06));
+        entityBallPositions.push_back(btVector3(0.9, 3, -0.12));
     
         break;
     
@@ -396,7 +401,7 @@ EntityControllerSystem::EntityControllerSystem(GAMEMODE mode, Input* input, Came
     }
 
 
-    for (int i = 0; i < m_EntityBallPositions.size(); i++)
+    for (int i = 0; i < entityBallPositions.size(); i++)
     {
         //create a dynamic rigidbody
 
@@ -417,7 +422,7 @@ EntityControllerSystem::EntityControllerSystem(GAMEMODE mode, Input* input, Came
         if (isDynamic)
             colShape->calculateLocalInertia(mass, localInertia);
 
-        startTransform.setOrigin(m_EntityBallPositions[i]);
+        startTransform.setOrigin(entityBallPositions[i]);
 
         //using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
         btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
@@ -433,23 +438,27 @@ EntityControllerSystem::EntityControllerSystem(GAMEMODE mode, Input* input, Came
 
 
 
+    // input pointers
+    btDiscreteDynamicsWorld** p_inputDynWorld = &m_dynamicsWorld;
+    int* p_ballsIndex = &m_ballsIndex;
+
     input->setKeyAction(PUSH_BALL, GLFW_KEY_F);
-    input->setActionFunction(PUSH_BALL, [m_dynamicsWorld, &camera, &ballsIndex](float deltaTime) {
-        btCollisionObject* obj = m_dynamicsWorld->getCollisionObjectArray()[ballsIndex];
+    input->setActionFunction(PUSH_BALL, [p_inputDynWorld, &camera, p_ballsIndex](float deltaTime) {
+        btCollisionObject* obj = (*p_inputDynWorld)->getCollisionObjectArray()[(*p_ballsIndex)];
         btRigidBody* body = btRigidBody::upcast(obj);
         body->setActivationState(ACTIVE_TAG);
-        glm::vec3 front = camera.getPlaneFront();
+        glm::vec3 front = camera->getPlaneFront();
         front = front * 4.0f;
         body->setLinearVelocity(btVector3(front.x, body->getLinearVelocity().y(), front.z));
         });
 
 
     input->setKeyAction(ACCELERATE_BALL, GLFW_KEY_E);
-    input->setActionFunction(ACCELERATE_BALL, [&m_dynamicsWorld, &camera, &ballsIndex](float deltaTime) {
-        btCollisionObject* obj = m_dynamicsWorld->getCollisionObjectArray()[ballsIndex];
+    input->setActionFunction(ACCELERATE_BALL, [p_inputDynWorld, &camera, p_ballsIndex](float deltaTime) {
+        btCollisionObject* obj = (*p_inputDynWorld)->getCollisionObjectArray()[(*p_ballsIndex)];
         btRigidBody* body = btRigidBody::upcast(obj);
         body->setActivationState(ACTIVE_TAG);
-        glm::vec3 front = camera.getPlaneFront();
+        glm::vec3 front = camera->getPlaneFront();
         front = front * 4.0f;
         body->setLinearVelocity(btVector3(body->getLinearVelocity().x() * (1.01 + deltaTime), body->getLinearVelocity().y(), body->getLinearVelocity().z() * (1.01 + deltaTime)));
         });
@@ -501,6 +510,43 @@ EntityControllerSystem::EntityControllerSystem(GAMEMODE mode, Input* input, Came
 //     #endif
 // }
 
-void EntityControllerSystem::StepSimulation(btScalar timeStep, int maxSubSteps, btScalar fixedTimeStep) {
-    m_dynamicsWorld->stepSimulation(timeStep, maxSubSteps, fixedTimeStep);
+// void EntityControllerSystem::StepSimulation(btScalar timeStep, int maxSubSteps, btScalar fixedTimeStep) {
+//     m_dynamicsWorld->stepSimulation(timeStep, maxSubSteps, fixedTimeStep);
+// }
+
+void EntityControllerSystem::update(double deltaTime)
+{
+    m_dynamicsWorld->stepSimulation(deltaTime, m_maxSubSteps, m_fixedTimeStep);
+
+    // update the rendering engine
+    int i = 0;
+    for (auto it = m_ballRenderIDs.begin(); it != m_ballRenderIDs.end(); it++)
+    {
+        btCollisionObject* obj = m_dynamicsWorld->getCollisionObjectArray()[m_ballsIndex + i];   // should be ball
+        btRigidBody* body = btRigidBody::upcast(obj);
+        btTransform trans;
+
+        if (body && body->getMotionState())
+        {
+            body->getMotionState()->getWorldTransform(trans);
+        }
+        else
+        {
+            trans = obj->getWorldTransform();
+        }
+
+        // btVector3 pos = trans.getOrigin();
+        glm::vec3 pos = glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+        // if (i == 0)
+        //     controlledPosition = pos;
+        glm::quat orient = glm::quat(trans.getRotation().getW(), trans.getRotation().getX(), trans.getRotation().getY(), trans.getRotation().getZ()); // probar de cambiar esto de wxyz a xyzw por si bullet los tiene en ordenes distintos
+
+        
+        m_renderEngine->updateObject(*it, pos, orient);
+        // it->setPosition(pos);
+        // it->setOrientation(orient);
+        // it->setScaling(0.05715f / 2);
+        // it->draw(modelShader, camera->getViewMatrix(), projection, camera->getPosition());
+        i++;
+    }
 }

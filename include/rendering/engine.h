@@ -30,8 +30,8 @@ namespace Rendering {
 
 		/////// OBJECTS ///////
 		// generar un nuevo modelo
-		int createObject(std::string& path, double scale = 1.0, Rendering::Shader* customShader = nullptr);			// definimos el path del modelo y la escala inicial del objeto
-		int createObject(std::string& path, glm::vec3 scale, Rendering::Shader* customShader = nullptr);			// definimos el path del modelo y la escala inicial del objeto
+		int createObject(std::string path, double scale = 1.0, Rendering::Shader* customShader = nullptr);			// definimos el path del modelo y la escala inicial del objeto
+		int createObject(std::string path, glm::vec3 scale, Rendering::Shader* customShader = nullptr);			// definimos el path del modelo y la escala inicial del objeto
 		// utilizar uno ya existente
 		int createObject(Rendering::Model* model, double scale = 1.0, Rendering::Shader* customShader = nullptr);	// definimos el path del modelo y la escala inicial del objeto
 		int createObject(Rendering::Model* model, glm::vec3 scale, Rendering::Shader* customShader = nullptr);		// definimos el path del modelo y la escala inicial del objeto

@@ -84,11 +84,11 @@ namespace Rendering {
 
 	/////// OBJECTS ///////
 
-	int RenderEngine3D::createObject(std::string& path, double scale, Rendering::Shader* customShader)
+	int RenderEngine3D::createObject(std::string path, double scale, Rendering::Shader* customShader)
 	{
 		return createObject(path, glm::vec3(scale), customShader);
 	}
-	int RenderEngine3D::createObject(std::string& path, glm::vec3 scale, Rendering::Shader* customShader)
+	int RenderEngine3D::createObject(std::string path, glm::vec3 scale, Rendering::Shader* customShader)
 	{
 		// generate Mesh
 		Rendering::Model* model = new Rendering::Model(path);
@@ -149,7 +149,7 @@ namespace Rendering {
 	{
 		Rendering::Shader* objectShader = m_shaders[id];
 		if (objectShader == nullptr) objectShader = &m_defaultModelShader;
-		m_objects[id].draw(objectShader, m_camera->getViewMatrix(), m_projection, m_camera->getPosition());
+		m_objects[id].draw(objectShader);
 	}
 
 	void RenderEngine3D::drawAll()
@@ -161,7 +161,7 @@ namespace Rendering {
 		{
 			Rendering::Shader* objectShader = m_shaders[i];
 			if (objectShader == nullptr) objectShader = &m_defaultModelShader;
-			m_objects[i].draw(objectShader, m_camera->getViewMatrix(), m_projection, m_camera->getPosition());
+			m_objects[i].draw(objectShader);
 		}
 	}
 
