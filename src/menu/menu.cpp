@@ -193,6 +193,12 @@ int initMenu(int& opcio, Window& window, float& Width, float& Height)
         lastFrame = currentFrame;
     }
 
+    // los inputs que hemos asignado hay que quitarlos (porque las funciones tienen algunos punteros y podrian causar errores)
+    input->removeActionFunction(EXIT);
+    input->removeKeyAction(GLFW_KEY_ESCAPE);
+
+    input->removeMouseCallback();
+
     input->removeActionFunction(LEFT_CLICK);
     input->removeKeyAction(GLFW_MOUSE_BUTTON_LEFT);
     return opcio;

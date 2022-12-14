@@ -39,10 +39,10 @@ enum GAMEMODE {
 class EntityControllerSystem {
 public:
     // EntityControllerSystem(int mode, Input* input, Camera* camera);
-    EntityControllerSystem(GAMEMODE mode, Input* input, Camera* camera, Rendering::RenderEngine3D* renderingEngine, std::vector<int>& ballRenderIDs, int maxSubSteps = 100, double fixedTimeStep = 0.001);
+    EntityControllerSystem(GAMEMODE mode, Input* input, Camera* camera, Rendering::RenderEngine3D* renderingEngine, std::vector<int>& ballRenderIDs, int maxSubSteps = 5, double fixedTimeStep = 0.0016);
     
     void StepSimulation(btScalar timeStep, int maxSubSteps, btScalar fixedTimeStep);
-    void update(double deltaTime);
+    void update(double deltaTime, glm::vec3* focusedBallPosition);
 
     // void draw(Shader* modelShader, Camera* camera, glm::mat4& projection, glm::vec3& controlledPosition, Shader* debugShader);
 

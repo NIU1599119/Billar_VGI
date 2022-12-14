@@ -40,6 +40,18 @@ public:
         m_actionStatus[action] = RELEASED;
         if (isPolling)
         {
+            auto iter = m_pollingKeys.begin();
+            for (iter; iter != m_pollingKeys.end(); iter++)
+            {
+                if (*iter == key)
+                {
+                    break;
+                }
+            }
+            if (iter != m_pollingKeys.end())
+            {
+                m_pollingKeys.erase(iter);
+            }
             m_pollingKeys.push_back(key);
         }
         else// isEvent
@@ -91,6 +103,7 @@ public:
     void updateCursor(float newX, float newY);
 
     void setMouseCallback(std::function<void(float, float)> mouseCallback, bool relative=true) { m_mouseCallback = mouseCallback; m_mouseOffset = relative; };
+    void removeMouseCallback() { m_mouseCallback = [](float x, float y){}; };
 
     void captureMouse() { m_mouseCapture = true; };
 

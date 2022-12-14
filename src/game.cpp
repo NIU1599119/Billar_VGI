@@ -85,7 +85,7 @@ int Game(Window& window) {
     bool shouldExit = false;
     //input->setKeyAction(EXIT, GLFW_KEY_BACKSPACE, false);
     input->setKeyAction(EXIT, GLFW_KEY_ESCAPE, false);
-    input->setActionFunction(EXIT, [&shouldExit](float delaTime) { shouldExit = true; });
+    input->setActionFunction(EXIT, [&shouldExit](float delaTime) { LOG_DEBUG("Exiting Game");shouldExit = true; });
 
     input->setKeyAction(SWITCH_MOUSE, GLFW_KEY_M, false);
     input->setActionFunction(SWITCH_MOUSE, [&window, input](float deltaTime) {
@@ -124,7 +124,7 @@ int Game(Window& window) {
     //////////// FISICAS ////////////
     ///-----initialization_start-----
 
-    EntityControllerSystem ECS(CLASSIC, input, &camera, &renderEngine, ballsRenderIDs, 100, 0.001);
+    EntityControllerSystem ECS(CLASSIC, input, &camera, &renderEngine, ballsRenderIDs);
 
 
     ///// INPUTS FOR BALL //////
@@ -160,7 +160,7 @@ int Game(Window& window) {
         cameraController->update();
 
         // ECS.StepSimulation(deltaTime, 100, 0.001f);
-        ECS.update(deltaTime);
+        ECS.update(deltaTime, &cameraOrbitPosition);
         // dynamicsWorld->stepSimulation(deltaTime, 100, 0.001f);
 
         //glm::mat4 view = camera.getViewMatrix();
@@ -212,7 +212,7 @@ int Game(Window& window) {
         ImGui::Begin("Debug Window");
         ImGui::Checkbox("Draw Triangles", &drawTriangles);
         ImGui::Separator();
-        //ImGui::Text("Cube Controls");
+        // ImGui::Text("Cube Controls");
         //ImGui::SliderFloat3("Position", glm::value_ptr(controlledPosition), -1.5f, 1.5f);
         //ImGui::SliderFloat3("Direction", glm::value_ptr(controlledDirection), -1.0f, 1.0f);
         //ImGui::Separator();
@@ -221,6 +221,7 @@ int Game(Window& window) {
         //ImGui::ColorEdit3("Light Color", glm::value_ptr(*lightPoint.getColor()));
         //ImGui::Separator();
         ImGui::Text("Camera Controls");
+        ImGui::Text("Current camera position (%f, %f, %f)", cameraOrbitPosition.x, cameraOrbitPosition.y, cameraOrbitPosition.z);
         if (ImGui::Button("Camera fly"))
         {
             unbindInputToController(input);
