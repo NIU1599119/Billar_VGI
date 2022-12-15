@@ -1,4 +1,3 @@
-
 // menu
 #include "menu/menu.h"
 
@@ -34,12 +33,16 @@ int main()
     float x, y;
     initResolution(x, y, window);
 
+    /* GENIOS
     if (Audio::initAudio() != 0)
     {
         return 1; // error inicializando audio
     }
     Audio::engine->setSoundVolume(0.1f);
-    Audio::engine->play2D("media/blues.ogg", true);
+    Audio::engine->play2D("media/blues.ogg", true);*/
+
+    Audio::AUDIO_FUNCTIONS.play2D("media/blues.ogg", true, false);
+
 
     bool continuarJugando = true;
     while(continuarJugando) {
@@ -59,8 +62,9 @@ int main()
             continuarJugando = false;
     }
 
-    Audio::deleteAudio();
     window.close();
+
+    //Audio::deleteAudio(); GENIOS
 
     return 0;
 }

@@ -1,7 +1,7 @@
 #include "game.h"
 
 int Game(Window& window) {
-
+    
     // enables z-buffer
     glEnable(GL_DEPTH_TEST);
 
@@ -205,6 +205,7 @@ int Game(Window& window) {
                 (*p_rigidObjects)[i].draw(renderEngine.getDebuggingShader());
             }
             #endif
+
         }
 
 
