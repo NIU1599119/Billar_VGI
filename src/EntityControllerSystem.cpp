@@ -399,45 +399,40 @@ void CollisionDetectorNearCallback(btBroadphasePair& collisionPair,
 	/// @param dispatcher 
 	/// @param dispatchInfo 
 
-    btManifoldResult myContactPointResult;
-
-
 	btCollisionObject* colObj0 = (btCollisionObject*)collisionPair.m_pProxy0->m_clientObject;
 	btCollisionObject* colObj1 = (btCollisionObject*)collisionPair.m_pProxy1->m_clientObject;
 
-	if (dispatcher.needsCollision(colObj0, colObj1))
-	{
-		btCollisionObjectWrapper obj0Wrap(0, colObj0->getCollisionShape(), colObj0, colObj0->getWorldTransform(), -1, -1);
-		btCollisionObjectWrapper obj1Wrap(0, colObj1->getCollisionShape(), colObj1, colObj1->getWorldTransform(), -1, -1);
+	if (!dispatcher.needsCollision(colObj0, colObj1))
+    {
+        return;
+    }
+    btCollisionObjectWrapper obj0Wrap(0, colObj0->getCollisionShape(), colObj0, colObj0->getWorldTransform(), -1, -1);
+    btCollisionObjectWrapper obj1Wrap(0, colObj1->getCollisionShape(), colObj1, colObj1->getWorldTransform(), -1, -1);
 
-		//dispatcher will keep algorithms persistent in the collision pair
-		if (!collisionPair.m_algorithm)
-		{
-			collisionPair.m_algorithm = dispatcher.findAlgorithm(&obj0Wrap, &obj1Wrap, 0, BT_CONTACT_POINT_ALGORITHMS);
-		}
+    //dispatcher will keep algorithms persistent in the collision pair
+    if (!collisionPair.m_algorithm)
+    {
+        collisionPair.m_algorithm = dispatcher.findAlgorithm(&obj0Wrap, &obj1Wrap, 0, BT_CONTACT_POINT_ALGORITHMS);
+    }
 
-		if (collisionPair.m_algorithm)
-		{
-			btManifoldResult contactPointResult(&obj0Wrap, &obj1Wrap);
 
-			if (dispatchInfo.m_dispatchFunc == btDispatcherInfo::DISPATCH_DISCRETE)
-			{
-				//discrete collision detection query
-				collisionPair.m_algorithm->processCollision(&obj0Wrap, &obj1Wrap, dispatchInfo, &contactPointResult);
-			}
-			else
-			{
-				//continuous collision detection query, time of impact (toi)
-				btScalar toi = collisionPair.m_algorithm->calculateTimeOfImpact(colObj0, colObj1, dispatchInfo, &contactPointResult);
-				if (dispatchInfo.m_timeOfImpact > toi)
-					dispatchInfo.m_timeOfImpact = toi;
-			}
+    btManifoldResult contactPointResult(&obj0Wrap, &obj1Wrap);
 
-            myContactPointResult = contactPointResult;  // save the manifold result to my variable
-		}
-	}
+    if (dispatchInfo.m_dispatchFunc == btDispatcherInfo::DISPATCH_DISCRETE)
+    {
+        //discrete collision detection query
+        collisionPair.m_algorithm->processCollision(&obj0Wrap, &obj1Wrap, dispatchInfo, &contactPointResult);
+    }
+    else
+    {
+        //continuous collision detection query, time of impact (toi)
+        btScalar toi = collisionPair.m_algorithm->calculateTimeOfImpact(colObj0, colObj1, dispatchInfo, &contactPointResult);
+        if (dispatchInfo.m_timeOfImpact > toi)
+            dispatchInfo.m_timeOfImpact = toi;
+    }
 
-    if (myContactPointResult.getPersistentManifold()->getNumContacts() == 0)    // no ha habido colision
+
+    if (contactPointResult.getPersistentManifold()->getNumContacts() == 0)    // no ha habido colision
         return;
 
     
@@ -465,5 +460,4 @@ void CollisionDetectorNearCallback(btBroadphasePair& collisionPair,
         return;
     
     entity0->collision(entity1); // let them handle it
-    // }
 }
