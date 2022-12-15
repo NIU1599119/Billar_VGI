@@ -36,7 +36,7 @@ namespace Rendering {
 
         //////// PHISICS ////////
 
-        void initializeBullet(btAlignedObjectArray<btCollisionShape*>& collisionShapes, btDiscreteDynamicsWorld* dynamicsWorld);
+        btRigidBody* getRigidBodyBullet(btAlignedObjectArray<btCollisionShape*>& collisionShapes);
 
         void setFriction(double friction) { m_friction = friction; }
         void setRestitution(double restitution) { m_restitution = restitution; }

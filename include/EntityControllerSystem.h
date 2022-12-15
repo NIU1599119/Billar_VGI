@@ -73,3 +73,5 @@ private:
     Rendering::RenderEngine3D* m_renderEngine;
     std::vector<int> m_ballRenderIDs;
 };
+
+void CollisionDetectorNearCallback(btBroadphasePair& collisionPair, btCollisionDispatcher& dispatcher, btDispatcherInfo& dispatchInfo);

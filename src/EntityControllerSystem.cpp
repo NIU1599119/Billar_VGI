@@ -1,4 +1,7 @@
 ﻿#include "EntityControllerSystem.h"
+#include "entities/Entity.h"
+#include "entities/EntityBall.h"
+#include "entities/EntityTable.h"
 
 
 EntityControllerSystem::EntityControllerSystem(GAMEMODE mode, Input* input, Camera* camera, Rendering::RenderEngine3D* renderingEngine, std::vector<int>& ballRenderIDs, int maxSubSteps, double fixedTimeStep)
@@ -8,11 +11,28 @@ EntityControllerSystem::EntityControllerSystem(GAMEMODE mode, Input* input, Came
     m_renderEngine(renderingEngine),
     m_ballRenderIDs(ballRenderIDs)
 {
+    Entities::GAME_TYPE game_type;  // para las conversiones
+    switch (mode)
+    {
+    case CLASSIC:
+        game_type = Entities::CLASSIC;
+        break;
+    case CARAMBOLA:
+        game_type = Entities::CARAMBOLA;
+        break;
+    case FREE_SHOTS:
+        game_type = Entities::FREE_SHOTS;
+        break;
+    default:
+        break;
+    }
+
     ///collision configuration contains default setup for memory, collision setup. Advanced users can create their own configuration.
     m_collisionConfiguration = new btDefaultCollisionConfiguration();
 
     ///use the default collision dispatcher. For parallel processing you can use a diffent dispatcher (see Extras/BulletMultiThreaded)
     m_dispatcher = new btCollisionDispatcher(m_collisionConfiguration);
+    m_dispatcher->setNearCallback((btNearCallback)CollisionDetectorNearCallback);
 
     ///btDbvtBroadphase is a good general purpose broadphase. You can also try out btAxis3Sweep.
     m_overlappingPairCache = new btDbvtBroadphase();
@@ -61,10 +81,12 @@ EntityControllerSystem::EntityControllerSystem(GAMEMODE mode, Input* input, Came
     {
         case CLASSIC:
         case FREE_SHOTS:
+        {
             table.setPosition(glm::vec3(0., 0.76 / 2.0, 0.));
             table.setScale(glm::vec3(2.62, 0.76, 1.50));
 
             m_EntityPool.push_back(table);
+            int wallsIdStart = m_EntityPool.size();
 
             // wall (front)
             wallAux.setPosition(glm::vec3(0., 0.76, -(0.75 - 0.095)));
@@ -95,11 +117,19 @@ EntityControllerSystem::EntityControllerSystem(GAMEMODE mode, Input* input, Came
 
             for (int i = 0; i < m_EntityPool.size(); i++)
             {
-                m_EntityPool[i].initializeBullet(m_collisionShapes, m_dynamicsWorld);
+                btRigidBody* body = m_EntityPool[i].getRigidBodyBullet(m_collisionShapes);
+                
+                Entities::Entity* tablePart;
+                if (i < wallsIdStart)
+                    tablePart = new Entities::EntityTable(game_type, Entities::CLOTH);
+                else
+                    tablePart = new Entities::EntityTable(game_type, Entities::RAIL);
+                body->setUserPointer(tablePart);
+                m_dynamicsWorld->addRigidBody(body);
             }
 
             break;
-
+        }
         case CARAMBOLA:
             break;
 
@@ -195,6 +225,10 @@ EntityControllerSystem::EntityControllerSystem(GAMEMODE mode, Input* input, Came
         body->setSpinningFriction(1);
         body->setRollingFriction(0.0005);
         m_dynamicsWorld->addRigidBody(body);
+
+
+        Entities::Entity* ballEntity = new Entities::EntityBall(i, game_type);
+        body->setUserPointer(ballEntity);
     }
 
 
@@ -228,96 +262,96 @@ EntityControllerSystem::EntityControllerSystem(GAMEMODE mode, Input* input, Came
 }
 
 
-struct BallToBallCallback : public btCollisionWorld::ContactResultCallback
-{
-    BallToBallCallback(int ball0number, int ball1number) : m_ball0number(ball0number), m_ball1number(ball1number) {};
+// struct BallToBallCallback : public btCollisionWorld::ContactResultCallback
+// {
+//     BallToBallCallback(int ball0number, int ball1number) : m_ball0number(ball0number), m_ball1number(ball1number) {};
 
-    btScalar addSingleResult(btManifoldPoint& cp,
-        const btCollisionObjectWrapper* colObj0Wrap,
-        int partId0,
-        int index0,
-        const btCollisionObjectWrapper* colObj1Wrap,
-        int partId1,
-        int index1)
-    {
-        const btCollisionObject* obj0 = colObj0Wrap->getCollisionObject();
-        const btCollisionObject* obj1 = colObj1Wrap->getCollisionObject();
-        const btRigidBody* body0 = btRigidBody::upcast(obj0);
-        const btRigidBody* body1 = btRigidBody::upcast(obj1);
+//     btScalar addSingleResult(btManifoldPoint& cp,
+//         const btCollisionObjectWrapper* colObj0Wrap,
+//         int partId0,
+//         int index0,
+//         const btCollisionObjectWrapper* colObj1Wrap,
+//         int partId1,
+//         int index1)
+//     {
+//         const btCollisionObject* obj0 = colObj0Wrap->getCollisionObject();
+//         const btCollisionObject* obj1 = colObj1Wrap->getCollisionObject();
+//         const btRigidBody* body0 = btRigidBody::upcast(obj0);
+//         const btRigidBody* body1 = btRigidBody::upcast(obj1);
 
-        if (body0 && body1 && body0->getMotionState() && body1->getMotionState())   // check if the pointers are OK and if the objects are active (in movement)
-        {
-            btVector3 bt_vel0 = body0->getLinearVelocity();
-            btVector3 bt_vel1 = body1->getLinearVelocity();
+//         if (body0 && body1 && body0->getMotionState() && body1->getMotionState())   // check if the pointers are OK and if the objects are active (in movement)
+//         {
+//             btVector3 bt_vel0 = body0->getLinearVelocity();
+//             btVector3 bt_vel1 = body1->getLinearVelocity();
 
-            btVector3 relative = bt_vel0 - bt_vel1;
+//             btVector3 relative = bt_vel0 - bt_vel1;
 
-            float relative_velocity = relative.length();    // more or less the force of impact according to relative speeds between the balls
+//             float relative_velocity = relative.length();    // more or less the force of impact according to relative speeds between the balls
 
-            if (relative_velocity < 0.01) // si la velocidad es tan baja no se tiene en cuenta
-                return 0;
+//             if (relative_velocity < 0.01) // si la velocidad es tan baja no se tiene en cuenta
+//                 return 0;
 
-            if (m_ball0number == 0)
-                LOG_DEBUG("Blank ball has collided with ball %d with a speed of:%f", m_ball1number, relative_velocity);
-            else
-                LOG_DEBUG("Ball %d has collided with ball %d with a speed of:%f", m_ball0number, m_ball1number, relative_velocity);
-        }
+//             if (m_ball0number == 0)
+//                 LOG_DEBUG("Blank ball has collided with ball %d with a speed of:%f", m_ball1number, relative_velocity);
+//             else
+//                 LOG_DEBUG("Ball %d has collided with ball %d with a speed of:%f", m_ball0number, m_ball1number, relative_velocity);
+//         }
 
-        return 0;
-    }
+//         return 0;
+//     }
 
-    int m_ball0number;
-    int m_ball1number;
-};
+//     int m_ball0number;
+//     int m_ball1number;
+// };
 
-struct BallToTableCallback : public btCollisionWorld::ContactResultCallback
-{
-    btScalar addSingleResult(btManifoldPoint& cp,
-        const btCollisionObjectWrapper* colObj0Wrap,
-        int partId0,
-        int index0,
-        const btCollisionObjectWrapper* colObj1Wrap,
-        int partId1,
-        int index1)
-    {
-        // callback here
-        // dont use this, it will run allways since every ball touches the ground
-        return 0;
-    }
-};
+// struct BallToTableCallback : public btCollisionWorld::ContactResultCallback
+// {
+//     btScalar addSingleResult(btManifoldPoint& cp,
+//         const btCollisionObjectWrapper* colObj0Wrap,
+//         int partId0,
+//         int index0,
+//         const btCollisionObjectWrapper* colObj1Wrap,
+//         int partId1,
+//         int index1)
+//     {
+//         // callback here
+//         // dont use this, it will run allways since every ball touches the ground
+//         return 0;
+//     }
+// };
 
 void EntityControllerSystem::update(double deltaTime, glm::vec3* focusedBallPosition)
 {
-    int numSteps = 10;                          // en total se hacen 10 * m_maxSubSteps como mucho
-    for (int step = 0; step < numSteps; step++)
-    {
+    // int numSteps = 10;                          // en total se hacen 10 * m_maxSubSteps como mucho
+    // for (int step = 0; step < numSteps; step++)
+    // {
         // m_dynamicsWorld->stepSimulation(deltaTime/numSteps, m_maxSubSteps, m_fixedTimeStep);
-        m_dynamicsWorld->stepSimulation(deltaTime/numSteps, m_maxSubSteps, m_fixedTimeStep);
+    m_dynamicsWorld->stepSimulation(deltaTime, m_maxSubSteps*4, m_fixedTimeStep);
 
-        // check for collisions
-        btCollisionObjectArray objectArray = m_dynamicsWorld->getCollisionObjectArray();     // has all balls, walls and table of the simulation
-        for (int i = 0; i < objectArray.size(); i++)
-        {
-            for (int j = ((i < m_ballsIndex) ? m_ballsIndex : i); j < objectArray.size(); j++)  // iterate every ball object
-            {
-                // i is object 1
-                // j is object 2
-                if (j == i) continue; // same object
+    //     // check for collisions
+    //     btCollisionObjectArray objectArray = m_dynamicsWorld->getCollisionObjectArray();     // has all balls, walls and table of the simulation
+    //     for (int i = 0; i < objectArray.size(); i++)
+    //     {
+    //         for (int j = ((i < m_ballsIndex) ? m_ballsIndex : i); j < objectArray.size(); j++)  // iterate every ball object
+    //         {
+    //             // i is object 1
+    //             // j is object 2
+    //             if (j == i) continue; // same object
 
-                if (i < m_ballsIndex)   // object 1 is not a ball
-                {
-                    // BallToTableCallback ballToTableCallback;
-                    // m_dynamicsWorld->contactPairTest(objectArray[i], objectArray[j], ballToTableCallback);
-                }
-                else                    // object 1 is a ball
-                {
-                    BallToBallCallback ballToBallCallback(i-m_ballsIndex, j-m_ballsIndex);
-                    m_dynamicsWorld->contactPairTest(objectArray[i], objectArray[j], ballToBallCallback);
-                }
-            }
-        }
+    //             if (i < m_ballsIndex)   // object 1 is not a ball
+    //             {
+    //                 // BallToTableCallback ballToTableCallback;
+    //                 // m_dynamicsWorld->contactPairTest(objectArray[i], objectArray[j], ballToTableCallback);
+    //             }
+    //             else                    // object 1 is a ball
+    //             {
+    //                 BallToBallCallback ballToBallCallback(i-m_ballsIndex, j-m_ballsIndex);
+    //                 m_dynamicsWorld->contactPairTest(objectArray[i], objectArray[j], ballToBallCallback);
+    //             }
+    //         }
+    //     }
 
-    }
+    // }
 
     // BallToBallCallback ballToBallcallback;
     // m_dynamicsWorld->contactPairTest(..., ..., callback);
@@ -354,4 +388,82 @@ void EntityControllerSystem::update(double deltaTime, glm::vec3* focusedBallPosi
         // it->draw(modelShader, camera->getViewMatrix(), projection, camera->getPosition());
         i++;
     }
+}
+
+
+
+void CollisionDetectorNearCallback(btBroadphasePair& collisionPair,
+  btCollisionDispatcher& dispatcher, btDispatcherInfo& dispatchInfo) {
+	/// @brief Modified function from dispatcher.defaultNearCallback(collisionPair, dispatcher, dispatchInfo)
+	/// @param collisionPair 
+	/// @param dispatcher 
+	/// @param dispatchInfo 
+
+    btManifoldResult myContactPointResult;
+
+
+	btCollisionObject* colObj0 = (btCollisionObject*)collisionPair.m_pProxy0->m_clientObject;
+	btCollisionObject* colObj1 = (btCollisionObject*)collisionPair.m_pProxy1->m_clientObject;
+
+	if (dispatcher.needsCollision(colObj0, colObj1))
+	{
+		btCollisionObjectWrapper obj0Wrap(0, colObj0->getCollisionShape(), colObj0, colObj0->getWorldTransform(), -1, -1);
+		btCollisionObjectWrapper obj1Wrap(0, colObj1->getCollisionShape(), colObj1, colObj1->getWorldTransform(), -1, -1);
+
+		//dispatcher will keep algorithms persistent in the collision pair
+		if (!collisionPair.m_algorithm)
+		{
+			collisionPair.m_algorithm = dispatcher.findAlgorithm(&obj0Wrap, &obj1Wrap, 0, BT_CONTACT_POINT_ALGORITHMS);
+		}
+
+		if (collisionPair.m_algorithm)
+		{
+			btManifoldResult contactPointResult(&obj0Wrap, &obj1Wrap);
+
+			if (dispatchInfo.m_dispatchFunc == btDispatcherInfo::DISPATCH_DISCRETE)
+			{
+				//discrete collision detection query
+				collisionPair.m_algorithm->processCollision(&obj0Wrap, &obj1Wrap, dispatchInfo, &contactPointResult);
+			}
+			else
+			{
+				//continuous collision detection query, time of impact (toi)
+				btScalar toi = collisionPair.m_algorithm->calculateTimeOfImpact(colObj0, colObj1, dispatchInfo, &contactPointResult);
+				if (dispatchInfo.m_timeOfImpact > toi)
+					dispatchInfo.m_timeOfImpact = toi;
+			}
+
+            myContactPointResult = contactPointResult;  // save the manifold result to my variable
+		}
+	}
+
+    if (myContactPointResult.getPersistentManifold()->getNumContacts() == 0)    // no ha habido colision
+        return;
+
+    
+    const btRigidBody* body0 = btRigidBody::upcast(colObj0);
+    const btRigidBody* body1 = btRigidBody::upcast(colObj1);
+
+    if (body0 == nullptr || body1 == nullptr || body0->getMotionState() == nullptr || body1->getMotionState() == nullptr)   // check if the pointers are OK and if the objects are active (in movement)
+    {
+        return;
+    }
+    btVector3 bt_vel0 = body0->getLinearVelocity();
+    btVector3 bt_vel1 = body1->getLinearVelocity();
+
+    btVector3 relative = bt_vel0 - bt_vel1;
+
+    float relative_velocity = relative.length();    // more or less the force of impact according to relative speeds between the balls
+
+    if (relative_velocity < 0.01) // si la velocidad es tan baja no se tiene en cuenta
+        return;
+
+    Entities::Entity* entity0 = (Entities::Entity*) colObj0->getUserPointer();
+    Entities::Entity* entity1 = (Entities::Entity*) colObj1->getUserPointer();
+
+    if (entity0 == nullptr || entity1 == nullptr)
+        return;
+    
+    entity0->collision(entity1); // let them handle it
+    // }
 }

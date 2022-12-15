@@ -156,12 +156,13 @@ int Game(Window& window) {
             // input handling inside
             window.processInput(deltaTime);
         }
-        // physics update outside (also update the position of everything)
-        cameraController->update();
 
         // ECS.StepSimulation(deltaTime, 100, 0.001f);
         ECS.update(deltaTime, &cameraOrbitPosition);
         // dynamicsWorld->stepSimulation(deltaTime, 100, 0.001f);
+
+        // physics update outside (also update the position of everything)
+        cameraController->update();
 
         //glm::mat4 view = camera.getViewMatrix();
 

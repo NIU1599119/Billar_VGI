@@ -53,7 +53,7 @@ namespace Rendering {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);    // disable wireframe rendering
     }
 
-    void CollisionBox::initializeBullet(btAlignedObjectArray<btCollisionShape*>& collisionShapes, btDiscreteDynamicsWorld* dynamicsWorld)
+    btRigidBody* CollisionBox::getRigidBodyBullet(btAlignedObjectArray<btCollisionShape*>& collisionShapes)
     {
         btCollisionShape* colShape = new btBoxShape(btVector3(m_scale.x/2, m_scale.y/2, m_scale.z/2));
 
@@ -81,7 +81,8 @@ namespace Rendering {
         body->setRestitution(m_restitution);
 
 		//add the body to the dynamics world
-		dynamicsWorld->addRigidBody(body);
+
+        return body;
     }
 
     void CollisionBox::generateCubeMesh()
