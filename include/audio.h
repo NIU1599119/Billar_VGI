@@ -42,9 +42,15 @@ class Audio
         }
 
         // Play sounds
-        irrklang::ISound* play2D(const char* path, bool looped, bool startPaused)
+        irrklang::ISound* play2D(const char* path, bool looped, bool startPaused, bool track = false)
         {
-            return  engine->play2D(path, looped, startPaused);
+            return  engine->play2D(path, looped, startPaused, track);
+        }
+
+        // volumen desde 0.0 a 1.0
+        void setVolume(float volume)
+        {
+            engine->setSoundVolume(volume);
         }
 
         static Audio AUDIO_FUNCTIONS;

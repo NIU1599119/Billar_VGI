@@ -1,8 +1,10 @@
 #include "entities/EntityBall.h"
+#include "audio.h"
+
 
 namespace Entities
 {
-    void EntityBall::collision(Entity* entity)
+    void EntityBall::collision(Entity* entity, double force)
     {
         std::string myBallName = getBallName();
 
@@ -12,7 +14,11 @@ namespace Entities
         EntityBall* p_otherBall = (EntityBall*) entity;
 
         std::string otherBallName = p_otherBall->getBallName();
-        LOG_INFO("%s has collided with %s", myBallName.c_str(), otherBallName.c_str());
+        LOG_INFO("%s has collided with %s, with a force of %f", myBallName.c_str(), otherBallName.c_str(), force);
+
+        irrklang::ISound* sound = Audio::AUDIO_FUNCTIONS.play2D("media/colision.ogg", false, true, true);
+        sound->setVolume(force/MAX_BALL_FORCE);
+        sound->setIsPaused(false);
     }
 
     std::string EntityBall::getBallName()

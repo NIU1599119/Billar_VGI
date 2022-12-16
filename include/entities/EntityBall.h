@@ -11,12 +11,15 @@ namespace Entities
 
         int getBallID() { return m_ballID; };
 
-        void collision(Entity* entity);
+        void collision(Entity* entity) {};
+        void collision(Entity* entity, double force);
 
         std::string getBallName();
 
     private:
         int m_ballID;
+
+        const double MAX_BALL_FORCE = 4.0;
     };
 
 

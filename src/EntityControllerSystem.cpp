@@ -406,6 +406,7 @@ void CollisionDetectorNearCallback(btBroadphasePair& collisionPair,
     {
         return;
     }
+
     btCollisionObjectWrapper obj0Wrap(0, colObj0->getCollisionShape(), colObj0, colObj0->getWorldTransform(), -1, -1);
     btCollisionObjectWrapper obj1Wrap(0, colObj1->getCollisionShape(), colObj1, colObj1->getWorldTransform(), -1, -1);
 
@@ -446,11 +447,9 @@ void CollisionDetectorNearCallback(btBroadphasePair& collisionPair,
     btVector3 bt_vel0 = body0->getLinearVelocity();
     btVector3 bt_vel1 = body1->getLinearVelocity();
 
-    btVector3 relative = bt_vel0 - bt_vel1;
+    double deltaSpeed = (bt_vel0 - bt_vel1).length();
 
-    float relative_velocity = relative.length();    // more or less the force of impact according to relative speeds between the balls
-
-    if (relative_velocity < 0.01) // si la velocidad es tan baja no se tiene en cuenta
+    if (deltaSpeed < 0.0001)     // si la colision es demasiado lenta salimos (significa que se estan tocando)
         return;
 
     Entities::Entity* entity0 = (Entities::Entity*) colObj0->getUserPointer();
@@ -459,5 +458,5 @@ void CollisionDetectorNearCallback(btBroadphasePair& collisionPair,
     if (entity0 == nullptr || entity1 == nullptr)
         return;
     
-    entity0->collision(entity1); // let them handle it
+    entity0->collision(entity1, deltaSpeed); // let them handle it
 }

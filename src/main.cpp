@@ -40,17 +40,21 @@ int main()
     }
     Audio::engine->setSoundVolume(0.1f);
     Audio::engine->play2D("media/blues.ogg", true);*/
+    Audio::AUDIO_FUNCTIONS.setVolume(1.0);
 
-    Audio::AUDIO_FUNCTIONS.play2D("media/blues.ogg", true, false);
+    irrklang::ISound* music = Audio::AUDIO_FUNCTIONS.play2D("media/blues.ogg", true, true, true);
+    music->setVolume(0.6);
 
 
     bool continuarJugando = true;
     while(continuarJugando) {
         int opcio = 0;
+        music->setIsPaused(false);
         initMenu(opcio, window, x, y);
 
         if (opcio == 1)
         {
+            music->setIsPaused(true);
             continuarJugando = (Game(window) == 0);
             if (!continuarJugando)
             {
@@ -62,9 +66,9 @@ int main()
             continuarJugando = false;
     }
 
-    window.close();
+    music->drop();
 
-    //Audio::deleteAudio(); GENIOS
+    window.close();
 
     return 0;
 }

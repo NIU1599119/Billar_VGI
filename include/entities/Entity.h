@@ -27,7 +27,8 @@ namespace Entities
         TYPE getType() { return m_type; };
         GAME_TYPE getSubType() { return m_subType; };
 
-        virtual void collision(Entity* entity) {};
+        virtual void collision(Entity* entity) = 0;
+        virtual void collision(Entity* entity, double force) = 0;
 
     protected:
         // glm::vec3 m_position;
