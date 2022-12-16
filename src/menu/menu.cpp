@@ -288,21 +288,6 @@ int optionsMenu(Window& window, float& Width, float& Height) {
     input->setKeyAction(EXIT, GLFW_KEY_ESCAPE, false);
     input->setActionFunction(EXIT, [&window](float delaTime) { window.close(); });
 
-    //////// this is for 3d interaction, don't use SWITCH_MOUSE on menu
-    // input->setKeyAction(SWITCH_MOUSE, GLFW_KEY_M, false);
-    // input->setActionFunction(SWITCH_MOUSE, [&window, input](float deltaTime) {
-    //     if (input->mouseIsCaptured())
-    //     {
-    //         glfwSetInputMode(window.getGLFWwindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-    //         input->uncaptureMouse();
-    //     }
-    //     else
-    //     {
-    //         glfwSetInputMode(window.getGLFWwindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);    // hides cursor and sets it to middle
-    //         input->captureMouse();
-    //     }
-    // });
-
     // menu cursor
     glfwSetInputMode(window.getGLFWwindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);      // let cursor free
     input->captureMouse();                                                          // but capture the inputs (position)
@@ -336,13 +321,13 @@ int optionsMenu(Window& window, float& Width, float& Height) {
     // set render-specific controls
     Renderer = new SpriteRenderer(ResourceManager::GetShader("sprite"));
     // load textures
-    ResourceManager::LoadTexture("textures/fondo3.png", true, "menu");
-    ResourceManager::LoadTexture("textures/menu/2.png", true, "button1");
-    ResourceManager::LoadTexture("textures/menu/3.png", true, "button2");
-    ResourceManager::LoadTexture("textures/menu/4.png", true, "button3");
-    ResourceManager::LoadTexture("textures/menu/5_sinfondo.png", true, "button4");
-    ResourceManager::LoadTexture("textures/menu/6_sinfondo.png", true, "button5");
-    ResourceManager::LoadTexture("textures/menu/loading.png", true, "loading");
+    ResourceManager::LoadTexture("textures/menu/opciones.png", true, "menu");
+    ResourceManager::LoadTexture("textures/menu/flecha-izquierda.png", true, "flechai1");
+    ResourceManager::LoadTexture("textures/menu/flecha-izquierda.png", true, "flechai2");
+    ResourceManager::LoadTexture("textures/menu/flecha-derecha.png", true, "flechad1");
+    ResourceManager::LoadTexture("textures/menu/flecha-derecha.png", true, "flechad2");
+    ResourceManager::LoadTexture("textures/menu/Jazz.png", true, "jazz");
+    ResourceManager::LoadTexture("textures/menu/indicador-volumen.png", true, "indicador");
 
     // Creacio del bucle de la ventana
 

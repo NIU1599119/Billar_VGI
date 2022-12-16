@@ -69,15 +69,14 @@ int Game(Window& window) {
     Rendering::RenderEngine3D renderEngine(&camera, modelShader, &lightShader, &debugShader);
     //int poolRenderID = renderEngine.createObject(std::string("models/pool_table/scene.gltf"), 0.1245);
     //renderEngine.updateObject(poolRenderID, glm::vec3(0.0), glm::quat(1.0, 0.0, 0.0, 0.0));
-    int blackBallRenderID = renderEngine.createObject(std::string("models/PoolBall/Pool.obj"), 0.05715 / 2);
+    int blackBallRenderID = renderEngine.createObject(std::string("models/billiard-balls/Ballwhite.obj"), 0.05715);
     renderEngine.updateObject(blackBallRenderID, glm::vec3(0.0, 0.8, 0.1), glm::quat(1.0, 0.0, 0.0, 0.0));
     std::vector<int> ballsRenderIDs;
     ballsRenderIDs.push_back(blackBallRenderID);
 
-    Rendering::Model ballModel("models/PoolBall1/Pool.obj");
     for (int i = 0; i < 15; i++) // create 15 balls
     {
-        int idx = renderEngine.createObject(&ballModel, 0.05715 / 2);
+        int idx = renderEngine.createObject("models/billiard-balls/ball" + std::to_string(i + 1) + ".obj", 0.05715);
         ballsRenderIDs.push_back(idx);
         renderEngine.updateObject(idx, glm::vec3(0.0, 0.8, 0.1), glm::quat(1.0, 0.0, 0.0, 0.0));
     }
