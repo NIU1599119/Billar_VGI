@@ -200,7 +200,7 @@ int Game(Window& window) {
     table.setRestitution(.513);
 
     table.setPosition(glm::vec3(0., 0.76/2.0, 0.));
-    table.setScale(glm::vec3(2.62, 0.76, 1.50));
+    table.setScale(glm::vec3(2.24, 0.76, 1.12));
 
     rigidObjects.push_back(table);
 
@@ -209,31 +209,122 @@ int Game(Window& window) {
     wallAux.setRestitution(.7695);          // restitucion real (se supone)
     // wallAux.setRestitution(1.0);
     
-    // wall (front)
-    wallAux.setPosition(glm::vec3(0., 0.76, -(0.75-0.095)));
     // posicion es el limite del tablero menos la mitad del ancho
-    wallAux.setScale(glm::vec3(2.62, 0.096, 0.19));
     // 262-224 = 150-112 = 38 cm Anchura paredes -> 19 anchura 1 pared
     // 81.3-76.5 = 4.8 cm Altura pared (comparado con el tablero)
 
+    // wall (front 1)
+    wallAux.setPosition(glm::vec3(0.55, 0.76, -(0.75-0.095)));
+    wallAux.setScale(glm::vec3(1.00, 0.096, 0.19));
     rigidObjects.push_back(wallAux);
 
-    // wall (back)
-    wallAux.setPosition(glm::vec3(0., 0.76, +(0.75-0.095)));
-    wallAux.setScale(glm::vec3(2.62, 0.096, 0.19));
+    // wall (front 2)
+    wallAux.setPosition(glm::vec3(-0.55, 0.76, -(0.75 - 0.095)));
+    wallAux.setScale(glm::vec3(1.00, 0.096, 0.19));
+    rigidObjects.push_back(wallAux);
 
+    // wall (back 1)
+    wallAux.setPosition(glm::vec3(0.55, 0.76, +(0.75-0.095)));
+    wallAux.setScale(glm::vec3(1.00, 0.096, 0.19));
+    rigidObjects.push_back(wallAux);
+
+    // wall (back 2)
+    wallAux.setPosition(glm::vec3(-0.55, 0.76, +(0.75 - 0.095)));
+    wallAux.setScale(glm::vec3(1.00, 0.096, 0.19));
     rigidObjects.push_back(wallAux);
 
     // wall (left)
     wallAux.setPosition(glm::vec3(-(1.31-0.095), 0.76, 0.));
-    wallAux.setScale(glm::vec3(0.19, 0.096, 1.50));
-
+    wallAux.setScale(glm::vec3(0.19, 0.096, 1.00));
     rigidObjects.push_back(wallAux);
 
     // wall (right)
     wallAux.setPosition(glm::vec3(+(1.31-0.095), 0.76, 0.));
-    wallAux.setScale(glm::vec3(0.19, 0.096, 1.50));
+    wallAux.setScale(glm::vec3(0.19, 0.096, 1.00));
+    rigidObjects.push_back(wallAux);
 
+    // wall hole 1 (left)
+    wallAux.setPosition(glm::vec3(+(1.31 - (0.095+0.028)), 0.76, 0.535));
+    wallAux.setScale(glm::vec3(0.04, 0.096, 0.15));
+    wallAux.setAngle(glm::radians(45.0f));
+    rigidObjects.push_back(wallAux);
+
+    // wall hole 1 (right)
+    wallAux.setPosition(glm::vec3(+(1.31 - (0.095 + 0.12)), 0.76, 0.63));
+    wallAux.setScale(glm::vec3(0.04, 0.096, 0.15));
+    wallAux.setAngle(glm::radians(45.0f));
+    rigidObjects.push_back(wallAux);
+
+    // wall hole 1 (back)
+    wallAux.setPosition(glm::vec3(+(1.31 - (0.095 + 0.0)), 0.76, 0.63));
+    wallAux.setScale(glm::vec3(0.04, 0.096, 0.20));
+    wallAux.setAngle(glm::radians(135.0f));
+    rigidObjects.push_back(wallAux);
+
+    // wall hole 2 (left)
+    wallAux.setPosition(glm::vec3(-(1.31 - (0.095 + 0.028)), 0.76, 0.535));
+    wallAux.setScale(glm::vec3(0.04, 0.096, 0.15));
+    wallAux.setAngle(glm::radians(135.0f));
+    rigidObjects.push_back(wallAux);
+
+    // wall hole 2 (right)
+    wallAux.setPosition(glm::vec3(-(1.31 - (0.095 + 0.12)), 0.76, 0.63));
+    wallAux.setScale(glm::vec3(0.04, 0.096, 0.15));
+    wallAux.setAngle(glm::radians(135.0f));
+    rigidObjects.push_back(wallAux);
+
+    // wall hole 2 (back)
+    wallAux.setPosition(glm::vec3(-(1.31 - (0.095 + 0.0)), 0.76, 0.63));
+    wallAux.setScale(glm::vec3(0.04, 0.096, 0.20));
+    wallAux.setAngle(glm::radians(45.0f));
+    rigidObjects.push_back(wallAux);
+
+    // wall hole 3 (left)
+    wallAux.setPosition(glm::vec3(+(1.31 - (0.095 + 0.028)), 0.76, -0.535));
+    wallAux.setScale(glm::vec3(0.04, 0.096, 0.15));
+    wallAux.setAngle(glm::radians(135.0f));
+    rigidObjects.push_back(wallAux);
+
+    // wall hole 3 (right)
+    wallAux.setPosition(glm::vec3(+(1.31 - (0.095 + 0.12)), 0.76, -0.63));
+    wallAux.setScale(glm::vec3(0.04, 0.096, 0.15));
+    wallAux.setAngle(glm::radians(135.0f));
+    rigidObjects.push_back(wallAux);
+
+    // wall hole 3 (back)
+    wallAux.setPosition(glm::vec3(+(1.31 - (0.095 + 0.0)), 0.76, -0.63));
+    wallAux.setScale(glm::vec3(0.04, 0.096, 0.20));
+    wallAux.setAngle(glm::radians(45.0f));
+    rigidObjects.push_back(wallAux);
+
+    // wall hole 4 (left)
+    wallAux.setPosition(glm::vec3(-(1.31 - (0.095 + 0.028)), 0.76, -0.535));
+    wallAux.setScale(glm::vec3(0.04, 0.096, 0.15));
+    wallAux.setAngle(glm::radians(45.0f));
+    rigidObjects.push_back(wallAux);
+
+    // wall hole 4 (right)
+    wallAux.setPosition(glm::vec3(-(1.31 - (0.095 + 0.12)), 0.76, -0.63));
+    wallAux.setScale(glm::vec3(0.04, 0.096, 0.15));
+    wallAux.setAngle(glm::radians(45.0f));
+    rigidObjects.push_back(wallAux);
+
+    // wall hole 4 (back)
+    wallAux.setPosition(glm::vec3(-(1.31 - (0.095 + 0.0)), 0.76, -0.63));
+    wallAux.setScale(glm::vec3(0.04, 0.096, 0.20));
+    wallAux.setAngle(glm::radians(135.0f));
+    rigidObjects.push_back(wallAux);
+
+    // wall hole 5
+    wallAux.setPosition(glm::vec3(0, 0.76, +(0.75 - 0.080 / 2)));
+    wallAux.setScale(glm::vec3(0.10, 0.096, 0.080));
+    wallAux.setAngle(glm::radians(0.0f));
+    rigidObjects.push_back(wallAux);
+
+    //wall hole 6
+    wallAux.setPosition(glm::vec3(0, 0.76, -(0.75 - 0.080/2)));
+    wallAux.setScale(glm::vec3(0.10, 0.096, 0.080));
+    wallAux.setAngle(glm::radians(0.0f));
     rigidObjects.push_back(wallAux);
 
     for (int i = 0; i < rigidObjects.size(); i++)

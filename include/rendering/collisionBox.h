@@ -24,6 +24,7 @@ namespace Rendering {
 
         void setPosition(glm::vec3 position) { m_position = position; };
         void setScale(glm::vec3 scale) { m_scale = scale; };
+        void setAngle(btScalar angle) { m_orientation = btQuaternion(btVector3(0.0f, 1.0f, 0.0f), angle); }
 
         glm::vec3 getPosition() { return m_position; };
         glm::vec3 getScale() { return m_scale; };
@@ -47,7 +48,7 @@ namespace Rendering {
 
         glm::vec3 m_position = glm::vec3(0.0f, 0.0f, 0.0f);
         glm::vec3 m_scale = glm::vec3(1.0f, 1.0f, 1.0f);
-
+        btQuaternion m_orientation = btQuaternion( btVector3(0.0f, 1.0f, 0.0f), 0.0f);
         glm::vec3 m_color = glm::vec3(1.0f);
 
         ///////////// RENDERING CUBE /////////////

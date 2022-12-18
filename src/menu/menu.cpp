@@ -328,8 +328,11 @@ int optionsMenu(Window& window, float& Width, float& Height) {
     ResourceManager::LoadTexture("textures/menu/flecha-derecha.png", true, "flechad2");
     ResourceManager::LoadTexture("textures/menu/Jazz.png", true, "jazz");
     ResourceManager::LoadTexture("textures/menu/indicador-volumen.png", true, "indicador");
+    ResourceManager::LoadTexture("textures/menu/6_sinfondo.png", true, "salir");
 
     // Creacio del bucle de la ventana
+
+    bool sortir;
 
     while (!window.shouldClose())
     {
@@ -338,45 +341,89 @@ int optionsMenu(Window& window, float& Width, float& Height) {
         // Agafa els inputs
 
         clicked = false;
+        sortir = false;
 
         window.processInput(deltaTime);
 
         Renderer->DrawSprite(ResourceManager::GetTexture("menu"),
             glm::vec2(0.0f, 0.0f), glm::vec2(Width, Height), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
 
-        int opcio = 0;
         
-
-        if ((mousePosition.x > (1180.0f * resFix) && mousePosition.y > (900.0f * resFix)) && (mousePosition.x < (1480.0f * resFix) && mousePosition.y < (1025.0f * resFix)))
+        
+        if ((mousePosition.x > (760.0f * resFix) && mousePosition.y > (400.0f * resFix)) && (mousePosition.x < (870.0f * resFix) && mousePosition.y < (510.0f * resFix)))
         {
-            Renderer->DrawSprite(ResourceManager::GetTexture("button5"),
-                glm::vec2(1180.0f * resFix, 900.0f * resFix), glm::vec2(300 * resFix, 125 * resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
-            opcio = 5;
+            Renderer->DrawSprite(ResourceManager::GetTexture("flechai1"),
+                glm::vec2(760.0f * resFix, 400.0f * resFix), glm::vec2(110 * resFix, 110 * resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+            
         }
         else
         {
-            Renderer->DrawSprite(ResourceManager::GetTexture("button5"),
-                glm::vec2(1180.0f * resFix, 900.0f * resFix), glm::vec2(300 * resFix, 125 * resFix), 0.0f, glm::vec3(0.7f, 0.7f, 0.7f));
+            Renderer->DrawSprite(ResourceManager::GetTexture("flechai1"),
+                glm::vec2(760.0f * resFix, 400.0f * resFix), glm::vec2(110 * resFix, 110 * resFix), 0.0f, glm::vec3(0.9f, 0.9f, 0.9f));
+
         }
+
+        if ((mousePosition.x > (760.0f * resFix) && mousePosition.y > (660.0f * resFix)) && (mousePosition.x < (870.0f * resFix) && mousePosition.y < (770.0f * resFix)))
+        {
+            Renderer->DrawSprite(ResourceManager::GetTexture("flechai2"),
+                glm::vec2(760.0f * resFix, 660.0f * resFix), glm::vec2(110 * resFix, 110 * resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+         
+        }
+        else
+        {
+            Renderer->DrawSprite(ResourceManager::GetTexture("flechai2"),
+                glm::vec2(760.0f * resFix, 660.0f * resFix), glm::vec2(110 * resFix, 110 * resFix), 0.0f, glm::vec3(0.9f, 0.9f, 0.9f));
+        }
+
+        if ((mousePosition.x > (1047.0f * resFix) && mousePosition.y > (398.0f * resFix)) && (mousePosition.x < (1157.0f * resFix) && mousePosition.y < (508.0f * resFix)))
+        {
+            Renderer->DrawSprite(ResourceManager::GetTexture("flechad1"),
+                glm::vec2(1047.0f * resFix, 398.0f * resFix), glm::vec2(110 * resFix, 110 * resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+            
+        }
+        else
+        {
+            Renderer->DrawSprite(ResourceManager::GetTexture("flechad1"),
+                glm::vec2(1047.0f * resFix, 398.0f * resFix), glm::vec2(110 * resFix, 110 * resFix), 0.0f, glm::vec3(0.9f, 0.9f, 0.9f));
+        }
+
+        if ((mousePosition.x > (1047.0f * resFix)) && mousePosition.y > (660.0f * resFix) && (mousePosition.x < (1157.0f * resFix) && mousePosition.y < (770.0f * resFix)))
+        {
+            Renderer->DrawSprite(ResourceManager::GetTexture("flechad2"),
+                glm::vec2(1047.0f * resFix, 660.0f * resFix), glm::vec2(110 * resFix, 110 * resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+            
+        }
+        else
+        {
+            Renderer->DrawSprite(ResourceManager::GetTexture("flechad2"),
+                glm::vec2(1047.0f * resFix, 660.0f * resFix), glm::vec2(110 * resFix, 110 * resFix), 0.0f, glm::vec3(0.9f, 0.9f, 0.9f));
+        }
+
+        /// SWITCH PARA CAMBIAR MUSICA
+
+        Renderer->DrawSprite(ResourceManager::GetTexture("jazz"),
+            glm::vec2(850.0f * resFix, 670.0f * resFix), glm::vec2(200 * resFix, 90 * resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+
+
+        if ((mousePosition.x > (1430.0f * resFix) && mousePosition.y > (900.0f * resFix)) && (mousePosition.x < (1730.0f * resFix) && mousePosition.y < (1025.0f * resFix)))
+        {
+            Renderer->DrawSprite(ResourceManager::GetTexture("salir"),
+                glm::vec2(1430.0f * resFix, 900.0f * resFix), glm::vec2(300 * resFix, 125 * resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+            sortir = true;
+        }
+        else
+        {
+            Renderer->DrawSprite(ResourceManager::GetTexture("salir"),
+                glm::vec2(1430.0f * resFix, 900.0f * resFix), glm::vec2(300 * resFix, 125 * resFix), 0.0f, glm::vec3(0.7f, 0.7f, 0.7f));
+        }
+
 
         // Actualitza el frame
         window.update();
 
-        if (opcio != 0 && clicked)
-        {
-            if (opcio == 1)
-            {
-                Renderer->DrawSprite(ResourceManager::GetTexture("loading"),
-                    glm::vec2(0.0f, 0.0f), glm::vec2(Width, Height), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
-                window.update();
+        if (clicked && sortir)
+            break;
 
-                break;
-            }
-            else
-            {
-                break;
-            }
-        }
 
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;

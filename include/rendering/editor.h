@@ -15,7 +15,7 @@ namespace Rendering
 		void update();
 	private:
 		std::string m_directory = "models/pool_table/scene.gltf";
-		double m_scale = 0.1246;
+		double m_scale = 0.109025;
 		std::vector<int> m_runtimeModels;
 		std::vector<std::string> m_runtimeModelsDirectories;
 		std::vector<glm::vec3> m_modelRotations;
