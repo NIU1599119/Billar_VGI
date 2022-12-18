@@ -3,6 +3,7 @@
 
 EntityControllerSystem::EntityControllerSystem(GAMEMODE gamemode, Rendering::RenderEngine3D* renderingEngine, std::vector<int>& ballRenderIDs, int maxSubSteps, double fixedTimeStep)
     : // simple initial constructors
+    m_gamemode(gamemode),
     m_maxSubSteps(maxSubSteps),
     m_fixedTimeStep(fixedTimeStep),
     m_renderEngine(renderingEngine),
@@ -105,6 +106,7 @@ EntityControllerSystem::EntityControllerSystem(GAMEMODE gamemode, Rendering::Ren
                     tablePart = new Entities::EntityTable(gamemode, Entities::RAIL);
                 body->setUserPointer(tablePart);
                 m_dynamicsWorld->addRigidBody(body);
+                m_entities.push_back(tablePart);
             }
 
             break;
@@ -203,40 +205,37 @@ EntityControllerSystem::EntityControllerSystem(GAMEMODE gamemode, Rendering::Ren
         body->setContactProcessingThreshold(0);// ESTE ERA EL THRESHOLD DIOOOOOOS
         body->setSpinningFriction(1);
         body->setRollingFriction(0.0005);
-        m_dynamicsWorld->addRigidBody(body);
 
 
         Entities::Entity* ballEntity = new Entities::EntityBall(i, gamemode);
         body->setUserPointer(ballEntity);
+        m_dynamicsWorld->addRigidBody(body);
+        m_entities.push_back(ballEntity);
+    }
+}
+
+EntityControllerSystem::~EntityControllerSystem()
+{
+    for (int i = 0; i < m_entities.size(); i++)
+    {
+        if (m_entities[i] != nullptr)
+            delete m_entities[i];
     }
 
+    if (m_dynamicsWorld != nullptr)
+        delete m_dynamicsWorld;
 
-    // no queremos que siempre este puesto
-    // // input pointers
-    // btDiscreteDynamicsWorld** p_inputDynWorld = &m_dynamicsWorld;
-    // int* p_ballsIndex = &m_ballsIndex;
+    if (m_solver != nullptr)
+        delete m_solver;
 
-    // input->setKeyAction(PUSH_BALL, GLFW_KEY_F);
-    // input->setActionFunction(PUSH_BALL, [p_inputDynWorld, camera, p_ballsIndex](float deltaTime) {
-    //     btCollisionObject* obj = (*p_inputDynWorld)->getCollisionObjectArray()[(*p_ballsIndex)];
-    //     btRigidBody* body = btRigidBody::upcast(obj);
-    //     body->setActivationState(ACTIVE_TAG);
-    //     glm::vec3 front = camera->getPlaneFront();
-    //     front = front * 4.0f;
-    //     body->setLinearVelocity(btVector3(front.x, body->getLinearVelocity().y(), front.z));
-    //     });
+    if (m_overlappingPairCache != nullptr)
+        delete m_overlappingPairCache;
 
+    if (m_dispatcher != nullptr)
+        delete m_dispatcher;
 
-    // input->setKeyAction(ACCELERATE_BALL, GLFW_KEY_E);
-    // input->setActionFunction(ACCELERATE_BALL, [p_inputDynWorld, camera, p_ballsIndex](float deltaTime) {
-    //     btCollisionObject* obj = (*p_inputDynWorld)->getCollisionObjectArray()[(*p_ballsIndex)];
-    //     btRigidBody* body = btRigidBody::upcast(obj);
-    //     body->setActivationState(ACTIVE_TAG);
-    //     glm::vec3 front = camera->getPlaneFront();
-    //     front = front * 4.0f;
-    //     body->setLinearVelocity(btVector3(body->getLinearVelocity().x() * (1.01 + deltaTime), body->getLinearVelocity().y(), body->getLinearVelocity().z() * (1.01 + deltaTime)));
-    //     });
-
+    if (m_collisionConfiguration != nullptr)
+        delete m_collisionConfiguration;
 
 }
 
@@ -366,4 +365,36 @@ bool EntityControllerSystem::isStatic()
     }
 
     return simulationIsStatic;
+}
+
+int EntityControllerSystem::createEntity(Entities::Entity* newEntity, btCollisionShape* colShape, btVector3& position)
+{
+    //btCollisionShape* colShape = new btBoxShape(btVector3(1,1,1));
+    // btCollisionShape* colShape = new btSphereShape(btScalar(0.05715 / 2.0));  // 0.05715 is diameter, function takes radius
+    int entityID = m_collisionShapes.size();
+    m_collisionShapes.push_back(colShape);
+
+    /// Create Dynamic Objects
+    btTransform startTransform;
+    startTransform.setIdentity();
+
+    btScalar mass(0.);   // 170 grams
+
+    //rigidbody is dynamic if and only if mass is non zero, otherwise static
+    bool isDynamic = (mass != 0.f);
+
+    btVector3 localInertia(0, 0, 0);
+    if (isDynamic)
+        colShape->calculateLocalInertia(mass, localInertia);
+
+    // startTransform.setOrigin();
+
+    //using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
+    btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+    btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
+    btRigidBody* body = new btRigidBody(rbInfo);
+
+    body->setUserPointer(newEntity);
+    m_dynamicsWorld->addRigidBody(body);
+    return entityID;
 }

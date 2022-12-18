@@ -7,4 +7,6 @@
 namespace Primitives
 {
     Rendering::Model* getNewCubeModel();
+
+    Rendering::Model* getCUBE();
 }

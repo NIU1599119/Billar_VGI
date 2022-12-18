@@ -7,8 +7,9 @@
 namespace Entities 
 {
     enum TYPE {
-        TABLE,
-        BALL
+        NOTHING = 0,
+        TABLE = 1,
+        BALL = 2
     };
 
     class Entity

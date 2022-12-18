@@ -8,6 +8,7 @@
 
 #include "game/gamemodes.h"
 #include "game/BaseGameState.h"
+#include "game/detectionBox.h"
 #include "coroutine.h"
 
 class Game
@@ -39,7 +40,7 @@ private:
 
     EntityControllerSystem* m_physicsEngine;
 
-    void drawDebugUI(unsigned int nFrame, double deltaTime, Input* input, glm::vec3* focusedBallPosition, Rendering::RuntimeModelEditor* runtimeModelEditor);
+    void drawDebugUI(unsigned int nFrame, double deltaTime, Input* input, glm::vec3* focusedBallPosition, Rendering::RuntimeModelEditor* runtimeModelEditor, DetectionBox& hole);
 
 
     // game functions

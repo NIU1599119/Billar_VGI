@@ -202,10 +202,16 @@ void Game::initializeBasicInputs()
     glfwSetInputMode((*p_window)->getGLFWwindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     input->captureMouse();
     #endif
+
+
+    input->setKeyAction(MOVE_FORWARDS, GLFW_KEY_W);
+    input->setKeyAction(MOVE_BACKWARDS, GLFW_KEY_S);
+    input->setKeyAction(MOVE_LEFT, GLFW_KEY_A);
+    input->setKeyAction(MOVE_RIGHT, GLFW_KEY_D);
 }
 
 
-void Game::drawDebugUI(unsigned int nFrame, double deltaTime, Input* input, glm::vec3* focusedBallPosition, Rendering::RuntimeModelEditor* runtimeModelEditor)
+void Game::drawDebugUI(unsigned int nFrame, double deltaTime, Input* input, glm::vec3* focusedBallPosition, Rendering::RuntimeModelEditor* runtimeModelEditor, DetectionBox& hole)
 {
     /////////// ImGui ///////////
 
@@ -255,6 +261,15 @@ void Game::drawDebugUI(unsigned int nFrame, double deltaTime, Input* input, glm:
 
     runtimeModelEditor->update();
 
+    ImGui::Begin("Holes");
+    glm::vec3 holePos = hole.getPosition();
+    glm::vec3 holeSize = hole.getSize();
+    ImGui::DragFloat3("position", glm::value_ptr(holePos), 0.001);
+    ImGui::DragFloat3("size", glm::value_ptr(holeSize), 0.001);
+    hole.setPosition(holePos);
+    hole.setSize(holeSize);
+    ImGui::End();
+
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -303,7 +318,6 @@ void Game::playerTurn(Coroutine* coro)
     CoroutineReset(coro);
 }
 
-
 int Game::startGameLoop()
 {
     initializeBasicInputs();
@@ -321,6 +335,9 @@ int Game::startGameLoop()
     // debug imgui tools
     Rendering::RuntimeModelEditor runtimeModelEditor(m_renderEngine);
     #endif
+
+    DetectionBox hole(m_renderEngine, m_physicsEngine, glm::vec3(0.0f, 0.789f, 0.0f), glm::vec3(0.1, 0.1, 0.1));
+
 
     Coroutine playerTurnCoroutine;
 
@@ -342,9 +359,11 @@ int Game::startGameLoop()
         if (!io.WantCaptureMouse)
         {
             // blocks anything here if mouse is over imgui
+            m_window->getInput()->enableKeyboard();
             playerTurn(&playerTurnCoroutine);
             m_window->processInput(deltaTime);
         }
+        else { m_window->getInput()->disableKeyboard(); };
         #else
         playerTurn(&playerTurnCoroutine);
         m_window->processInput(deltaTime);
@@ -353,6 +372,9 @@ int Game::startGameLoop()
         m_physicsEngine->update(deltaTime, &focusedBallPosition);
         
         m_currentCameraController->update();
+
+        hole.checkBallInside(m_gameState->getGamemode());
+        hole.update();
 
         //// rendering update
 
@@ -371,7 +393,9 @@ int Game::startGameLoop()
         #endif
 
         #ifdef DEBUG
-        drawDebugUI(nFrame, deltaTime, m_window->getInput(), &focusedBallPosition, &runtimeModelEditor);
+
+
+        drawDebugUI(nFrame, deltaTime, m_window->getInput(), &focusedBallPosition, &runtimeModelEditor, hole);
         #endif
 
         m_window->update();

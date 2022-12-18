@@ -39,6 +39,7 @@ class EntityControllerSystem {
 public:
     // EntityControllerSystem(int mode, Input* input, Camera* camera);
     EntityControllerSystem(GAMEMODE mode, Rendering::RenderEngine3D* renderingEngine, std::vector<int>& ballRenderIDs, int maxSubSteps = 30, double fixedTimeStep = 0.0016);
+    ~EntityControllerSystem();
     
     void StepSimulation(btScalar timeStep, int maxSubSteps, btScalar fixedTimeStep);
     void update(double deltaTime, glm::vec3* focusedBallPosition, int focusedBallID = 0);
@@ -57,7 +58,10 @@ public:
     btDiscreteDynamicsWorld** getDynamicsWorld() { return &m_dynamicsWorld; };
     int getBallIdx(int ballID = 0) { return m_ballsIndex+ballID; }; 
 
+    int createEntity(Entities::Entity* newEntity, btCollisionShape* colShape, btVector3& position);
+
 private:
+    GAMEMODE m_gamemode;
     btDefaultCollisionConfiguration* m_collisionConfiguration;
     btCollisionDispatcher* m_dispatcher;
     btBroadphaseInterface* m_overlappingPairCache;
@@ -70,6 +74,7 @@ private:
     btAlignedObjectArray<btCollisionShape*> m_collisionShapes;
 
     std::vector<Rendering::CollisionBox> m_EntityPool;
+    std::vector<Entities::Entity*> m_entities;
     // std::vector<btVector3> m_EntityBallPositions;
     // std::vector<Rendering::Object> m_EntityBallObjects;
     // std::vector<Rendering::Model> m_EntityBallModels;
