@@ -7,30 +7,6 @@
 
 namespace Rendering {
 
-    void CollisionBox::draw(Shader* shader, glm::mat4& view, glm::mat4& projection)
-    {
-        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );    // wireframe rendering
-
-        if (m_mesh == nullptr)
-            return;
-        glm::mat4 translate = glm::mat4(1.0f);
-        translate = glm::translate(translate, m_position);
-        glm::mat4 orientation = glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-        glm::mat4 scale = glm::scale(glm::mat4(1.0f), m_scale);
-        glm::mat4 model = translate * orientation * scale;
-
-        shader->activate();
-        shader->setUniformVec3("color", m_color);
-        shader->setUniformMat4("model", model);
-        shader->setUniformMat4("normalRotation", orientation);
-        shader->setUniformMat4("view", view);
-        shader->setUniformMat4("projection", projection);
-
-        m_mesh->draw(shader);
-
-        glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );    // disable wireframe rendering
-    }
-
     void CollisionBox::draw(Shader* shader)
     {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);    // wireframe rendering

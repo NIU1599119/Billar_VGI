@@ -3,45 +3,49 @@
 // Controllers
 #include "EntityControllerSystem.h"
 
-#include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
-
-#include <stdio.h>
-#include <iostream>
-#include <math.h>
-
-/*
-#include "window.h"
-#include "gl_utils.h"
-*/
-
 #include "rendering/engine.h"
 #include "rendering/editor.h"
-// #include "rendering/shader.h"
-// #include "rendering/texture.h"
 
-// #include "rendering/model.h"
-// #include "rendering/lightPoint.h"
-//#include "rendering/object.h"
+#include "game/gamemodes.h"
+#include "game/BaseGameState.h"
+#include "coroutine.h"
 
-/*
-#include "camera/camera.h"
-// #include "input.h" // included in window
-#include "camera/camera_controller_fly.h"
-#include "camera/camera_controller_fps.h"
-#include "camera/camera_controller_orbit.h"
+class Game
+{
+public:
+    Game(Window* window, GAMEMODE gamemode, int numPlayers);
+    ~Game();
+
+    int startGameLoop();
+
+private:
+    Window* m_window;
+
+    BaseGameState* m_gameState;
+
+    Rendering::RenderEngine3D* m_renderEngine;
+    std::vector<Rendering::Shader*> m_shaders;
+    Camera m_camera;
+
+    std::vector<int> m_barRenderIndexes;
+    std::vector<int> m_ballRenderIndexes;
+    std::vector<int> m_lightIndexes;
+
+    void initializeRenderObjects();
+    void initializeRenderLights();
+    void initializeBasicInputs();
+
+    CameraController* m_currentCameraController;
+
+    EntityControllerSystem* m_physicsEngine;
+
+    void drawDebugUI(unsigned int nFrame, double deltaTime, Input* input, glm::vec3* focusedBallPosition, Rendering::RuntimeModelEditor* runtimeModelEditor);
 
 
-// matrix operations
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+    // game functions
+    bool m_shouldExit = false;
+    bool m_isMoveDone = false;    // se inicia en cada turno a false, cuando el jugador mueve una bola se pone en true
+    void playerTurn(Coroutine* coro);
+    std::function<void (float)> m_pushBallFunction;
 
-// fisicas
-#include "btBulletDynamicsCommon.h"
-#include "rendering/collisionBox.h"
-*/
-
-
-int Game(Window& window);
+};

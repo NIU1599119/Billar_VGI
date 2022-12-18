@@ -98,6 +98,9 @@ public:
     void setActionStatus(ACTIONS action, STATUS status) { m_actionStatus[action] = status; };
     STATUS getActionStatus(ACTIONS action) { return m_actionStatus[action]; };
 
+    void disableKeyboard() { m_isKeyboardDisabled = true; };
+    void enableKeyboard() { m_isKeyboardDisabled = false; };
+
     ////////// MOUSE ///////////
 
     void updateCursor(float newX, float newY);
@@ -128,6 +131,9 @@ private:
 
     // std::vector<eventKey> m_eventKeys;
 
+    bool m_isKeyboardDisabled = false;
+
+
     ////////// MOUSE ///////////
     float m_sensitivity = 0.1f;
 
@@ -139,7 +145,6 @@ private:
     bool m_mouseOffset = true; // pass offset(true) or position(false)
 
     std::function<void(float, float)> m_mouseCallback;
-
 };
 
 

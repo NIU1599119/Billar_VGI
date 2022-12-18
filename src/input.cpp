@@ -2,6 +2,7 @@
 
 void Input::pressKey(int key, float deltaTime)
 {
+    if (m_isKeyboardDisabled) return;
     m_actions[m_keys[key]](deltaTime);
 };
 
@@ -19,7 +20,8 @@ void Input::pressEventKey(int key, bool isPressed, float deltaTime)
             if (!isPressed)
             {
                 m_actionStatus[m_keys[key]] = DEPRESSED;
-                m_actions[m_keys[key]](deltaTime);
+                // m_actions[m_keys[key]](deltaTime);
+                pressKey(key, deltaTime);
             }
         }
         else if (m_actionStatus[m_keys[key]] == DEPRESSED)

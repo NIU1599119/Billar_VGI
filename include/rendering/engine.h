@@ -17,7 +17,7 @@ namespace Rendering {
 	class RenderEngine3D
 	{
 	public:
-		RenderEngine3D(Camera* camera, Rendering::Shader defaultShader, Rendering::Shader* lightShader = nullptr, Rendering::Shader* debugShader = nullptr);
+		RenderEngine3D(Camera* camera, Rendering::Shader* defaultShader, Rendering::Shader* lightShader = nullptr, Rendering::Shader* debugShader = nullptr);
 		~RenderEngine3D();
 
 		/////// CAMERA & PROJECTION ///////
@@ -82,7 +82,7 @@ namespace Rendering {
 		void updateProjection();
 
 		/////// OBJECTS ///////
-		Rendering::Shader m_defaultModelShader;			// shader por defecto
+		Rendering::Shader* m_defaultModelShader;			// shader por defecto
 		std::vector<Rendering::Shader*> m_shaders;	// posibles shaders especificos para algunos objetos (si son nullptr se utiliza el m_generalModelShader)
 		std::vector<Rendering::Object> m_objects;	// estructura con los objetos que se renderizan cada frame
 

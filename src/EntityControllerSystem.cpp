@@ -1,32 +1,13 @@
 ﻿#include "EntityControllerSystem.h"
-#include "entities/Entity.h"
-#include "entities/EntityBall.h"
-#include "entities/EntityTable.h"
 
 
-EntityControllerSystem::EntityControllerSystem(GAMEMODE mode, Input* input, Camera* camera, Rendering::RenderEngine3D* renderingEngine, std::vector<int>& ballRenderIDs, int maxSubSteps, double fixedTimeStep)
+EntityControllerSystem::EntityControllerSystem(GAMEMODE gamemode, Rendering::RenderEngine3D* renderingEngine, std::vector<int>& ballRenderIDs, int maxSubSteps, double fixedTimeStep)
     : // simple initial constructors
     m_maxSubSteps(maxSubSteps),
     m_fixedTimeStep(fixedTimeStep),
     m_renderEngine(renderingEngine),
     m_ballRenderIDs(ballRenderIDs)
 {
-    Entities::GAME_TYPE game_type;  // para las conversiones
-    switch (mode)
-    {
-    case CLASSIC:
-        game_type = Entities::CLASSIC;
-        break;
-    case CARAMBOLA:
-        game_type = Entities::CARAMBOLA;
-        break;
-    case FREE_SHOTS:
-        game_type = Entities::FREE_SHOTS;
-        break;
-    default:
-        break;
-    }
-
     ///collision configuration contains default setup for memory, collision setup. Advanced users can create their own configuration.
     m_collisionConfiguration = new btDefaultCollisionConfiguration();
 
@@ -51,8 +32,6 @@ EntityControllerSystem::EntityControllerSystem(GAMEMODE mode, Input* input, Came
     std::vector<glm::vec3> wallSizes;
     // 1 10 1
 
-    // wallPos.push_back(btVector3(btScalar(0.), btScalar(0.76/2), btScalar(0.)));   // table
-    // wallSizes.push_back(btVector3(btScalar(2.62), btScalar(0.76), btScalar(1.50)));
     /*    ------------ X ------------
         ┌──┬──────────┬─┬───────────┬─┐
         │O └──────────┘O└───────────┘O│ |
@@ -77,7 +56,7 @@ EntityControllerSystem::EntityControllerSystem(GAMEMODE mode, Input* input, Came
 
     ///////////// Inicialization EntityPool /////////////////
 
-    switch(mode) 
+    switch(gamemode) 
     {
         case CLASSIC:
         case FREE_SHOTS:
@@ -121,9 +100,9 @@ EntityControllerSystem::EntityControllerSystem(GAMEMODE mode, Input* input, Came
                 
                 Entities::Entity* tablePart;
                 if (i < wallsIdStart)
-                    tablePart = new Entities::EntityTable(game_type, Entities::CLOTH);
+                    tablePart = new Entities::EntityTable(gamemode, Entities::CLOTH);
                 else
-                    tablePart = new Entities::EntityTable(game_type, Entities::RAIL);
+                    tablePart = new Entities::EntityTable(gamemode, Entities::RAIL);
                 body->setUserPointer(tablePart);
                 m_dynamicsWorld->addRigidBody(body);
             }
@@ -144,7 +123,7 @@ EntityControllerSystem::EntityControllerSystem(GAMEMODE mode, Input* input, Came
     std::vector<btVector3> entityBallPositions;
 
 
-    switch (mode)
+    switch (gamemode)
     {
     case CLASSIC:
         if (m_ballRenderIDs.size() != 16)
@@ -227,135 +206,44 @@ EntityControllerSystem::EntityControllerSystem(GAMEMODE mode, Input* input, Came
         m_dynamicsWorld->addRigidBody(body);
 
 
-        Entities::Entity* ballEntity = new Entities::EntityBall(i, game_type);
+        Entities::Entity* ballEntity = new Entities::EntityBall(i, gamemode);
         body->setUserPointer(ballEntity);
     }
 
 
+    // no queremos que siempre este puesto
+    // // input pointers
+    // btDiscreteDynamicsWorld** p_inputDynWorld = &m_dynamicsWorld;
+    // int* p_ballsIndex = &m_ballsIndex;
 
-    // input pointers
-    btDiscreteDynamicsWorld** p_inputDynWorld = &m_dynamicsWorld;
-    int* p_ballsIndex = &m_ballsIndex;
-
-    input->setKeyAction(PUSH_BALL, GLFW_KEY_F);
-    input->setActionFunction(PUSH_BALL, [p_inputDynWorld, camera, p_ballsIndex](float deltaTime) {
-        btCollisionObject* obj = (*p_inputDynWorld)->getCollisionObjectArray()[(*p_ballsIndex)];
-        btRigidBody* body = btRigidBody::upcast(obj);
-        body->setActivationState(ACTIVE_TAG);
-        glm::vec3 front = camera->getPlaneFront();
-        front = front * 4.0f;
-        body->setLinearVelocity(btVector3(front.x, body->getLinearVelocity().y(), front.z));
-        });
+    // input->setKeyAction(PUSH_BALL, GLFW_KEY_F);
+    // input->setActionFunction(PUSH_BALL, [p_inputDynWorld, camera, p_ballsIndex](float deltaTime) {
+    //     btCollisionObject* obj = (*p_inputDynWorld)->getCollisionObjectArray()[(*p_ballsIndex)];
+    //     btRigidBody* body = btRigidBody::upcast(obj);
+    //     body->setActivationState(ACTIVE_TAG);
+    //     glm::vec3 front = camera->getPlaneFront();
+    //     front = front * 4.0f;
+    //     body->setLinearVelocity(btVector3(front.x, body->getLinearVelocity().y(), front.z));
+    //     });
 
 
-    input->setKeyAction(ACCELERATE_BALL, GLFW_KEY_E);
-    input->setActionFunction(ACCELERATE_BALL, [p_inputDynWorld, camera, p_ballsIndex](float deltaTime) {
-        btCollisionObject* obj = (*p_inputDynWorld)->getCollisionObjectArray()[(*p_ballsIndex)];
-        btRigidBody* body = btRigidBody::upcast(obj);
-        body->setActivationState(ACTIVE_TAG);
-        glm::vec3 front = camera->getPlaneFront();
-        front = front * 4.0f;
-        body->setLinearVelocity(btVector3(body->getLinearVelocity().x() * (1.01 + deltaTime), body->getLinearVelocity().y(), body->getLinearVelocity().z() * (1.01 + deltaTime)));
-        });
+    // input->setKeyAction(ACCELERATE_BALL, GLFW_KEY_E);
+    // input->setActionFunction(ACCELERATE_BALL, [p_inputDynWorld, camera, p_ballsIndex](float deltaTime) {
+    //     btCollisionObject* obj = (*p_inputDynWorld)->getCollisionObjectArray()[(*p_ballsIndex)];
+    //     btRigidBody* body = btRigidBody::upcast(obj);
+    //     body->setActivationState(ACTIVE_TAG);
+    //     glm::vec3 front = camera->getPlaneFront();
+    //     front = front * 4.0f;
+    //     body->setLinearVelocity(btVector3(body->getLinearVelocity().x() * (1.01 + deltaTime), body->getLinearVelocity().y(), body->getLinearVelocity().z() * (1.01 + deltaTime)));
+    //     });
 
 
 }
 
 
-// struct BallToBallCallback : public btCollisionWorld::ContactResultCallback
-// {
-//     BallToBallCallback(int ball0number, int ball1number) : m_ball0number(ball0number), m_ball1number(ball1number) {};
-
-//     btScalar addSingleResult(btManifoldPoint& cp,
-//         const btCollisionObjectWrapper* colObj0Wrap,
-//         int partId0,
-//         int index0,
-//         const btCollisionObjectWrapper* colObj1Wrap,
-//         int partId1,
-//         int index1)
-//     {
-//         const btCollisionObject* obj0 = colObj0Wrap->getCollisionObject();
-//         const btCollisionObject* obj1 = colObj1Wrap->getCollisionObject();
-//         const btRigidBody* body0 = btRigidBody::upcast(obj0);
-//         const btRigidBody* body1 = btRigidBody::upcast(obj1);
-
-//         if (body0 && body1 && body0->getMotionState() && body1->getMotionState())   // check if the pointers are OK and if the objects are active (in movement)
-//         {
-//             btVector3 bt_vel0 = body0->getLinearVelocity();
-//             btVector3 bt_vel1 = body1->getLinearVelocity();
-
-//             btVector3 relative = bt_vel0 - bt_vel1;
-
-//             float relative_velocity = relative.length();    // more or less the force of impact according to relative speeds between the balls
-
-//             if (relative_velocity < 0.01) // si la velocidad es tan baja no se tiene en cuenta
-//                 return 0;
-
-//             if (m_ball0number == 0)
-//                 LOG_DEBUG("Blank ball has collided with ball %d with a speed of:%f", m_ball1number, relative_velocity);
-//             else
-//                 LOG_DEBUG("Ball %d has collided with ball %d with a speed of:%f", m_ball0number, m_ball1number, relative_velocity);
-//         }
-
-//         return 0;
-//     }
-
-//     int m_ball0number;
-//     int m_ball1number;
-// };
-
-// struct BallToTableCallback : public btCollisionWorld::ContactResultCallback
-// {
-//     btScalar addSingleResult(btManifoldPoint& cp,
-//         const btCollisionObjectWrapper* colObj0Wrap,
-//         int partId0,
-//         int index0,
-//         const btCollisionObjectWrapper* colObj1Wrap,
-//         int partId1,
-//         int index1)
-//     {
-//         // callback here
-//         // dont use this, it will run allways since every ball touches the ground
-//         return 0;
-//     }
-// };
-
-void EntityControllerSystem::update(double deltaTime, glm::vec3* focusedBallPosition)
+void EntityControllerSystem::update(double deltaTime, glm::vec3* focusedBallPosition, int focusedBallID)
 {
-    // int numSteps = 10;                          // en total se hacen 10 * m_maxSubSteps como mucho
-    // for (int step = 0; step < numSteps; step++)
-    // {
-        // m_dynamicsWorld->stepSimulation(deltaTime/numSteps, m_maxSubSteps, m_fixedTimeStep);
-    m_dynamicsWorld->stepSimulation(deltaTime, m_maxSubSteps*4, m_fixedTimeStep);
-
-    //     // check for collisions
-    //     btCollisionObjectArray objectArray = m_dynamicsWorld->getCollisionObjectArray();     // has all balls, walls and table of the simulation
-    //     for (int i = 0; i < objectArray.size(); i++)
-    //     {
-    //         for (int j = ((i < m_ballsIndex) ? m_ballsIndex : i); j < objectArray.size(); j++)  // iterate every ball object
-    //         {
-    //             // i is object 1
-    //             // j is object 2
-    //             if (j == i) continue; // same object
-
-    //             if (i < m_ballsIndex)   // object 1 is not a ball
-    //             {
-    //                 // BallToTableCallback ballToTableCallback;
-    //                 // m_dynamicsWorld->contactPairTest(objectArray[i], objectArray[j], ballToTableCallback);
-    //             }
-    //             else                    // object 1 is a ball
-    //             {
-    //                 BallToBallCallback ballToBallCallback(i-m_ballsIndex, j-m_ballsIndex);
-    //                 m_dynamicsWorld->contactPairTest(objectArray[i], objectArray[j], ballToBallCallback);
-    //             }
-    //         }
-    //     }
-
-    // }
-
-    // BallToBallCallback ballToBallcallback;
-    // m_dynamicsWorld->contactPairTest(..., ..., callback);
-
+    m_dynamicsWorld->stepSimulation(deltaTime, m_maxSubSteps, m_fixedTimeStep);
 
     // update the rendering engine
     int i = 0;
@@ -382,22 +270,18 @@ void EntityControllerSystem::update(double deltaTime, glm::vec3* focusedBallPosi
 
         
         m_renderEngine->updateObject(*it, pos, orient);
-        // it->setPosition(pos);
-        // it->setOrientation(orient);
-        // it->setScaling(0.05715f / 2);
-        // it->draw(modelShader, camera->getViewMatrix(), projection, camera->getPosition());
+
         i++;
     }
 }
 
 
-
+/// @brief Modified function from dispatcher.defaultNearCallback(collisionPair, dispatcher, dispatchInfo)
+/// @param collisionPair
+/// @param dispatcher
+/// @param dispatchInfo
 void CollisionDetectorNearCallback(btBroadphasePair& collisionPair,
   btCollisionDispatcher& dispatcher, btDispatcherInfo& dispatchInfo) {
-	/// @brief Modified function from dispatcher.defaultNearCallback(collisionPair, dispatcher, dispatchInfo)
-	/// @param collisionPair 
-	/// @param dispatcher 
-	/// @param dispatchInfo 
 
 	btCollisionObject* colObj0 = (btCollisionObject*)collisionPair.m_pProxy0->m_clientObject;
 	btCollisionObject* colObj1 = (btCollisionObject*)collisionPair.m_pProxy1->m_clientObject;
@@ -432,6 +316,7 @@ void CollisionDetectorNearCallback(btBroadphasePair& collisionPair,
             dispatchInfo.m_timeOfImpact = toi;
     }
 
+    /// custom code a partir de aqui
 
     if (contactPointResult.getPersistentManifold()->getNumContacts() == 0)    // no ha habido colision
         return;
@@ -459,4 +344,26 @@ void CollisionDetectorNearCallback(btBroadphasePair& collisionPair,
         return;
     
     entity0->collision(entity1, deltaSpeed); // let them handle it
+}
+
+bool EntityControllerSystem::isStatic()
+{
+    bool simulationIsStatic = true;
+
+    btCollisionObjectArray currentObjectArray = m_dynamicsWorld->getCollisionObjectArray();
+    for (int i = 0; i < currentObjectArray.size(); i++)
+    {
+        btCollisionObject* obj = m_dynamicsWorld->getCollisionObjectArray()[i];
+        btRigidBody* body = btRigidBody::upcast(obj);
+
+        int activationState = body->getActivationState();
+
+        if (activationState != ACTIVE_TAG)
+            continue;
+        
+        simulationIsStatic = false;
+        break;
+    }
+
+    return simulationIsStatic;
 }

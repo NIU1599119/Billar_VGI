@@ -55,10 +55,14 @@ int main()
         if (opcio == 1)
         {
             music->setIsPaused(true);
-            continuarJugando = (Game(window) == 0);
+            Game newGame(&window, CLASSIC, 2);
+
+            continuarJugando = (newGame.startGameLoop() == 0);
             if (!continuarJugando)
             {
-                LOG_ERROR("El juego ha crasheado o no ha podido cargar");
+                LOG_ERROR("El juego ha crasheado o se ha cerrado manualmente");
+                music->drop();
+                window.close();
                 return 1;
             }
         }

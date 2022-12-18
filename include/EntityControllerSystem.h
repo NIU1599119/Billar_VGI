@@ -29,20 +29,19 @@
 #include "rendering/engine.h"
 #include "rendering/object.h"
 
-enum GAMEMODE {
-    CLASSIC,
-    CARAMBOLA,
-    FREE_SHOTS
-};
+#include "game/gamemodes.h"
+#include "entities/Entity.h"
+#include "entities/EntityBall.h"
+#include "entities/EntityTable.h"
 
 
 class EntityControllerSystem {
 public:
     // EntityControllerSystem(int mode, Input* input, Camera* camera);
-    EntityControllerSystem(GAMEMODE mode, Input* input, Camera* camera, Rendering::RenderEngine3D* renderingEngine, std::vector<int>& ballRenderIDs, int maxSubSteps = 5, double fixedTimeStep = 0.0016);
+    EntityControllerSystem(GAMEMODE mode, Rendering::RenderEngine3D* renderingEngine, std::vector<int>& ballRenderIDs, int maxSubSteps = 30, double fixedTimeStep = 0.0016);
     
     void StepSimulation(btScalar timeStep, int maxSubSteps, btScalar fixedTimeStep);
-    void update(double deltaTime, glm::vec3* focusedBallPosition);
+    void update(double deltaTime, glm::vec3* focusedBallPosition, int focusedBallID = 0);
 
     // void draw(Shader* modelShader, Camera* camera, glm::mat4& projection, glm::vec3& controlledPosition, Shader* debugShader);
 
@@ -51,6 +50,12 @@ public:
 
     // temporal function
     std::vector<Rendering::CollisionBox>* getCollisionsBoxPtr() { return &m_EntityPool; }
+
+    // check if all balls are static (inactive)
+    bool isStatic();
+
+    btDiscreteDynamicsWorld** getDynamicsWorld() { return &m_dynamicsWorld; };
+    int getBallIdx(int ballID = 0) { return m_ballsIndex+ballID; }; 
 
 private:
     btDefaultCollisionConfiguration* m_collisionConfiguration;

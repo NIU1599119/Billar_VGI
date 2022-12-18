@@ -2,7 +2,7 @@
 
 namespace Rendering {
 
-	RenderEngine3D::RenderEngine3D(Camera* camera, Rendering::Shader defaultShader, Rendering::Shader* lightShader, Rendering::Shader* debugShader)
+	RenderEngine3D::RenderEngine3D(Camera* camera, Rendering::Shader* defaultShader, Rendering::Shader* lightShader, Rendering::Shader* debugShader)
 		:
 		m_camera(camera),
 		m_defaultModelShader(defaultShader),
@@ -32,7 +32,7 @@ namespace Rendering {
 		// updated every frame
 		glm::mat4 view = m_camera->getViewMatrix();
 		glm::vec3 viewPos = m_camera->getPosition();
-		Rendering::updateShaderView(&m_defaultModelShader, view, viewPos);
+		Rendering::updateShaderView(m_defaultModelShader, view, viewPos);
 
 		for (auto it = m_shaders.begin(); it != m_shaders.end(); it++)
 		{
@@ -64,7 +64,7 @@ namespace Rendering {
 	void RenderEngine3D::updateShaderProjection()
 	{
 		// updated only when resizing the window or changing the FOV or the maxRenderDistance
-		Rendering::updateShaderProjection(&m_defaultModelShader, m_projection);
+		Rendering::updateShaderProjection(m_defaultModelShader, m_projection);
 		for (auto it = m_shaders.begin(); it != m_shaders.end(); it++)
 		{
 			if (*it == nullptr) continue;
@@ -148,7 +148,7 @@ namespace Rendering {
 	void RenderEngine3D::draw(int id)
 	{
 		Rendering::Shader* objectShader = m_shaders[id];
-		if (objectShader == nullptr) objectShader = &m_defaultModelShader;
+		if (objectShader == nullptr) objectShader = m_defaultModelShader;
 		m_objects[id].draw(objectShader);
 	}
 
@@ -160,7 +160,7 @@ namespace Rendering {
 		for (int i = 0; i < m_objects.size(); i++)
 		{
 			Rendering::Shader* objectShader = m_shaders[i];
-			if (objectShader == nullptr) objectShader = &m_defaultModelShader;
+			if (objectShader == nullptr) objectShader = m_defaultModelShader;
 			m_objects[i].draw(objectShader);
 		}
 	}
@@ -252,7 +252,7 @@ namespace Rendering {
 	{
 		for (int i = 0; i < m_lights.size(); i++)
 		{
-			Rendering::updateShaderLighting(&m_defaultModelShader, i, m_lights[i]);
+			Rendering::updateShaderLighting(m_defaultModelShader, i, m_lights[i]);
 
 			for (auto it = m_shaders.begin(); it != m_shaders.end(); it++)
 			{
@@ -261,7 +261,7 @@ namespace Rendering {
 			}
 		}
 
-		Rendering::updateShaderLighting(&m_defaultModelShader, m_lights.size());
+		Rendering::updateShaderLighting(m_defaultModelShader, m_lights.size());
 
 		for (auto it = m_shaders.begin(); it != m_shaders.end(); it++)
 		{

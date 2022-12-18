@@ -7,7 +7,7 @@ namespace Entities
     class EntityBall : public Entity
     {
     public:
-        EntityBall(int ballID, GAME_TYPE game_type) : Entity(BALL, game_type), m_ballID(ballID) {};
+        EntityBall(int ballID, GAMEMODE game_type) : Entity(BALL, game_type), m_ballID(ballID) {};
 
         int getBallID() { return m_ballID; };
 

@@ -1,150 +1,339 @@
 #include "game.h"
 
-int Game(Window& window) {
-    
-    // enables z-buffer
-    glEnable(GL_DEPTH_TEST);
+#ifdef DEBUG
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
+#endif
 
-    ///// loading shaders /////
+#include "game/ClassicState.h"
+#include "game/CarambolaState.h"
 
-    Rendering::Shader modelShader("shaders/model.vert", "shaders/model.frag");
-    if(!modelShader.compileShaders())
+Game::Game(Window* window, GAMEMODE gamemode, int numPlayers)
+: m_window(window)
+{
+    // inicializacion del modo de juego
+    switch (gamemode)
+    {
+    case CLASSIC:
+        m_gameState = new ClassicState(numPlayers);
+        break;
+    case CARAMBOLA:
+        m_gameState = new CarambolaState(numPlayers);
+        break;
+    case FREE_SHOTS:
+        LOG_ERROR("No hay tiros libres todavia");
+        ASSERT(false);
+        break;
+    default:
+        LOG_ERROR("Modo de juego desconocido");
+        ASSERT(false);
+        break;
+    }
+
+    // inicializacion de los shaders
+    Rendering::Shader* modelShader = new Rendering::Shader("shaders/model.vert", "shaders/model.frag");
+    if(!modelShader->compileShaders())
     {
         LOG_ERROR("Failed compiling shader");
-        return 1;
+        ASSERT(false);
     }
 
-    Rendering::Shader lightShader("shaders/light.vert", "shaders/light.frag");
-    if(!lightShader.compileShaders())
+    Rendering::Shader* lightShader = new Rendering::Shader("shaders/light.vert", "shaders/light.frag");
+    if(!lightShader->compileShaders())
     {
         LOG_ERROR("Failed compiling shader");
-        return 1;
+        ASSERT(false);
     }
 
-    #ifdef DEBUG_SHADER
-    Rendering::Shader debugShader("shaders/debug.vert", "shaders/debug.frag");
-    if(!debugShader.compileShaders())
+    Rendering::Shader* debugShader = new Rendering::Shader("shaders/debug.vert", "shaders/debug.frag");
+    if(!debugShader->compileShaders())
     {
         LOG_ERROR("Failed compiling debugShader");
-        return 1;
-    }
-    #else
-    Rendering::Shader debugShader("shaders/debug.vert", "shaders/debug.frag");
-    if(!debugShader.compileShaders())
-    {
-        LOG_ERROR("Failed compiling debugShader");
-        return 1;
-    }
-    #endif
-
-    ///// rendering /////
-    Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
-    Rendering::RenderEngine3D renderEngine(&camera, modelShader, &lightShader, &debugShader);
-    //int poolRenderID = renderEngine.createObject(std::string("models/pool_table/scene.gltf"), 0.1245);
-    //renderEngine.updateObject(poolRenderID, glm::vec3(0.0), glm::quat(1.0, 0.0, 0.0, 0.0));
-    int blackBallRenderID = renderEngine.createObject(std::string("models/PoolBall/Pool.obj"), 0.05715 / 2);
-    renderEngine.updateObject(blackBallRenderID, glm::vec3(0.0, 0.8, 0.1), glm::quat(1.0, 0.0, 0.0, 0.0));
-    std::vector<int> ballsRenderIDs;
-    ballsRenderIDs.push_back(blackBallRenderID);
-
-    Rendering::Model ballModel("models/PoolBall1/Pool.obj");
-    for (int i = 0; i < 15; i++) // create 15 balls
-    {
-        int idx = renderEngine.createObject(&ballModel, 0.05715 / 2);
-        ballsRenderIDs.push_back(idx);
-        renderEngine.updateObject(idx, glm::vec3(0.0, 0.8, 0.1), glm::quat(1.0, 0.0, 0.0, 0.0));
+        ASSERT(false);
     }
 
-    std::vector<int> lightsRenderID;
-    for (int i = 0; i < 5; i++)
-    {
-        int idx = renderEngine.addLight();
-        lightsRenderID.push_back(idx);
-        renderEngine.setLightPosition(idx, glm::vec3(-1.0 + (i / 2.0), 2.5, 0.0));
-        renderEngine.setLightColor(idx, glm::vec3(1.0, 1.0, 1.0));
-        renderEngine.setLightPolinomial(idx, 1.0, 0.09, 0.0032);
-    }
+    m_shaders.push_back(modelShader);
+    m_shaders.push_back(lightShader);
+    m_shaders.push_back(debugShader);
 
-    /////////// IMGUI init ///////////
+    LOG_INFO("Shaders compiled");
 
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    bool drawTriangles = true;
+    // camara
+    m_camera = Camera(glm::vec3(0.0f, 0.0f, 3.0f));
+    m_renderEngine = new Rendering::RenderEngine3D(&m_camera, modelShader, lightShader, debugShader);
 
-    //glm::vec3 controlledPosition = glm::vec3(1.0f, 1.0f, 1.0f);
-    //glm::vec3 controlledDirection = glm::vec3(0.5f, 1.0f, 0.0f);
+    initializeRenderObjects();
+    initializeRenderLights();
 
-    /////////// INPUT init ///////////
-
-    Input* input = window.getInput();
-
-    input->setKeyAction(MOVE_FORWARDS, GLFW_KEY_W);
-    input->setKeyAction(MOVE_LEFT, GLFW_KEY_A);
-    input->setKeyAction(MOVE_BACKWARDS, GLFW_KEY_S);
-    input->setKeyAction(MOVE_RIGHT, GLFW_KEY_D);
-
-    bool shouldExit = false;
-    //input->setKeyAction(EXIT, GLFW_KEY_BACKSPACE, false);
-    input->setKeyAction(EXIT, GLFW_KEY_ESCAPE, false);
-    input->setActionFunction(EXIT, [&shouldExit](float delaTime) { LOG_DEBUG("Exiting Game");shouldExit = true; });
-
-    input->setKeyAction(SWITCH_MOUSE, GLFW_KEY_M, false);
-    input->setActionFunction(SWITCH_MOUSE, [&window, input](float deltaTime) {
-        if (input->mouseIsCaptured())
-        {
-            glfwSetInputMode(window.getGLFWwindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-            input->uncaptureMouse();
-        }
-        else
-        {
-            glfwSetInputMode(window.getGLFWwindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);    // hides cursor and sets it to middle
-            input->captureMouse();
-        }
-        });
-
-    /////////// CAMERA ///////////
-
-    //Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
-
-    // camera perspective to screen
-    //glm::mat4 projection = glm::perspective(45.0f, 16.0f / 9.0f, 0.1f, 100.0f); /// this should be updated when window changes size
-
-
-    enum CameraType {
-        FLY,
-        FPS,
-        ORBIT
-    };
-    CameraType currentType = ORBIT;
-
-
-    glm::vec3 cameraOrbitPosition = glm::vec3(1.0f, 1.0f, 1.0f);
-    CameraController* cameraController = new CameraControllerOrbit(&camera, 2.5f, 1.0f, &cameraOrbitPosition);
-    bindInputToController(input, cameraController);
+    LOG_INFO("Initialized all render objects");
 
     //////////// FISICAS ////////////
     ///-----initialization_start-----
 
-    EntityControllerSystem ECS(CLASSIC, input, &camera, &renderEngine, ballsRenderIDs);
+    m_physicsEngine = new EntityControllerSystem(gamemode, m_renderEngine, m_ballRenderIndexes);
+
+    LOG_INFO("Initialized the physics engine");
+
+    // variables necesarias para las funciones
+    Input* input = m_window->getInput();
+    btDiscreteDynamicsWorld** p_dynamicsWorld = m_physicsEngine->getDynamicsWorld();
+    Camera* p_camera = &m_camera;
+    bool* p_isMoveDone = &m_isMoveDone;
+    int currentBallToShoot = m_gameState->getPlayerBallID();
+    currentBallToShoot = m_physicsEngine->getBallIdx(currentBallToShoot);
+
+    m_pushBallFunction = [p_dynamicsWorld, p_camera, currentBallToShoot, p_isMoveDone](float deltaTime){
+        btCollisionObject* obj = (*p_dynamicsWorld)->getCollisionObjectArray()[currentBallToShoot];
+        btRigidBody* body = btRigidBody::upcast(obj);
+        body->setActivationState(ACTIVE_TAG);
+        glm::vec3 front = p_camera->getPlaneFront();
+        front = front * 4.0f;
+        body->setLinearVelocity(btVector3(front.x, body->getLinearVelocity().y(), front.z));
+        *p_isMoveDone = true;
+    };
+    LOG_INFO("Initialized the game functions");
+    
+
+    LOG_INFO("Game engine is initialized");
+}
+
+Game::~Game()
+{
+    if (m_physicsEngine != nullptr) delete m_physicsEngine;
+    m_physicsEngine = nullptr;
+
+    if (m_renderEngine != nullptr) delete m_renderEngine;
+    m_renderEngine = nullptr;
+
+    for (int i = 0; i < m_shaders.size(); i++)
+    {
+        if (m_shaders[i] != nullptr) delete m_shaders[i];
+        m_shaders[i] = nullptr;
+    }
+
+    if (m_gameState != nullptr) delete m_gameState;
+    m_gameState = nullptr;
+}
 
 
-    ///// INPUTS FOR BALL //////
 
-    // btDiscreteDynamicsWorld* dynamicsWorld = ECS.getDynamicsWorld();
-    // int ballsIndex = ECS.getBallsIndex();
+void Game::initializeRenderObjects()
+{
+    switch (m_gameState->getGamemode())
+    {
+    case CLASSIC:
+    {
+        // add the table
+        // int poolRenderID = m_renderEngine->createObject(std::string("models/pool_table/scene.gltf"), 0.1245);
+        // renderEngine.updateObject(poolRenderID, glm::vec3(0.0), glm::quat(1.0, 0.0, 0.0, 0.0));
+        // m_barRenderIndexes.push_back(poolRenderID);
 
+
+        // add the balls
+        int cueBallRenderID = m_renderEngine->createObject(std::string("models/PoolBall/Pool.obj"), 0.05715 / 2);
+        m_ballRenderIndexes.push_back(cueBallRenderID); // 0 is CUE ball
+
+        Rendering::Model* ballModel = new Rendering::Model("models/PoolBall1/Pool.obj");    // delete this later
+        for (int i = 1; i < 16; i++)
+        {
+            // int iBallID = m_renderEngine->createObject(std::string("models/PoolBall" + std::to_string(i) + "/Pool.obj"), 0.05715 / 2);
+            int iBallID = m_renderEngine->createObject(ballModel, 0.05715 / 2);
+            m_ballRenderIndexes.push_back(iBallID);
+        }
+
+        break;
+    }
+    case CARAMBOLA:
+        // de momento no tenemos nada
+        // meter la mesa
+
+        // meter las bolas
+
+        break;
+    case FREE_SHOTS:
+        // de momento no tenemos nada
+        break;
+    default:
+        break;
+    }
+
+    /// aqui va el codigo que carga todo el bar y pone los muebles en sus posiciones
+
+}
+
+
+void Game::initializeRenderLights()
+{
+    for (int i = 0; i < 5; i++)
+    {
+        int idx = m_renderEngine->addLight();
+        m_lightIndexes.push_back(idx);
+        m_renderEngine->setLightPosition(idx, glm::vec3(-1.0 + (i / 2.0), 2.5, 0.0));
+        m_renderEngine->setLightColor(idx, glm::vec3(1.0, 1.0, 1.0));
+        m_renderEngine->setLightPolinomial(idx, 1.0, 0.09, 0.0032);
+    }
+}
+
+void Game::initializeBasicInputs()
+{
+    Window** p_window = &m_window;
+    Input* input = m_window->getInput();
+    bool* p_shouldExit = &m_shouldExit;
+
+    input->setKeyAction(EXIT, GLFW_KEY_ESCAPE, false);
+    input->setActionFunction(EXIT, [p_shouldExit](float deltaTime) { LOG_INFO("Exiting Game"); *p_shouldExit = true; });
+
+    #ifdef DEBUG
+    input->setKeyAction(SWITCH_MOUSE, GLFW_KEY_M, false);
+    input->setActionFunction(SWITCH_MOUSE, [p_window, input](float deltaTime) {
+        if (input->mouseIsCaptured())
+        {
+            glfwSetInputMode((*p_window)->getGLFWwindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            input->uncaptureMouse();
+        }
+        else
+        {
+            glfwSetInputMode((*p_window)->getGLFWwindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);    // hides cursor and sets it to middle
+            input->captureMouse();
+        }
+        });
+    #else
+    glfwSetInputMode((*p_window)->getGLFWwindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    input->captureMouse();
+    #endif
+}
+
+
+void Game::drawDebugUI(unsigned int nFrame, double deltaTime, Input* input, glm::vec3* focusedBallPosition, Rendering::RuntimeModelEditor* runtimeModelEditor)
+{
+    /////////// ImGui ///////////
+
+    ImGui::Begin("Debug Window");
+    ImGui::Text("Camera Controls");
+    glm::vec3 currentCameraPosition = m_camera.getPosition();
+    ImGui::Text("Current camera position (%f, %f, %f)", currentCameraPosition.x, currentCameraPosition.y, currentCameraPosition.z);
+    if (ImGui::Button("Camera fly"))
+    {
+        unbindInputToController(input);
+        if (m_currentCameraController != nullptr)
+            delete m_currentCameraController;
+        m_currentCameraController = new CameraControllerFly(&m_camera);
+        bindInputToController(input, m_currentCameraController);
+    }
+    if (ImGui::Button("Camera fps"))
+    {
+        unbindInputToController(input);
+        if (m_currentCameraController != nullptr)
+            delete m_currentCameraController;
+        m_currentCameraController = new CameraControllerFps(&m_camera);
+        bindInputToController(input, m_currentCameraController);
+    }
+    if (ImGui::Button("Camera orbit (far)"))
+    {
+        unbindInputToController(input);
+        if (m_currentCameraController != nullptr)
+            delete m_currentCameraController;
+        m_currentCameraController = new CameraControllerOrbit(&m_camera, 2.5f, 1.0f, focusedBallPosition);
+        bindInputToController(input, m_currentCameraController);
+    }
+    if (ImGui::Button("Camera orbit (close)"))
+    {
+        unbindInputToController(input);
+        if (m_currentCameraController != nullptr)
+            delete m_currentCameraController;
+        m_currentCameraController = new CameraControllerOrbit(&m_camera, 2.5f, 0.2f, focusedBallPosition);
+        bindInputToController(input, m_currentCameraController);
+    }
+    ImGui::Separator();
+    ImGui::Text("Frame number %u", nFrame);
+    ImGui::Text("FPS: %f", 1 / deltaTime);
+    ImGui::Separator();
+    ImGui::Text("Game status");
+    ImGui::Text("Current player is %d", m_gameState->getCurrentPlayer());
+    ImGui::End();
+
+    runtimeModelEditor->update();
+
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+}
+
+
+void Game::playerTurn(Coroutine* coro)
+{
+    // gracias a bigrando420 se puede simplificar un monton este codigo
+    // los yields hacen como un checkpoint y salen de la funcion
+    // cuando hay condicion el checkpoint se queda bloqueado hasta que la condicion se cumple
+    // al final se tiene que hacer un CoroutineEnd o un CoroutineReset, el end hace que no se pueda volver a ejecutar hasta que
+    //          coro->line = 0, el reset hace que coro->line = 0 y entonces se puede volver a ejecutar otro bucle de juego justo cuando se acaba este
+
+    // variables necesarias en toda la corutina
+    Input* input = m_window->getInput();
+
+    CoroutineBegin(coro);
+    // asign the input to the player
+    // LOG_DEBUG("Begin corutine");
+    input->setKeyAction(PUSH_BALL, GLFW_KEY_F, false);
+    input->setActionFunction(PUSH_BALL, m_pushBallFunction);
+
+    // player has to throw the ball so we wait for it
+    CoroutineYieldUntil(coro, m_isMoveDone);
+    // when player does move, he can no longer shoot again
+    // LOG_DEBUG("Player has moved");
+    input->removeActionFunction(PUSH_BALL);
+    input->removeKeyAction(GLFW_KEY_F);
+
+    // now that the move is done we wait for the simulation to be static
+    while(!m_physicsEngine->isStatic())
+    {
+        CoroutineYield(coro);   // esto hace que se detenga la ejecucion hasta que haya que salir del bucle
+                                // se ve raro pero el bucle no hace nada
+                                // tambien se podria poner como: CoroutineYieldUntil(coro, m_physicsEngine->isStatic())
+    }
+    // LOG_DEBUG("World has stopped");
+
+    // now that the simulation is static the next turn can go on
+
+    m_gameState->nextTurn();
+    m_isMoveDone = false;
+    // LOG_DEBUG("Corutine has ended, next turn\n");
+
+    CoroutineReset(coro);
+}
+
+
+int Game::startGameLoop()
+{
+    initializeBasicInputs();
+    glm::vec3 focusedBallPosition;
+    m_currentCameraController = new CameraControllerOrbit(&m_camera, 2.5, 0.5, &focusedBallPosition);
+    bindInputToController(m_window->getInput(), m_currentCameraController);
 
     unsigned int nFrame = 0;
-    float deltaTime = 0.0f;	// Time between current frame and last frame
-    float lastFrame = 0.0f; // Time of last frame
+    double deltaTime = 0.0f;	// Time between current frame and last frame
+    double lastFrame = 0.0f; // Time of last frame
 
-    Rendering::RuntimeModelEditor runtimeModelEditor(&renderEngine);
+    #ifdef DEBUG
+    /////////// IMGUI init ///////////
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    // debug imgui tools
+    Rendering::RuntimeModelEditor runtimeModelEditor(m_renderEngine);
+    #endif
 
-    while (!window.shouldClose() && !shouldExit)
+    Coroutine playerTurnCoroutine;
+
+    m_shouldExit = false;
+
+    initializeBasicInputs();
+
+    while (!m_window->shouldClose() && !m_shouldExit)
     {
-        // rendering commands here
         GL(glClearColor(0.1f, 0.1f, 0.15f, 1.0f));
         GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
+        #ifdef DEBUG
         // ImGui newframe
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -153,132 +342,47 @@ int Game(Window& window) {
         if (!io.WantCaptureMouse)
         {
             // blocks anything here if mouse is over imgui
-            // input handling inside
-            window.processInput(deltaTime);
+            playerTurn(&playerTurnCoroutine);
+            m_window->processInput(deltaTime);
         }
+        #else
+        playerTurn(&playerTurnCoroutine);
+        m_window->processInput(deltaTime);
+        #endif
 
-        // ECS.StepSimulation(deltaTime, 100, 0.001f);
-        ECS.update(deltaTime, &cameraOrbitPosition);
-        // dynamicsWorld->stepSimulation(deltaTime, 100, 0.001f);
+        m_physicsEngine->update(deltaTime, &focusedBallPosition);
+        
+        m_currentCameraController->update();
 
-        // physics update outside (also update the position of everything)
-        cameraController->update();
+        //// rendering update
 
-        //glm::mat4 view = camera.getViewMatrix();
+        m_renderEngine->updateShaderView();
+        m_renderEngine->drawAll();
 
-        /////////// RENDERING ///////////
-        if (drawTriangles)
+        m_renderEngine->drawLights();
+
+        #ifdef DEBUG_SHADER
+        std::vector<Rendering::CollisionBox>* p_rigidObjects = m_physicsEngine->getCollisionsBoxPtr();
+        for (int i = 0; i < (*p_rigidObjects).size(); i++)
         {
-            //// update rendering data
-            // ECS.draw(&modelShader, &camera, projection, controlledPosition, &debugShader);
-
-            // for (int i = 0; i < 16; i++)
-            // {
-            //     btCollisionObject* obj = ballsPhisics[i];
-            //     btRigidBody* body = btRigidBody::upcast(obj);
-            //     btTransform trans;
-            //     if (body && body->getMotionState())
-            //         body->getMotionState()->getWorldTransform(trans);
-            //     else
-            //         trans = obj->getWorldTransform();
-            //     glm::vec3 pos = glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
-            //     glm::quat orient = glm::quat(trans.getRotation().getW(), trans.getRotation().getX(), trans.getRotation().getY(), trans.getRotation().getZ());
-
-            //     if (i == 0)
-            //         cameraOrbitPosition = pos;
-
-            //     renderEngine.updateObject(ballsRenderIDs[i], pos, orient);
-            // }
-
-            //// rendering update
-
-            renderEngine.updateShaderView();
-            renderEngine.drawAll();
-
-            renderEngine.drawLights();
-
-            #ifdef DEBUG_SHADER
-            std::vector<Rendering::CollisionBox>* p_rigidObjects = ECS.getCollisionsBoxPtr();
-            for (int i = 0; i < (*p_rigidObjects).size(); i++)
-            {
-                //rigidObjects[i].draw(&debugShader, view, projection);
-                (*p_rigidObjects)[i].draw(renderEngine.getDebuggingShader());
-            }
-            #endif
-
+            //rigidObjects[i].draw(&debugShader, view, projection);
+            (*p_rigidObjects)[i].draw(m_renderEngine->getDebuggingShader());
         }
+        #endif
 
+        #ifdef DEBUG
+        drawDebugUI(nFrame, deltaTime, m_window->getInput(), &focusedBallPosition, &runtimeModelEditor);
+        #endif
 
-        /////////// ImGui ///////////
-
-        ImGui::Begin("Debug Window");
-        ImGui::Checkbox("Draw Triangles", &drawTriangles);
-        ImGui::Separator();
-        // ImGui::Text("Cube Controls");
-        //ImGui::SliderFloat3("Position", glm::value_ptr(controlledPosition), -1.5f, 1.5f);
-        //ImGui::SliderFloat3("Direction", glm::value_ptr(controlledDirection), -1.0f, 1.0f);
-        //ImGui::Separator();
-        //ImGui::Text("Light Cube Controls");
-        //ImGui::SliderFloat3("Light Position", glm::value_ptr(lightCubePosition), -2.0f, 2.0f);
-        //ImGui::ColorEdit3("Light Color", glm::value_ptr(*lightPoint.getColor()));
-        //ImGui::Separator();
-        ImGui::Text("Camera Controls");
-        ImGui::Text("Current camera position (%f, %f, %f)", cameraOrbitPosition.x, cameraOrbitPosition.y, cameraOrbitPosition.z);
-        if (ImGui::Button("Camera fly"))
-        {
-            unbindInputToController(input);
-            if (cameraController != nullptr)
-                delete cameraController;
-            cameraController = new CameraControllerFly(&camera);
-            bindInputToController(input, cameraController);
-        }
-        if (ImGui::Button("Camera fps"))
-        {
-            unbindInputToController(input);
-            if (cameraController != nullptr)
-                delete cameraController;
-            cameraController = new CameraControllerFps(&camera);
-            bindInputToController(input, cameraController);
-        }
-        if (ImGui::Button("Camera orbit (far)"))
-        {
-            unbindInputToController(input);
-            if (cameraController != nullptr)
-                delete cameraController;
-            cameraController = new CameraControllerOrbit(&camera, 2.5f, 1.0f, &cameraOrbitPosition);
-            bindInputToController(input, cameraController);
-        }
-        if (ImGui::Button("Camera orbit (close)"))
-        {
-            unbindInputToController(input);
-            if (cameraController != nullptr)
-                delete cameraController;
-            cameraController = new CameraControllerOrbit(&camera, 2.5f, 0.2f, &cameraOrbitPosition);
-            bindInputToController(input, cameraController);
-        }
-        ImGui::Separator();
-        ImGui::Text("Frame number %u", nFrame);
-        ImGui::Text("FPS: %f", 1 / deltaTime);
-        ImGui::End();
-
-        runtimeModelEditor.update();
-
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-
-        // check and call events and swap the buffers
-
-        window.update();
+        m_window->update();
 
         nFrame++;
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+
     }
 
-    if (cameraController != nullptr)
-        delete cameraController;
-
-    return (shouldExit ? 0 : 1); // 0 si se cierra correctamente, 1 si se cierra mal
+    return (m_shouldExit ? 0 : 1); // 0 si se cierra correctamente, 1 si se cierra de otra forma (crash, forzado, ...)
 }
+

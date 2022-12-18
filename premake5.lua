@@ -50,7 +50,7 @@ project "Billar"
         links { "IrrKlang" }        -- librerias dinamicas
         linkoptions {"-L./bin/%{cfg.buildcfg}/ \'-Wl,-rpath,$$ORIGIN\'"}    -- esto es para definir la carpeta donde se encuentra el .so y que en runtime coja el .so de la misma carpeta en la que este el ejecutable
         prebuildcommands {
-            "mkdir bin/shared/ -p",
+            "mkdir bin/%{cfg.buildcfg}/ -p",
             "{COPY} libs/irrKlang/bin/linux-gcc-64/* bin/%{cfg.buildcfg}"   -- librerias .so que se usaran con el ejecutable (si le pasamos el juego a alguien hay que darle tambien los .so)
         }
 

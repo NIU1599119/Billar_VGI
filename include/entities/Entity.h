@@ -2,6 +2,7 @@
 #include <glm/glm.hpp>
 #include "debug.h"
 
+#include "game/gamemodes.h"
 
 namespace Entities 
 {
@@ -10,22 +11,16 @@ namespace Entities
         BALL
     };
 
-    enum GAME_TYPE {
-        CLASSIC,
-        CARAMBOLA,
-        FREE_SHOTS
-    };
-
     class Entity
     {
     public:
-        Entity(TYPE type, GAME_TYPE subType) : m_type(type), m_subType(subType) {};
+        Entity(TYPE type, GAMEMODE subType) : m_type(type), m_subType(subType) {};
 
         // void setPosition();
         // void getPosition();
 
         TYPE getType() { return m_type; };
-        GAME_TYPE getSubType() { return m_subType; };
+        GAMEMODE getSubType() { return m_subType; };
 
         virtual void collision(Entity* entity) = 0;
         virtual void collision(Entity* entity, double force) = 0;
@@ -33,7 +28,7 @@ namespace Entities
     protected:
         // glm::vec3 m_position;
         TYPE m_type;
-        GAME_TYPE m_subType;
+        GAMEMODE m_subType;
     };
 
 };
