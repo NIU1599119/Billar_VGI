@@ -1,10 +1,5 @@
 #include "rendering/collisionBox.h"
 
-#include "debug.h"
-
-#include <glm/gtc/matrix_transform.hpp>
-
-
 namespace Rendering {
 
     void CollisionBox::draw(Shader* shader)
@@ -15,7 +10,8 @@ namespace Rendering {
             return;
         glm::mat4 translate = glm::mat4(1.0f);
         translate = glm::translate(translate, m_position);
-        glm::mat4 orientation = glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+        glm::quat quatOrientation = glm::quat(m_orientation.getX(), m_orientation.getY(), m_orientation.getZ(), m_orientation.getW());
+        glm::mat4 orientation = glm::mat4_cast(quatOrientation);
         glm::mat4 scale = glm::scale(glm::mat4(1.0f), m_scale);
         glm::mat4 model = translate * orientation * scale;
 
@@ -39,6 +35,8 @@ namespace Rendering {
 		groundTransform.setIdentity();
         
 		groundTransform.setOrigin(btVector3(m_position.x, m_position.y, m_position.z));
+        groundTransform.setRotation(btQuaternion(m_orientation.getX(), m_orientation.getY(), m_orientation.getZ(), m_orientation.getW()));
+
 
 		btScalar mass(0.);
 

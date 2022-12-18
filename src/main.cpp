@@ -66,6 +66,16 @@ int main()
                 return 1;
             }
         }
+        else if (opcio == 4)
+        {
+            // Opciones
+            continuarJugando = (optionsMenu(window,x,y));
+            if (!continuarJugando)
+            {
+                LOG_ERROR("El menu de opciones ha crasheado");
+                return 1;
+            }
+        }
         else
             continuarJugando = false;
     }

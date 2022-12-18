@@ -163,7 +163,7 @@ int initMenu(int& opcio, Window& window, float& Width, float& Height)
         {
             Renderer->DrawSprite(ResourceManager::GetTexture("button5"),
                 glm::vec2(1180.0f * resFix, 900.0f * resFix), glm::vec2(300 * resFix, 125 * resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
-            opcio = 4;
+            opcio = 5;
         }
         else
         {
@@ -284,4 +284,166 @@ int initResolution(float& x, float& y, Window& window)
     window.update();
 
     return 0;
+}
+
+int optionsMenu(Window& window, float& Width, float& Height) {
+
+    Input* input = window.getInput();
+
+    float resFix = Width / 1920;
+
+    // Creaci� de la detecci� d'inputs
+
+    bool clicked = false;
+
+    //input->setKeyAction(EXIT, GLFW_KEY_BACKSPACE, false);
+    input->setKeyAction(EXIT, GLFW_KEY_ESCAPE, false);
+    input->setActionFunction(EXIT, [&window](float delaTime) { window.close(); });
+
+    // menu cursor
+    glfwSetInputMode(window.getGLFWwindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);      // let cursor free
+    input->captureMouse();                                                          // but capture the inputs (position)
+
+    glm::vec2 mousePosition = glm::vec2(0.0f);
+
+    // mouse input setup
+    input->setMouseCallback([&mousePosition](float posX, float posY) {
+        // LOG_DEBUG("Mouse is now at (%f, %f)", posX, posY);
+        mousePosition = glm::vec2(posX, posY);
+        }, false);  // false indica posicion absoluta para obtener la posicion en pixeles del cursor (en lugar de la posicion relativa que tiene que ver con el anterior frame)
+
+    input->setKeyAction(LEFT_CLICK, GLFW_MOUSE_BUTTON_LEFT, false);
+    input->setActionFunction(LEFT_CLICK, [&mousePosition, &clicked](float deltaTime) {
+        LOG_DEBUG("Mouse clicked at (%f, %f)", mousePosition.x, mousePosition.y);
+        clicked = true;
+        });
+
+
+    float deltaTime = 0.0f;	// Time between current frame and last frame
+    float lastFrame = 0.0f; // Time of last frame
+
+    // Creaci� dels botons
+    // load shaders
+    ResourceManager::LoadShader("shaders/sprite.vs", "shaders/sprite.frag", nullptr, "sprite");
+    // configure shaders
+    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(Width),
+        static_cast<float>(Height), 0.0f, -1.0f, 1.0f);
+    ResourceManager::GetShader("sprite").Use().SetInteger("image", 0);
+    ResourceManager::GetShader("sprite").SetMatrix4("projection", projection);
+    // set render-specific controls
+    Renderer = new SpriteRenderer(ResourceManager::GetShader("sprite"));
+    // load textures
+    ResourceManager::LoadTexture("textures/menu/opciones.png", true, "menu");
+    ResourceManager::LoadTexture("textures/menu/flecha-izquierda.png", true, "flechai1");
+    ResourceManager::LoadTexture("textures/menu/flecha-izquierda.png", true, "flechai2");
+    ResourceManager::LoadTexture("textures/menu/flecha-derecha.png", true, "flechad1");
+    ResourceManager::LoadTexture("textures/menu/flecha-derecha.png", true, "flechad2");
+    ResourceManager::LoadTexture("textures/menu/Jazz.png", true, "jazz");
+    ResourceManager::LoadTexture("textures/menu/indicador-volumen.png", true, "indicador");
+    ResourceManager::LoadTexture("textures/menu/6_sinfondo.png", true, "salir");
+
+    // Creacio del bucle de la ventana
+
+    bool sortir;
+
+    while (!window.shouldClose())
+    {
+        GL(glClearColor(0.1f, 0.1f, 0.15f, 1.0f));
+        GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+        // Agafa els inputs
+
+        clicked = false;
+        sortir = false;
+
+        window.processInput(deltaTime);
+
+        Renderer->DrawSprite(ResourceManager::GetTexture("menu"),
+            glm::vec2(0.0f, 0.0f), glm::vec2(Width, Height), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+
+        
+        
+        if ((mousePosition.x > (760.0f * resFix) && mousePosition.y > (400.0f * resFix)) && (mousePosition.x < (870.0f * resFix) && mousePosition.y < (510.0f * resFix)))
+        {
+            Renderer->DrawSprite(ResourceManager::GetTexture("flechai1"),
+                glm::vec2(760.0f * resFix, 400.0f * resFix), glm::vec2(110 * resFix, 110 * resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+            
+        }
+        else
+        {
+            Renderer->DrawSprite(ResourceManager::GetTexture("flechai1"),
+                glm::vec2(760.0f * resFix, 400.0f * resFix), glm::vec2(110 * resFix, 110 * resFix), 0.0f, glm::vec3(0.9f, 0.9f, 0.9f));
+
+        }
+
+        if ((mousePosition.x > (760.0f * resFix) && mousePosition.y > (660.0f * resFix)) && (mousePosition.x < (870.0f * resFix) && mousePosition.y < (770.0f * resFix)))
+        {
+            Renderer->DrawSprite(ResourceManager::GetTexture("flechai2"),
+                glm::vec2(760.0f * resFix, 660.0f * resFix), glm::vec2(110 * resFix, 110 * resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+         
+        }
+        else
+        {
+            Renderer->DrawSprite(ResourceManager::GetTexture("flechai2"),
+                glm::vec2(760.0f * resFix, 660.0f * resFix), glm::vec2(110 * resFix, 110 * resFix), 0.0f, glm::vec3(0.9f, 0.9f, 0.9f));
+        }
+
+        if ((mousePosition.x > (1047.0f * resFix) && mousePosition.y > (398.0f * resFix)) && (mousePosition.x < (1157.0f * resFix) && mousePosition.y < (508.0f * resFix)))
+        {
+            Renderer->DrawSprite(ResourceManager::GetTexture("flechad1"),
+                glm::vec2(1047.0f * resFix, 398.0f * resFix), glm::vec2(110 * resFix, 110 * resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+            
+        }
+        else
+        {
+            Renderer->DrawSprite(ResourceManager::GetTexture("flechad1"),
+                glm::vec2(1047.0f * resFix, 398.0f * resFix), glm::vec2(110 * resFix, 110 * resFix), 0.0f, glm::vec3(0.9f, 0.9f, 0.9f));
+        }
+
+        if ((mousePosition.x > (1047.0f * resFix)) && mousePosition.y > (660.0f * resFix) && (mousePosition.x < (1157.0f * resFix) && mousePosition.y < (770.0f * resFix)))
+        {
+            Renderer->DrawSprite(ResourceManager::GetTexture("flechad2"),
+                glm::vec2(1047.0f * resFix, 660.0f * resFix), glm::vec2(110 * resFix, 110 * resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+            
+        }
+        else
+        {
+            Renderer->DrawSprite(ResourceManager::GetTexture("flechad2"),
+                glm::vec2(1047.0f * resFix, 660.0f * resFix), glm::vec2(110 * resFix, 110 * resFix), 0.0f, glm::vec3(0.9f, 0.9f, 0.9f));
+        }
+
+        /// SWITCH PARA CAMBIAR MUSICA
+
+        Renderer->DrawSprite(ResourceManager::GetTexture("jazz"),
+            glm::vec2(850.0f * resFix, 670.0f * resFix), glm::vec2(200 * resFix, 90 * resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+
+
+        if ((mousePosition.x > (1430.0f * resFix) && mousePosition.y > (900.0f * resFix)) && (mousePosition.x < (1730.0f * resFix) && mousePosition.y < (1025.0f * resFix)))
+        {
+            Renderer->DrawSprite(ResourceManager::GetTexture("salir"),
+                glm::vec2(1430.0f * resFix, 900.0f * resFix), glm::vec2(300 * resFix, 125 * resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+            sortir = true;
+        }
+        else
+        {
+            Renderer->DrawSprite(ResourceManager::GetTexture("salir"),
+                glm::vec2(1430.0f * resFix, 900.0f * resFix), glm::vec2(300 * resFix, 125 * resFix), 0.0f, glm::vec3(0.7f, 0.7f, 0.7f));
+        }
+
+
+        // Actualitza el frame
+        window.update();
+
+        if (clicked && sortir)
+            break;
+
+
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+    }
+
+    input->removeActionFunction(LEFT_CLICK);
+    input->removeKeyAction(GLFW_MOUSE_BUTTON_LEFT);
+
+    return 1;
 }

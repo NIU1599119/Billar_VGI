@@ -88,7 +88,7 @@ Game::Game(Window* window, GAMEMODE gamemode, int numPlayers)
         btRigidBody* body = btRigidBody::upcast(obj);
         body->setActivationState(ACTIVE_TAG);
         glm::vec3 front = p_camera->getPlaneFront();
-        front = front * 4.0f;
+        front = front * 2.0f;
         body->setLinearVelocity(btVector3(front.x, body->getLinearVelocity().y(), front.z));
         *p_isMoveDone = true;
     };
@@ -125,20 +125,19 @@ void Game::initializeRenderObjects()
     case CLASSIC:
     {
         // add the table
-        // int poolRenderID = m_renderEngine->createObject(std::string("models/pool_table/scene.gltf"), 0.1245);
-        // renderEngine.updateObject(poolRenderID, glm::vec3(0.0), glm::quat(1.0, 0.0, 0.0, 0.0));
-        // m_barRenderIndexes.push_back(poolRenderID);
+        int poolRenderID = m_renderEngine->createObject(std::string("models/pool_table/scene.gltf"), 0.1245);
+        m_renderEngine->updateObject(poolRenderID, glm::vec3(0.0), glm::quat(1.0, 0.0, 0.0, 0.0));
+        m_barRenderIndexes.push_back(poolRenderID);
 
 
         // add the balls
-        int cueBallRenderID = m_renderEngine->createObject(std::string("models/PoolBall/Pool.obj"), 0.05715 / 2);
+        int cueBallRenderID = m_renderEngine->createObject(std::string("models/billiard-balls/ballwhite.obj"), 0.05715);
         m_ballRenderIndexes.push_back(cueBallRenderID); // 0 is CUE ball
 
-        Rendering::Model* ballModel = new Rendering::Model("models/PoolBall1/Pool.obj");    // delete this later
+        // Rendering::Model* ballModel = new Rendering::Model("models/PoolBall1/Pool.obj");    // delete this later
         for (int i = 1; i < 16; i++)
         {
-            // int iBallID = m_renderEngine->createObject(std::string("models/PoolBall" + std::to_string(i) + "/Pool.obj"), 0.05715 / 2);
-            int iBallID = m_renderEngine->createObject(ballModel, 0.05715 / 2);
+            int iBallID = m_renderEngine->createObject(std::string("models/billiard-balls/ball" + std::to_string(i) + ".obj"), 0.05715);
             m_ballRenderIndexes.push_back(iBallID);
         }
 
@@ -336,7 +335,7 @@ int Game::startGameLoop()
     Rendering::RuntimeModelEditor runtimeModelEditor(m_renderEngine);
     #endif
 
-    DetectionBox hole(m_renderEngine, m_physicsEngine, glm::vec3(0.0f, 0.789f, 0.0f), glm::vec3(0.1, 0.1, 0.1));
+    DetectionBox hole(m_renderEngine, m_physicsEngine, glm::vec3(0.0f, 0.789f, 1.0f), glm::vec3(0.1, 0.1, 0.1));
 
 
     Coroutine playerTurnCoroutine;
@@ -393,8 +392,6 @@ int Game::startGameLoop()
         #endif
 
         #ifdef DEBUG
-
-
         drawDebugUI(nFrame, deltaTime, m_window->getInput(), &focusedBallPosition, &runtimeModelEditor, hole);
         #endif
 

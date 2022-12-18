@@ -57,16 +57,147 @@ EntityControllerSystem::EntityControllerSystem(GAMEMODE gamemode, Rendering::Ren
 
     ///////////// Inicialization EntityPool /////////////////
 
+    int wallsIdStart = 0;
+
     switch(gamemode) 
     {
         case CLASSIC:
         case FREE_SHOTS:
         {
+            table.setPosition(glm::vec3(0., 0.76/2.0, 0.));
+            table.setScale(glm::vec3(2.24, 0.76, 1.12));
+
+            m_EntityPool.push_back(table);
+
+            wallsIdStart = m_EntityPool.size();
+            
+            // posicion es el limite del tablero menos la mitad del ancho
+            // 262-224 = 150-112 = 38 cm Anchura paredes -> 19 anchura 1 pared
+            // 81.3-76.5 = 4.8 cm Altura pared (comparado con el tablero)
+
+            // wall (front 1)
+            wallAux.setPosition(glm::vec3(0.55, 0.76, -(0.75-0.095)));
+            wallAux.setScale(glm::vec3(1.00, 0.096, 0.19));
+            m_EntityPool.push_back(wallAux);
+
+            // wall (front 2)
+            wallAux.setPosition(glm::vec3(-0.55, 0.76, -(0.75 - 0.095)));
+            wallAux.setScale(glm::vec3(1.00, 0.096, 0.19));
+            m_EntityPool.push_back(wallAux);
+
+            // wall (back 1)
+            wallAux.setPosition(glm::vec3(0.55, 0.76, +(0.75-0.095)));
+            wallAux.setScale(glm::vec3(1.00, 0.096, 0.19));
+            m_EntityPool.push_back(wallAux);
+
+            // wall (back 2)
+            wallAux.setPosition(glm::vec3(-0.55, 0.76, +(0.75 - 0.095)));
+            wallAux.setScale(glm::vec3(1.00, 0.096, 0.19));
+            m_EntityPool.push_back(wallAux);
+
+            // wall (left)
+            wallAux.setPosition(glm::vec3(-(1.31-0.095), 0.76, 0.));
+            wallAux.setScale(glm::vec3(0.19, 0.096, 1.00));
+            m_EntityPool.push_back(wallAux);
+
+            // wall (right)
+            wallAux.setPosition(glm::vec3(+(1.31-0.095), 0.76, 0.));
+            wallAux.setScale(glm::vec3(0.19, 0.096, 1.00));
+            m_EntityPool.push_back(wallAux);
+
+            // wall hole 1 (left)
+            wallAux.setPosition(glm::vec3(+(1.31 - (0.095+0.028)), 0.76, 0.535));
+            wallAux.setScale(glm::vec3(0.04, 0.096, 0.15));
+            wallAux.setAngle(glm::radians(45.0f));
+            m_EntityPool.push_back(wallAux);
+
+            // wall hole 1 (right)
+            wallAux.setPosition(glm::vec3(+(1.31 - (0.095 + 0.12)), 0.76, 0.63));
+            wallAux.setScale(glm::vec3(0.04, 0.096, 0.15));
+            wallAux.setAngle(glm::radians(45.0f));
+            m_EntityPool.push_back(wallAux);
+
+            // wall hole 1 (back)
+            wallAux.setPosition(glm::vec3(+(1.31 - (0.095 + 0.0)), 0.76, 0.63));
+            wallAux.setScale(glm::vec3(0.04, 0.096, 0.20));
+            wallAux.setAngle(glm::radians(135.0f));
+            m_EntityPool.push_back(wallAux);
+
+            // wall hole 2 (left)
+            wallAux.setPosition(glm::vec3(-(1.31 - (0.095 + 0.028)), 0.76, 0.535));
+            wallAux.setScale(glm::vec3(0.04, 0.096, 0.15));
+            wallAux.setAngle(glm::radians(135.0f));
+            m_EntityPool.push_back(wallAux);
+
+            // wall hole 2 (right)
+            wallAux.setPosition(glm::vec3(-(1.31 - (0.095 + 0.12)), 0.76, 0.63));
+            wallAux.setScale(glm::vec3(0.04, 0.096, 0.15));
+            wallAux.setAngle(glm::radians(135.0f));
+            m_EntityPool.push_back(wallAux);
+
+            // wall hole 2 (back)
+            wallAux.setPosition(glm::vec3(-(1.31 - (0.095 + 0.0)), 0.76, 0.63));
+            wallAux.setScale(glm::vec3(0.04, 0.096, 0.20));
+            wallAux.setAngle(glm::radians(45.0f));
+            m_EntityPool.push_back(wallAux);
+
+            // wall hole 3 (left)
+            wallAux.setPosition(glm::vec3(+(1.31 - (0.095 + 0.028)), 0.76, -0.535));
+            wallAux.setScale(glm::vec3(0.04, 0.096, 0.15));
+            wallAux.setAngle(glm::radians(135.0f));
+            m_EntityPool.push_back(wallAux);
+
+            // wall hole 3 (right)
+            wallAux.setPosition(glm::vec3(+(1.31 - (0.095 + 0.12)), 0.76, -0.63));
+            wallAux.setScale(glm::vec3(0.04, 0.096, 0.15));
+            wallAux.setAngle(glm::radians(135.0f));
+            m_EntityPool.push_back(wallAux);
+
+            // wall hole 3 (back)
+            wallAux.setPosition(glm::vec3(+(1.31 - (0.095 + 0.0)), 0.76, -0.63));
+            wallAux.setScale(glm::vec3(0.04, 0.096, 0.20));
+            wallAux.setAngle(glm::radians(45.0f));
+            m_EntityPool.push_back(wallAux);
+
+            // wall hole 4 (left)
+            wallAux.setPosition(glm::vec3(-(1.31 - (0.095 + 0.028)), 0.76, -0.535));
+            wallAux.setScale(glm::vec3(0.04, 0.096, 0.15));
+            wallAux.setAngle(glm::radians(45.0f));
+            m_EntityPool.push_back(wallAux);
+
+            // wall hole 4 (right)
+            wallAux.setPosition(glm::vec3(-(1.31 - (0.095 + 0.12)), 0.76, -0.63));
+            wallAux.setScale(glm::vec3(0.04, 0.096, 0.15));
+            wallAux.setAngle(glm::radians(45.0f));
+            m_EntityPool.push_back(wallAux);
+
+            // wall hole 4 (back)
+            wallAux.setPosition(glm::vec3(-(1.31 - (0.095 + 0.0)), 0.76, -0.63));
+            wallAux.setScale(glm::vec3(0.04, 0.096, 0.20));
+            wallAux.setAngle(glm::radians(135.0f));
+            m_EntityPool.push_back(wallAux);
+
+            // wall hole 5
+            wallAux.setPosition(glm::vec3(0, 0.76, +(0.75 - 0.080 / 2)));
+            wallAux.setScale(glm::vec3(0.10, 0.096, 0.080));
+            wallAux.setAngle(glm::radians(0.0f));
+            m_EntityPool.push_back(wallAux);
+
+            //wall hole 6
+            wallAux.setPosition(glm::vec3(0, 0.76, -(0.75 - 0.080/2)));
+            wallAux.setScale(glm::vec3(0.10, 0.096, 0.080));
+            wallAux.setAngle(glm::radians(0.0f));
+            m_EntityPool.push_back(wallAux);
+
+
+            break;
+        }
+        case CARAMBOLA:
             table.setPosition(glm::vec3(0., 0.76 / 2.0, 0.));
             table.setScale(glm::vec3(2.62, 0.76, 1.50));
 
             m_EntityPool.push_back(table);
-            int wallsIdStart = m_EntityPool.size();
+            wallsIdStart = m_EntityPool.size();
 
             // wall (front)
             wallAux.setPosition(glm::vec3(0., 0.76, -(0.75 - 0.095)));
@@ -94,28 +225,23 @@ EntityControllerSystem::EntityControllerSystem(GAMEMODE gamemode, Rendering::Ren
             wallAux.setScale(glm::vec3(0.19, 0.096, 1.50));
 
             m_EntityPool.push_back(wallAux);
-
-            for (int i = 0; i < m_EntityPool.size(); i++)
-            {
-                btRigidBody* body = m_EntityPool[i].getRigidBodyBullet(m_collisionShapes);
-                
-                Entities::Entity* tablePart;
-                if (i < wallsIdStart)
-                    tablePart = new Entities::EntityTable(gamemode, Entities::CLOTH);
-                else
-                    tablePart = new Entities::EntityTable(gamemode, Entities::RAIL);
-                body->setUserPointer(tablePart);
-                m_dynamicsWorld->addRigidBody(body);
-                m_entities.push_back(tablePart);
-            }
-
             break;
-        }
-        case CARAMBOLA:
-            break;
-
         default:
             break;
+    }
+
+    for (int i = 0; i < m_EntityPool.size(); i++)
+    {
+        btRigidBody* body = m_EntityPool[i].getRigidBodyBullet(m_collisionShapes);
+        
+        Entities::Entity* tablePart;
+        if (i < wallsIdStart)
+            tablePart = new Entities::EntityTable(gamemode, Entities::CLOTH);
+        else
+            tablePart = new Entities::EntityTable(gamemode, Entities::RAIL);
+        body->setUserPointer(tablePart);
+        m_dynamicsWorld->addRigidBody(body);
+        m_entities.push_back(tablePart);
     }
 
     /////////// Posiciones ///////////////
