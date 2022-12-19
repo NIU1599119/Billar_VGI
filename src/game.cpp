@@ -170,7 +170,7 @@ void Game::initializeRenderLights()
         m_lightIndexes.push_back(idx);
         m_renderEngine->setLightPosition(idx, glm::vec3(-1.0 + (i / 2.0), 2.5, 0.0));
         m_renderEngine->setLightColor(idx, glm::vec3(1.0, 1.0, 1.0));
-        m_renderEngine->setLightPolinomial(idx, 1.0, 0.09, 0.0032);
+        m_renderEngine->setLightPolinomial(idx, 2.0, 0.09, 0.0032);
     }
 }
 
