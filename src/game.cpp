@@ -180,8 +180,8 @@ void Game::initializeRenderObjects()
     case CLASSIC:
     {
         // add the table
-        int poolRenderID = m_renderEngine->createObject(std::string("models/pool-table/table.obj"), 1.0);
-        m_renderEngine->updateObject(poolRenderID, glm::vec3(0.0), glm::quat(1.0, 0.0, 0.0, 0.0));
+        int poolRenderID = m_renderEngine->createObject(std::string("models/pool-table/table.obj"), 0.7);
+        m_renderEngine->updateObject(poolRenderID, glm::vec3(0.0,0.064,0.0), glm::quat(1.0, 0.0, 0.0, 0.0));
         m_barRenderIndexes.push_back(poolRenderID);
 
 
