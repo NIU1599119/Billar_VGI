@@ -38,6 +38,12 @@ project "Billar"
     files { "src/**.cpp", "include/**.h", "include/**.hpp" }
 
     links { "GLFW", "GLM", "GLAD", "ImGui", "assimp", "bullet" }
+    openmp "On"
+    defines {
+        "B3_USE_CLEW",
+        "BT_THREADSAFE",
+		"BT_USE_OPENMP"
+    }
 
     filter "system:linux"
         pic "On"
@@ -62,7 +68,7 @@ project "Billar"
 
         links { "irrKlang" }                        -- librerias dinamicas
         libdirs { "bin/%{cfg.buildcfg}" }
-        linkoptions {"-L./bin/%{cfg.buildcfg}"}     -- define la carpeta donde se encuentran las librerias dinamicas
+        -- linkoptions {"-L./bin/%{cfg.buildcfg}"}     -- define la carpeta donde se encuentran las librerias dinamicas
 
         prebuildcommands {  -- mover archivos de librerias dinamicas a la carpeta de compilacion
             "mkdir bin/%{cfg.buildcfg}/ -p",

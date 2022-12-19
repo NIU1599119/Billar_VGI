@@ -9,6 +9,7 @@ EntityControllerSystem::EntityControllerSystem(GAMEMODE gamemode, Rendering::Ren
     m_renderEngine(renderingEngine),
     m_ballRenderIDs(ballRenderIDs)
 {
+    /*
     ///collision configuration contains default setup for memory, collision setup. Advanced users can create their own configuration.
     m_collisionConfiguration = new btDefaultCollisionConfiguration();
 
@@ -23,6 +24,26 @@ EntityControllerSystem::EntityControllerSystem(GAMEMODE gamemode, Rendering::Ren
     m_solver = new btSequentialImpulseConstraintSolver;
 
     m_dynamicsWorld = new btDiscreteDynamicsWorld(m_dispatcher, m_overlappingPairCache, m_solver, m_collisionConfiguration);
+    */
+    //////// bullet3
+    //static CustomTaskScheduler TaskScheduler(TEXT("bullet physics task scheduler"), PhysicsThreadCount);
+    //TaskScheduler.setNumThreads(PhysicsThreadCount);
+    //btITaskScheduler* ts = new btITaskScheduler(,);
+    //btSetTaskScheduler(ts);
+    btITaskScheduler* m_taskScheduler = btCreateDefaultTaskScheduler();
+    btSetTaskScheduler(m_taskScheduler);
+
+    int nThreads = m_taskScheduler->getMaxNumThreads();
+    nThreads = nThreads / 2;
+    m_taskScheduler->setNumThreads(nThreads);
+
+    m_collisionConfiguration = new btDefaultCollisionConfiguration();
+    m_dispatcher = new btCollisionDispatcherMt(m_collisionConfiguration);
+    m_dispatcher->setNearCallback((btNearCallback)CollisionDetectorNearCallback);
+    m_overlappingPairCache = new btDbvtBroadphase();
+    m_solverPool = new btConstraintSolverPoolMt(nThreads);
+
+    m_dynamicsWorld = new btDiscreteDynamicsWorldMt(m_dispatcher, m_overlappingPairCache, m_solverPool, nullptr, m_collisionConfiguration);
 
     m_dynamicsWorld->setGravity(btVector3(0, -9.81, 0));
     ///-----initialization_end-----
@@ -351,8 +372,8 @@ EntityControllerSystem::~EntityControllerSystem()
     if (m_dynamicsWorld != nullptr)
         delete m_dynamicsWorld;
 
-    if (m_solver != nullptr)
-        delete m_solver;
+    if (m_solverPool != nullptr)
+        delete m_solverPool;
 
     if (m_overlappingPairCache != nullptr)
         delete m_overlappingPairCache;
@@ -362,7 +383,10 @@ EntityControllerSystem::~EntityControllerSystem()
 
     if (m_collisionConfiguration != nullptr)
         delete m_collisionConfiguration;
-
+    
+    // este no se deletea por alguna razon
+    //if (m_taskScheduler != nullptr)
+    //    delete m_taskScheduler;
 }
 
 

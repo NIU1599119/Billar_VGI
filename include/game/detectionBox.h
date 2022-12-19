@@ -44,7 +44,7 @@ public:
         for(int i = 0; i < nBalls; i++)
         {
             int ballID = m_ecs->getBallIdx(i);
-            btDiscreteDynamicsWorld** dynamicsWorld = m_ecs->getDynamicsWorld();
+            btDiscreteDynamicsWorldMt** dynamicsWorld = m_ecs->getDynamicsWorld();
 
             btCollisionObject* obj = (*dynamicsWorld)->getCollisionObjectArray()[ballID];
             btRigidBody* body = btRigidBody::upcast(obj);

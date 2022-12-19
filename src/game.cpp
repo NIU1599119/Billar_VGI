@@ -77,7 +77,7 @@ Game::Game(Window* window, GAMEMODE gamemode, int numPlayers)
 
     // variables necesarias para las funciones
     Input* input = m_window->getInput();
-    btDiscreteDynamicsWorld** p_dynamicsWorld = m_physicsEngine->getDynamicsWorld();
+    btDiscreteDynamicsWorldMt** p_dynamicsWorld = m_physicsEngine->getDynamicsWorld();
     Camera* p_camera = &m_camera;
     bool* p_isMoveDone = &m_isMoveDone;
     int currentBallToShoot = m_gameState->getPlayerBallID();

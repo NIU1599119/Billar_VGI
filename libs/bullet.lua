@@ -24,8 +24,11 @@ project "bullet"
 		"bullet/src/clew/**",
 	}
 
+    openmp "On"
 	defines {
 		"B3_USE_CLEW",
+        "BT_THREADSAFE",
+		"BT_USE_OPENMP"
 	}
     
 	filter "system:linux"

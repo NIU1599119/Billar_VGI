@@ -11,7 +11,11 @@
 #include <glm/gtc/type_ptr.hpp>
 
 // fisicas
-#include "btBulletDynamicsCommon.h"
+#include <BulletDynamics/Dynamics/btDiscreteDynamicsWorldMt.h>
+#include <BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolverMt.h>
+#include <BulletCollision/CollisionDispatch/btCollisionDispatcherMt.h>
+
+#include <btBulletDynamicsCommon.h>
 #include "rendering/collisionBox.h"
 
 // Input
@@ -55,18 +59,25 @@ public:
     // check if all balls are static (inactive)
     bool isStatic();
 
-    btDiscreteDynamicsWorld** getDynamicsWorld() { return &m_dynamicsWorld; };
+    btDiscreteDynamicsWorldMt** getDynamicsWorld() { return &m_dynamicsWorld; };
     int getBallIdx(int ballID = 0) { return m_ballsIndex+ballID; }; 
 
     int createEntity(Entities::Entity* newEntity, btCollisionShape* colShape, btVector3& position);
 
 private:
     GAMEMODE m_gamemode;
+    //btDefaultCollisionConfiguration* m_collisionConfiguration;
+    //btCollisionDispatcher* m_dispatcher;
+    //btBroadphaseInterface* m_overlappingPairCache;
+    //btSequentialImpulseConstraintSolver* m_solver;
+    //btDiscreteDynamicsWorld* m_dynamicsWorld;
+
+    btITaskScheduler* m_taskScheduler;
     btDefaultCollisionConfiguration* m_collisionConfiguration;
-    btCollisionDispatcher* m_dispatcher;
+    btCollisionDispatcherMt* m_dispatcher;
     btBroadphaseInterface* m_overlappingPairCache;
-    btSequentialImpulseConstraintSolver* m_solver;
-    btDiscreteDynamicsWorld* m_dynamicsWorld;
+    btConstraintSolverPoolMt* m_solverPool;
+    btDiscreteDynamicsWorldMt* m_dynamicsWorld;
 
     int m_maxSubSteps;
     double m_fixedTimeStep;
@@ -75,9 +86,7 @@ private:
 
     std::vector<Rendering::CollisionBox> m_EntityPool;
     std::vector<Entities::Entity*> m_entities;
-    // std::vector<btVector3> m_EntityBallPositions;
-    // std::vector<Rendering::Object> m_EntityBallObjects;
-    // std::vector<Rendering::Model> m_EntityBallModels;
+
     int m_ballsIndex;
 
     Rendering::RenderEngine3D* m_renderEngine;
