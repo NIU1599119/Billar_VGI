@@ -119,7 +119,19 @@ Game::~Game()
 
 
 void Game::initializeRenderObjects()
-{
+{   
+    //add the room
+  /*  int roomRenderID = m_renderEngine->createObject(std::string("models/room/Room.obj"));
+    m_renderEngine->updateObject(roomRenderID, glm::vec3(0.0), glm::quat(1.0, 0.0, 0.0, 0.0));
+    m_renderEngine->updateObjectScaling(roomRenderID, 2.0);
+    m_barRenderIndexes.push_back(roomRenderID);
+
+    int roomRenderID2 = m_renderEngine->createObject(std::string("models/room/Room.obj"));
+    m_renderEngine->updateObject(roomRenderID, glm::vec3(0.0), glm::quat(1.0, 0.0, 0.0, 0.0));
+    m_renderEngine->updateObjectScaling(roomRenderID, 2.0);
+    m_barRenderIndexes.push_back(roomRenderID);*/
+
+
     switch (m_gameState->getGamemode())
     {
     case CLASSIC:
@@ -134,7 +146,6 @@ void Game::initializeRenderObjects()
         int cueBallRenderID = m_renderEngine->createObject(std::string("models/billiard-balls/ballwhite.obj"), 0.05715);
         m_ballRenderIndexes.push_back(cueBallRenderID); // 0 is CUE ball
 
-        // Rendering::Model* ballModel = new Rendering::Model("models/PoolBall1/Pool.obj");    // delete this later
         for (int i = 1; i < 16; i++)
         {
             int iBallID = m_renderEngine->createObject(std::string("models/billiard-balls/ball" + std::to_string(i) + ".obj"), 0.05715);
