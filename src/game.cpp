@@ -88,7 +88,7 @@ Game::Game(Window* window, GAMEMODE gamemode, int numPlayers)
         btRigidBody* body = btRigidBody::upcast(obj);
         body->setActivationState(ACTIVE_TAG);
         glm::vec3 front = p_camera->getPlaneFront();
-        front = front * 2.0f;
+        front = front * 3.0f;
         body->setLinearVelocity(btVector3(front.x, body->getLinearVelocity().y(), front.z));
         *p_isMoveDone = true;
     };
@@ -125,7 +125,7 @@ void Game::initializeRenderObjects()
     case CLASSIC:
     {
         // add the table
-        int poolRenderID = m_renderEngine->createObject(std::string("models/pool_table/scene.gltf"), 0.1245);
+        int poolRenderID = m_renderEngine->createObject(std::string("models/pool_table/scene.gltf"), 0.109025);
         m_renderEngine->updateObject(poolRenderID, glm::vec3(0.0), glm::quat(1.0, 0.0, 0.0, 0.0));
         m_barRenderIndexes.push_back(poolRenderID);
 

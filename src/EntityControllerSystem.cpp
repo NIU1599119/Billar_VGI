@@ -329,8 +329,8 @@ EntityControllerSystem::EntityControllerSystem(GAMEMODE gamemode, Rendering::Ren
         body->setFriction(.245);
         body->setRestitution(0.97468);
         body->setContactProcessingThreshold(0);// ESTE ERA EL THRESHOLD DIOOOOOOS
-        body->setSpinningFriction(1);
-        body->setRollingFriction(0.0005);
+        body->setSpinningFriction(0.8);
+        body->setRollingFriction(0.0004);
 
 
         Entities::Entity* ballEntity = new Entities::EntityBall(i, gamemode);
