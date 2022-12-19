@@ -121,23 +121,66 @@ Game::~Game()
 void Game::initializeRenderObjects()
 {   
     //add the room
-  /*  int roomRenderID = m_renderEngine->createObject(std::string("models/room/Room.obj"));
+    int roomRenderID = m_renderEngine->createObject(std::string("models/room/Room.obj"),1.0);
     m_renderEngine->updateObject(roomRenderID, glm::vec3(0.0), glm::quat(1.0, 0.0, 0.0, 0.0));
-    m_renderEngine->updateObjectScaling(roomRenderID, 2.0);
+    m_renderEngine->updateObjectScaling(roomRenderID, glm::vec3(2.0, 4.0, 2.0));
     m_barRenderIndexes.push_back(roomRenderID);
 
-    int roomRenderID2 = m_renderEngine->createObject(std::string("models/room/Room.obj"));
-    m_renderEngine->updateObject(roomRenderID, glm::vec3(0.0), glm::quat(1.0, 0.0, 0.0, 0.0));
-    m_renderEngine->updateObjectScaling(roomRenderID, 2.0);
-    m_barRenderIndexes.push_back(roomRenderID);*/
+    int roomRenderID2 = m_renderEngine->createObject(std::string("models/room/Room.obj"),1.0);
+    m_renderEngine->updateObject(roomRenderID2, glm::vec3(0.0, 4.0, 0.0), glm::quat(1.0, 0.0, 0.0, 0.0));
+    m_renderEngine->updateObjectScaling(roomRenderID2, 2.0);
+    m_barRenderIndexes.push_back(roomRenderID2);
 
+    //add pub_counter
+    int barraBarRenderID = m_renderEngine->createObject(std::string("models/pub_counter/scene.gltf"), 1.0);
+    m_renderEngine->updateObject(barraBarRenderID, glm::vec3(2.512, 0.0, 1.615), glm::quat(0.5, -0.5, 0.5, 0.5));
+    m_renderEngine->updateObjectScaling(barraBarRenderID, glm::vec3(0.2, 0.2, 0.25));
+    m_barRenderIndexes.push_back(barraBarRenderID);
+
+    //add wood_door
+    int doorRenderID = m_renderEngine->createObject(std::string("models/wooden_door/scene.gltf"), 1.0);
+    m_renderEngine->updateObject(doorRenderID, glm::vec3(-3.96, 0.0, 3.25), glm::quat(0.5, -0.5, -0.5, -0.5));
+    m_renderEngine->updateObjectScaling(doorRenderID, glm::vec3(0.35, 0.2, 0.35));
+    m_barRenderIndexes.push_back(doorRenderID);
+
+    //add wood_table
+    int tableRenderID = m_renderEngine->createObject(std::string("models/wooden_bar_table/scene.gltf"), 1.0);
+    m_renderEngine->updateObject(tableRenderID, glm::vec3(0.0, 0.323, -2.385), glm::quat(1.0, 0.0, 0.0, 0.0));
+    m_renderEngine->updateObjectScaling(tableRenderID, glm::vec3(0.4, 0.4, 0.4));
+    m_barRenderIndexes.push_back(tableRenderID);
+
+    int tableRenderID2 = m_renderEngine->createObject(std::string("models/wooden_bar_table/scene.gltf"), 1.0);
+    m_renderEngine->updateObject(tableRenderID2, glm::vec3(2.0, 0.323, -2.385), glm::quat(1.0, 0.0, 0.0, 0.0));
+    m_renderEngine->updateObjectScaling(tableRenderID2, glm::vec3(0.4, 0.4, 0.4));
+    m_barRenderIndexes.push_back(tableRenderID2);
+
+    int tableRenderID3 = m_renderEngine->createObject(std::string("models/wooden_bar_table/scene.gltf"), 1.0);
+    m_renderEngine->updateObject(tableRenderID3, glm::vec3(-2.0, 0.323, -2.385), glm::quat(1.0, 0.0, 0.0, 0.0));
+    m_renderEngine->updateObjectScaling(tableRenderID3, glm::vec3(0.4, 0.4, 0.4));
+    m_barRenderIndexes.push_back(tableRenderID3);
+
+    //add chairs
+    int chairRenderID = m_renderEngine->createObject(std::string("models/wooden_bar_table/scene.gltf"), 1.0);
+    m_renderEngine->updateObject(chairRenderID, glm::vec3(0.0, 0.323, -2.385), glm::quat(1.0, 0.0, 0.0, 0.0));
+    m_renderEngine->updateObjectScaling(chairRenderID, glm::vec3(0.4, 0.4, 0.4));
+    m_barRenderIndexes.push_back(chairRenderID);
+
+    int chairRenderID2 = m_renderEngine->createObject(std::string("models/wooden_bar_table/scene.gltf"), 1.0);
+    m_renderEngine->updateObject(chairRenderID2, glm::vec3(2.0, 0.323, -2.385), glm::quat(1.0, 0.0, 0.0, 0.0));
+    m_renderEngine->updateObjectScaling(chairRenderID2, glm::vec3(0.4, 0.4, 0.4));
+    m_barRenderIndexes.push_back(chairRenderID2);
+
+    int chairRenderID3 = m_renderEngine->createObject(std::string("models/wooden_bar_table/scene.gltf"), 1.0);
+    m_renderEngine->updateObject(tableRenderID3, glm::vec3(-2.0, 0.323, -2.385), glm::quat(1.0, 0.0, 0.0, 0.0));
+    m_renderEngine->updateObjectScaling(chairRenderID3, glm::vec3(0.4, 0.4, 0.4));
+    m_barRenderIndexes.push_back(chairRenderID3);
 
     switch (m_gameState->getGamemode())
     {
     case CLASSIC:
     {
         // add the table
-        int poolRenderID = m_renderEngine->createObject(std::string("models/pool_table/scene.gltf"), 0.109025);
+        int poolRenderID = m_renderEngine->createObject(std::string("models/pool-table/table.obj"), 1.0);
         m_renderEngine->updateObject(poolRenderID, glm::vec3(0.0), glm::quat(1.0, 0.0, 0.0, 0.0));
         m_barRenderIndexes.push_back(poolRenderID);
 

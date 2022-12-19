@@ -1,0 +1,11 @@
+Model Information:
+* title:	Wooden bar table with steel footboard
+* source:	https://sketchfab.com/3d-models/wooden-bar-table-with-steel-footboard-a711a387e3534814a86bce5892e1956a
+* author:	Mike Piven (https://sketchfab.com/mihail.piven)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Wooden bar table with steel footboard" (https://sketchfab.com/3d-models/wooden-bar-table-with-steel-footboard-a711a387e3534814a86bce5892e1956a) by Mike Piven (https://sketchfab.com/mihail.piven) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
