@@ -10,6 +10,9 @@ Ni 1.000000
 d 1.000000
 illum 2
 map_Kd floor.jpg
+map_Ks floor_specular.png
+norm floor_normal.png
+
 
 newmtl Material.002
 Ns 90.196078
@@ -19,7 +22,9 @@ Ks 0.500000 0.500000 0.500000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd MAHOGANY.JPG
+map_Kd Mahogany.jpg
+map_Ks Mahogany_specular.png
+norm Mahogany_normal.png
 
 newmtl mat_brass
 Ns 33.333333

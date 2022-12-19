@@ -10,4 +10,6 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 map_Kd textures/Mesa_de_Billar_lmb_PoolTable_AlbedoTranspa.png
+map_Ks textures/Mesa_de_Billar_lmb_PoolTable_Specular.png
+norm textures/Mesa_de_Billar_lmb_PoolTable_Normal.png
 illum 2
