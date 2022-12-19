@@ -30,11 +30,11 @@ namespace Rendering {
 
 		/////// OBJECTS ///////
 		// generar un nuevo modelo
-		int createObject(std::string path, double scale = 1.0, Rendering::Shader* customShader = nullptr);			// definimos el path del modelo y la escala inicial del objeto
-		int createObject(std::string path, glm::vec3 scale, Rendering::Shader* customShader = nullptr);			// definimos el path del modelo y la escala inicial del objeto
+		int createObject(std::string path, double scale = 1.0, bool manage = true, Rendering::Shader* customShader = nullptr);			// definimos el path del modelo y la escala inicial del objeto
+		int createObject(std::string path, glm::vec3 scale, bool manage = true, Rendering::Shader* customShader = nullptr);			// definimos el path del modelo y la escala inicial del objeto
 		// utilizar uno ya existente
-		int createObject(Rendering::Model* model, double scale = 1.0, Rendering::Shader* customShader = nullptr);	// definimos el path del modelo y la escala inicial del objeto
-		int createObject(Rendering::Model* model, glm::vec3 scale, Rendering::Shader* customShader = nullptr);		// definimos el path del modelo y la escala inicial del objeto
+		int createObject(Rendering::Model* model, double scale = 1.0, bool manage = true, Rendering::Shader* customShader = nullptr);	// definimos el path del modelo y la escala inicial del objeto
+		int createObject(Rendering::Model* model, glm::vec3 scale, bool manage = true, Rendering::Shader* customShader = nullptr);		// definimos el path del modelo y la escala inicial del objeto
 		
 		// Nota : despues de borrar un objeto se tienen que actualizar los indices de los objetos que van despues a uno menos
 		void deleteObject(int id);
@@ -85,6 +85,9 @@ namespace Rendering {
 		Rendering::Shader* m_defaultModelShader;			// shader por defecto
 		std::vector<Rendering::Shader*> m_shaders;	// posibles shaders especificos para algunos objetos (si son nullptr se utiliza el m_generalModelShader)
 		std::vector<Rendering::Object> m_objects;	// estructura con los objetos que se renderizan cada frame
+
+		std::vector<Rendering::Model*> m_models;	// lista de modelos usados, para poder borrar luego
+		std::vector<bool> m_manageModel;
 
 		/////// LIGHTS ///////
 		

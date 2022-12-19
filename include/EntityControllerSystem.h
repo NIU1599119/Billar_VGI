@@ -38,7 +38,7 @@
 class EntityControllerSystem {
 public:
     // EntityControllerSystem(int mode, Input* input, Camera* camera);
-    EntityControllerSystem(GAMEMODE mode, Rendering::RenderEngine3D* renderingEngine, std::vector<int>& ballRenderIDs, int maxSubSteps = 30, double fixedTimeStep = 0.0016);
+    EntityControllerSystem(GAMEMODE mode, Rendering::RenderEngine3D* renderingEngine, std::vector<int>& ballRenderIDs, int maxSubSteps = 10, double fixedTimeStep = 0.0016);
     ~EntityControllerSystem();
     
     void StepSimulation(btScalar timeStep, int maxSubSteps, btScalar fixedTimeStep);

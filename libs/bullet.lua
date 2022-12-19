@@ -19,9 +19,13 @@ project "bullet"
         "bullet/src/Bullet3Common/**",
 		"bullet/src/Bullet3Collision/**",
 		"bullet/src/Bullet3Geometry/**",
-		-- "bullet/src/Bullet3OpenCL/**",
+		"bullet/src/Bullet3OpenCL/**",
 		"bullet/src/Bullet3Serialize/**",
 		"bullet/src/clew/**",
+	}
+
+	defines {
+		"B3_USE_CLEW",
 	}
     
 	filter "system:linux"

@@ -5,13 +5,19 @@
 
 
 namespace Rendering {
-    Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
+    Mesh::Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, std::vector<Texture>& textures)
     {
         m_vertices = vertices;
         m_indices = indices;
         m_textures = textures;
 
         setupMesh();
+
+        m_vertices.clear();             // vaciar vector
+        m_vertices.shrink_to_fit();     // desalocatarlo
+        m_indicesSize = m_indices.size();
+        m_indices.clear();
+        m_indices.shrink_to_fit();
     }
 
     void Mesh::setupMesh()
@@ -46,6 +52,14 @@ namespace Rendering {
 
         // bind an invalid VAO
         GL(glBindVertexArray(0));
+    }
+
+    void Mesh::dealocate()
+    {
+        GL(glBindVertexArray(0));
+        GL(glDeleteBuffers(1, &m_EBO));
+        GL(glDeleteBuffers(1, &m_VBO));
+        GL(glDeleteVertexArrays(1, &m_VAO));
     }
 
     void Mesh::draw(Shader *shader)
@@ -92,7 +106,7 @@ namespace Rendering {
 
         // draw mesh
         GL(glBindVertexArray(m_VAO));
-        GL(glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, 0));
+        GL(glDrawElements(GL_TRIANGLES, m_indicesSize, GL_UNSIGNED_INT, 0));
         GL(glBindVertexArray(0));
     }
 }

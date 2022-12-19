@@ -11,12 +11,20 @@ namespace Rendering {
 	{
 		m_debugBoxModel = Primitives::getNewCubeModel();
 		updateProjection();
-		glEnable(GL_DEPTH_TEST);
+		GL(glEnable(GL_DEPTH_TEST));
 	}
 
 	RenderEngine3D::~RenderEngine3D()
 	{
-		glDisable(GL_DEPTH_TEST);
+		GL(glDisable(GL_DEPTH_TEST));
+		// render engine se encarga de borrar todos los modelos utilizados
+		for (int i = 0; i < m_models.size(); i++)
+		{
+			if (!m_manageModel[i]) continue;	// si no se encarga de borrarlo se sale
+			if (m_models[i] != nullptr)
+				delete m_models[i];
+			m_models[i] = nullptr;
+		}
 	}
 
 	/////// CAMERA & PROJECTION ///////
@@ -84,26 +92,28 @@ namespace Rendering {
 
 	/////// OBJECTS ///////
 
-	int RenderEngine3D::createObject(std::string path, double scale, Rendering::Shader* customShader)
+	int RenderEngine3D::createObject(std::string path, double scale, bool manage, Rendering::Shader* customShader)
 	{
-		return createObject(path, glm::vec3(scale), customShader);
+		return createObject(path, glm::vec3(scale), manage, customShader);
 	}
-	int RenderEngine3D::createObject(std::string path, glm::vec3 scale, Rendering::Shader* customShader)
+	int RenderEngine3D::createObject(std::string path, glm::vec3 scale, bool manage, Rendering::Shader* customShader)
 	{
 		// generate Mesh
 		Rendering::Model* model = new Rendering::Model(path);
-		return createObject(model, scale, customShader);
+		return createObject(model, scale, manage, customShader);
 	}
-	int RenderEngine3D::createObject(Rendering::Model* model, double scale, Rendering::Shader* customShader)
+	int RenderEngine3D::createObject(Rendering::Model* model, double scale, bool manage, Rendering::Shader* customShader)
 	{
-		return createObject(model, glm::vec3(scale), customShader);
+		return createObject(model, glm::vec3(scale), manage, customShader);
 	}
-	int RenderEngine3D::createObject(Rendering::Model* model, glm::vec3 scale, Rendering::Shader* customShader)
+	int RenderEngine3D::createObject(Rendering::Model* model, glm::vec3 scale, bool manage, Rendering::Shader* customShader)
 	{
 		Rendering::Object newObject = Rendering::Object(model, scale);
 		
 		int idx = m_objects.size();
 		m_objects.push_back(newObject);
+		m_models.push_back(model);
+		m_manageModel.push_back(manage);
 		m_shaders.push_back(customShader);	// sera nullptr por defecto
 		return idx;
 	}

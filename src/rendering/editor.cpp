@@ -11,7 +11,7 @@ namespace Rendering
         ImGui::Text("Add a model");
         
         char directory[255]{};
-        strncpy(directory, m_directory.c_str(), sizeof(directory) - 1);
+        strncpy_s(directory, m_directory.c_str(), sizeof(directory) - 1);
         ImGui::InputText("", directory, sizeof(directory));
         m_directory = directory;
 
