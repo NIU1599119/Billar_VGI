@@ -18,12 +18,26 @@ namespace Rendering {
 	{
 		GL(glDisable(GL_DEPTH_TEST));
 		// render engine se encarga de borrar todos los modelos utilizados
+		std::vector<Rendering::Model*> uniqueModels;
 		for (int i = 0; i < m_models.size(); i++)
 		{
 			if (!m_manageModel[i]) continue;	// si no se encarga de borrarlo se sale
-			if (m_models[i] != nullptr)
-				delete m_models[i];
+			if (m_models[i] == nullptr) continue;
+			/*
+			m_models[i]->dealocate();
+			delete m_models[i];
+			*/
+			std::vector<Rendering::Model*>::iterator it = std::find(uniqueModels.begin(), uniqueModels.end(), m_models[i]);
+			if (it == uniqueModels.end())
+			{
+				uniqueModels.push_back(m_models[i]);
+			}
 			m_models[i] = nullptr;
+		}
+
+		for (int i = 0; i < uniqueModels.size(); i++)
+		{
+			delete uniqueModels[i];
 		}
 	}
 
