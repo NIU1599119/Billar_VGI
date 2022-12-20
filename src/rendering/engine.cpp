@@ -92,16 +92,16 @@ namespace Rendering {
 
 	/////// OBJECTS ///////
 
-	int RenderEngine3D::createObject(std::string path, double scale, bool manage, Rendering::Shader* customShader)
+	int RenderEngine3D::createObject(std::string path, double scale, Rendering::Shader* customShader)
 	{
-		return createObject(path, glm::vec3(scale), manage, customShader);
+		return createObject(path, glm::vec3(scale), customShader);
 	}
-	int RenderEngine3D::createObject(std::string path, glm::vec3 scale, bool manage, Rendering::Shader* customShader)
+	int RenderEngine3D::createObject(std::string path, glm::vec3 scale, Rendering::Shader* customShader)
 	{
 		// generate Mesh
 		Rendering::Model* model = Rendering::createModel(path);
 		if (model == nullptr) return -1;
-		return createObject(model, scale, manage, customShader);
+		return createObject(model, scale, true, customShader);
 	}
 	int RenderEngine3D::createObject(Rendering::Model* model, double scale, bool manage, Rendering::Shader* customShader)
 	{
