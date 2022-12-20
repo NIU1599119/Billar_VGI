@@ -99,7 +99,8 @@ namespace Rendering {
 	int RenderEngine3D::createObject(std::string path, glm::vec3 scale, bool manage, Rendering::Shader* customShader)
 	{
 		// generate Mesh
-		Rendering::Model* model = new Rendering::Model(path);
+		Rendering::Model* model = Rendering::createModel(path);
+		if (model == nullptr) return -1;
 		return createObject(model, scale, manage, customShader);
 	}
 	int RenderEngine3D::createObject(Rendering::Model* model, double scale, bool manage, Rendering::Shader* customShader)

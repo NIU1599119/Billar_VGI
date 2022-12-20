@@ -2,18 +2,16 @@
 
 namespace Rendering
 {
-
-
     void RuntimeModelEditor::update()
     {
         ImGui::Begin("Runtime Model Editor");
 
         ImGui::Text("Add a model");
         
-        char directory[255]{};
-        strncpy_s(directory, m_directory.c_str(), sizeof(directory) - 1);
-        ImGui::InputText("", directory, sizeof(directory));
-        m_directory = directory;
+        // char directory[255]{};
+        // strncpy(directory, m_directory.c_str(), sizeof(directory) - 1);
+        ImGui::InputText("", &m_directory);
+        // m_directory = directory;
 
         ImGui::InputDouble("scale", &m_scale, 0.001);
         
@@ -21,19 +19,24 @@ namespace Rendering
         {
             ImGui::Text("Loading model, screen will freeze...");
             int loadedModelID = m_engine->createObject(m_directory, m_scale);
-            m_runtimeModels.push_back(loadedModelID);
-            m_runtimeModelsDirectories.push_back(directory);
-            m_modelRotations.push_back(glm::vec3(0.0));
+            if (loadedModelID != -1)
+            {
+                m_runtimeModels.push_back(loadedModelID);
+                m_runtimeModelsDirectories.push_back(m_directory);
+                m_modelRotations.push_back(glm::vec3(0.0));
 
-            m_directory = "models/";
-            m_scale = 1.0;
+                m_directory = "models/";
+                m_scale = 1.0;
+            }
+            else
+                ImGui::Text("Error loading");
         }
         ImGui::Separator();
 
         ImGui::Text("Models:");
         for (int i = m_runtimeModels.size() - 1; i >= 0; i--)
         {
-            if (ImGui::CollapsingHeader(m_runtimeModelsDirectories[i].c_str()))
+            if (ImGui::CollapsingHeader((std::to_string(i) + " : " + m_runtimeModelsDirectories[i]).c_str()))
             {
                 ImGui::Indent(8);
                 glm::vec3 position = m_engine->getObjectPosition(m_runtimeModels[i]);
@@ -63,10 +66,16 @@ namespace Rendering
                     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 1, 0.0, 0.0, 1.0});
                     if (ImGui::Button("Confirm"))
                     {
-                        m_runtimeModels.erase(std::find(m_runtimeModels.begin(), m_runtimeModels.end(), m_runtimeModels[i]));
-                        m_runtimeModelsDirectories.erase(std::find(m_runtimeModelsDirectories.begin(), m_runtimeModelsDirectories.end(), m_runtimeModelsDirectories[i]));
-                        m_runtimeModels.erase(std::find(m_runtimeModels.begin(), m_runtimeModels.end(), m_runtimeModels[i]));
                         m_engine->deleteObject(m_runtimeModels[i]);
+                        auto rModel = m_runtimeModels.begin() + i;
+                        // m_runtimeModels.erase(std::find(m_runtimeModels.begin(), m_runtimeModels.end(), m_runtimeModels[i]));
+                        m_runtimeModels.erase(rModel);
+                        auto rModelDir = m_runtimeModelsDirectories.begin() + i;
+                        // m_runtimeModelsDirectories.erase(std::find(m_runtimeModelsDirectories.begin(), m_runtimeModelsDirectories.end(), m_runtimeModelsDirectories[i]));
+                        m_runtimeModelsDirectories.erase(rModelDir);
+                        auto modelRot = m_modelRotations.begin();
+                        // m_modelRotations.erase(std::find(m_modelRotations.begin(), m_modelRotations.end(), m_modelRotations[i]));
+                        m_modelRotations.erase(modelRot);
                     }
                     ImGui::PopStyleColor(3);
                     ImGui::Unindent(8);

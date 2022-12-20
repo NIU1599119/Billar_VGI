@@ -4,6 +4,13 @@
 
 namespace Rendering {
 
+    Model* createModel(const std::string &path, bool gamma)
+    {
+        Model* newModel = new Model(path, gamma);
+        if (newModel->errorLoading())
+            return nullptr;
+        return newModel;
+    }
 
     void Model::draw(Shader* shader)
     {
@@ -22,6 +29,7 @@ namespace Rendering {
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
         {
             LOG_ERROR("Import error %s", importer.GetErrorString());
+            m_errorLoading = true;
             return;
         }
         // get the folder of the obj file where model data is saved

@@ -28,7 +28,8 @@ project "Billar"
         "libs/glfw/include/",
         "libs/glm/",
         "libs/imgui/",
-        "libs/imgui/examples",
+        "libs/imgui/examples/",
+        "libs/imgui/misc/cpp/",
         "libs/stb/include",
         "libs/assimp/include",
         "libs/bullet/src",
@@ -54,7 +55,7 @@ project "Billar"
         links { "dl", "pthread" }   -- platform specific libraries
 
         links { "IrrKlang" }        -- librerias dinamicas
-        linkoptions {"-L./bin/%{cfg.buildcfg}/ \'-Wl,-rpath,$$ORIGIN\'"}    -- esto es para definir la carpeta donde se encuentra el .so y que en runtime coja el .so de la misma carpeta en la que este el ejecutable
+        linkoptions {"-fopenmp -L./bin/%{cfg.buildcfg}/ \'-Wl,-rpath,$$ORIGIN\'"}    -- esto es para definir la carpeta donde se encuentra el .so y que en runtime coja el .so de la misma carpeta en la que este el ejecutable
         prebuildcommands {
             "mkdir bin/%{cfg.buildcfg}/ -p",
             "{COPY} libs/irrKlang/bin/linux-gcc-64/* bin/%{cfg.buildcfg}"   -- librerias .so que se usaran con el ejecutable (si le pasamos el juego a alguien hay que darle tambien los .so)

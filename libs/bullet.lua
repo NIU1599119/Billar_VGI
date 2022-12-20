@@ -37,6 +37,8 @@ project "bullet"
 		systemversion "latest"
 		staticruntime "On"
 
+		linkoptions { "-fopenmp" }
+
 		defines
 		{
 			"_BULLET_X11"
