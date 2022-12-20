@@ -374,7 +374,7 @@ int optionsMenu(Window& window, float& Width, float& Height, irrklang::ISound* m
         {
             Renderer->DrawSprite(ResourceManager::GetTexture("flechai1"),
                 glm::vec2(760.0f * resFix, 400.0f * resFix), glm::vec2(110 * resFix, 110 * resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
-            changeVolume = -0.2;
+            changeVolume = -0.2f;
         }
         else
         {
@@ -399,7 +399,7 @@ int optionsMenu(Window& window, float& Width, float& Height, irrklang::ISound* m
         {
             Renderer->DrawSprite(ResourceManager::GetTexture("flechad1"),
                 glm::vec2(1047.0f * resFix, 398.0f * resFix), glm::vec2(110 * resFix, 110 * resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
-            changeVolume = 0.2;
+            changeVolume = 0.2f;
         }
         else
         {
@@ -424,24 +424,24 @@ int optionsMenu(Window& window, float& Width, float& Height, irrklang::ISound* m
         Renderer->DrawSprite(ResourceManager::GetTexture("indicador"),
             glm::vec2(828.0f * resFix, 425.0f * resFix), glm::vec2(110 * resFix, 50 * resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
 
-        if (volume > 0)
+        if (volume > 0.1f)
         {
             Renderer->DrawSprite(ResourceManager::GetTexture("indicador"),
                 glm::vec2(858.0f * resFix, 425.0f * resFix), glm::vec2(110 * resFix, 50 * resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
 
-            if (volume > 0.2)
+            if (volume > 0.3f)
             {
                 Renderer->DrawSprite(ResourceManager::GetTexture("indicador"),
                     glm::vec2(888.0f * resFix, 425.0f * resFix), glm::vec2(110 * resFix, 50 * resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
-                if (volume > 0.4)
+                if (volume > 0.5f)
                 {
                     Renderer->DrawSprite(ResourceManager::GetTexture("indicador"),
                         glm::vec2(918.0f * resFix, 425.0f * resFix), glm::vec2(110 * resFix, 50 * resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
-                    if (volume > 0.6)
+                    if (volume > 0.7f)
                     {
                         Renderer->DrawSprite(ResourceManager::GetTexture("indicador"),
                             glm::vec2(948.0f * resFix, 425.0f * resFix), glm::vec2(110 * resFix, 50 * resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
-                        if (volume > 0.8)
+                        if (volume > 0.9f)
                         {
                             Renderer->DrawSprite(ResourceManager::GetTexture("indicador"),
                                 glm::vec2(978.0f * resFix, 425.0f * resFix), glm::vec2(110 * resFix, 50 * resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));

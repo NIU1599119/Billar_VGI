@@ -55,7 +55,7 @@ int main()
 
         if (opcio == 1)
         {
-            music->setIsPaused(true);
+            //music->setIsPaused(true);
             Game newGame(&window, CLASSIC, 2);
 
             continuarJugando = (newGame.startGameLoop() == 0);
