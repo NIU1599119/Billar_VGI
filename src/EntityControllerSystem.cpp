@@ -69,12 +69,12 @@ EntityControllerSystem::EntityControllerSystem(GAMEMODE gamemode, Rendering::Ren
     */
 
     Rendering::CollisionBox table;
-    table.setFriction(.8165);
+    table.setFriction(.9565);
     table.setRestitution(.513);
 
     Rendering::CollisionBox wallAux(table.getMesh());
-    wallAux.setFriction(.8165);             // all walls have this values
-    wallAux.setRestitution(.7695);          // restitucion real (se supone)
+    wallAux.setFriction(.6165);             // all walls have this values
+    wallAux.setRestitution(.8695);          // restitucion real (se supone)
 
     ///////////// Inicialization EntityPool /////////////////
 
@@ -347,11 +347,11 @@ EntityControllerSystem::EntityControllerSystem(GAMEMODE gamemode, Rendering::Ren
         btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
         btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
         btRigidBody* body = new btRigidBody(rbInfo);
-        body->setFriction(.245);
+        body->setFriction(.145);
         body->setRestitution(0.97468);
         body->setContactProcessingThreshold(0);// ESTE ERA EL THRESHOLD DIOOOOOOS
         body->setSpinningFriction(0.8);
-        body->setRollingFriction(0.0004);
+        body->setRollingFriction(0.0006);
 
 
         Entities::Entity* ballEntity = new Entities::EntityBall(i, gamemode);
