@@ -44,7 +44,8 @@ int main()
 
     irrklang::ISound* music = Audio::AUDIO_FUNCTIONS.play2D("media/blues.ogg", true, true, true);
     music->setVolume(0.6);
-
+    int musicNum = 1;
+    float volume = 0.6;
 
     bool continuarJugando = true;
     while(continuarJugando) {
@@ -69,7 +70,7 @@ int main()
         else if (opcio == 4)
         {
             // Opciones
-            continuarJugando = (optionsMenu(window,x,y));
+            continuarJugando = (optionsMenu(window,x,y,music,musicNum,volume));
             if (!continuarJugando)
             {
                 LOG_ERROR("El menu de opciones ha crasheado");
