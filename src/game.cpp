@@ -531,6 +531,8 @@ void Game::initializeHUD()
     ResourceManager::LoadTexture("textures/hud/13.png", true, "13");
     ResourceManager::LoadTexture("textures/hud/14.png", true, "14");
     ResourceManager::LoadTexture("textures/hud/15.png", true, "15");
+    ResourceManager::LoadTexture("textures/hud/p1.png", true, "p1");
+    ResourceManager::LoadTexture("textures/hud/p2.png", true, "p2");
 
     m_teamOffSet1 = 0.0f;
     m_teamOffSet2 = 960.0f;
@@ -547,25 +549,55 @@ void Game::drawHUD()
     m_pocketed = classicState->getPocketedBalls();
 
 
-    for (int i = 1; i < 8; i++)
-    {
-        if (!m_pocketed[i])
-        {
-            RendererGame->DrawSprite(ResourceManager::GetTexture(std::to_string(i)),
-                glm::vec2(((100.0f + (85.0f * i)) + m_teamOffSet1) * m_resFix, 50.0f * m_resFix), glm::vec2(85 * m_resFix, 85 * m_resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+    std::vector<CLASSIC_BALL_TYPES> teams = classicState->getTeams();
 
-        }
+    bool print = false;
+
+    if (teams[0] == STRIPED)
+    {
+        print = true;
+        m_teamOffSet1 = 960.0f;
+        m_teamOffSet2 = 0.0f;
     }
-    for (int i = 9; i < 16; i++)
+    else if (teams[0] == SOLID)
     {
-        if (!m_pocketed[i])
-        {
-            RendererGame->DrawSprite(ResourceManager::GetTexture(std::to_string(i)),
-                glm::vec2(((100.0f + (85.0f * (i - 8))) + m_teamOffSet2) * m_resFix, 50.0f * m_resFix), glm::vec2(85 * m_resFix, 85 * m_resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
-
-        }
+        print = true;
+        m_teamOffSet1 = 0.0f;
+        m_teamOffSet2 = 960.0f;
     }
 
+    if (print)
+    {
+        for (int i = 1; i < 8; i++)
+        {
+            if (!m_pocketed[i])
+            {
+                RendererGame->DrawSprite(ResourceManager::GetTexture(std::to_string(i)),
+                    glm::vec2(((100.0f + (85.0f * i)) + m_teamOffSet1) * m_resFix, 50.0f * m_resFix), glm::vec2(85 * m_resFix, 85 * m_resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+
+            }
+        }
+        for (int i = 9; i < 16; i++)
+        {
+            if (!m_pocketed[i])
+            {
+                RendererGame->DrawSprite(ResourceManager::GetTexture(std::to_string(i)),
+                    glm::vec2(((100.0f + (85.0f * (i - 8))) + m_teamOffSet2) * m_resFix, 50.0f * m_resFix), glm::vec2(85 * m_resFix, 85 * m_resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+
+            }
+        }
+    }
+
+    if (classicState->getCurrentPlayer() == 0)
+    {
+        RendererGame->DrawSprite(ResourceManager::GetTexture("p1"),
+            glm::vec2(810.0f * m_resFix, 900.0f * m_resFix), glm::vec2(300 * m_resFix, 150 * m_resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+    }
+    else
+    {
+        RendererGame->DrawSprite(ResourceManager::GetTexture("p2"),
+            glm::vec2(810.0f * m_resFix, 900.0f * m_resFix), glm::vec2(300 * m_resFix, 150 * m_resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+    }
 
     RendererGame->DrawSprite(ResourceManager::GetTexture("hud"),
         glm::vec2(0.0f * m_resFix, 0.0f * m_resFix), glm::vec2(1920 * m_resFix, 1080 * m_resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
