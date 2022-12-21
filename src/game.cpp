@@ -18,6 +18,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "gl_utils.h"
 
+SpriteRenderer* RendererGame;
+
 Game::Game(Window* window, GAMEMODE gamemode, int numPlayers)
 : m_window(window)
 {
@@ -496,6 +498,80 @@ void Game::initializeDetectionBoxes()
     }
 }
 
+void Game::initializeHUD()
+{
+    // load shaders
+    ResourceManager::LoadShader("shaders/sprite.vs", "shaders/sprite.frag", nullptr, "sprite");
+    // configure shaders
+    float Width = m_window->getWidth();
+    float Height = m_window->getHeight();
+    float resFix = Width / 1920;
+
+    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(Width),
+        static_cast<float>(Height), 0.0f, -1.0f, 1.0f);
+
+
+    ResourceManager::GetShader("sprite").Use().SetInteger("image", 0);
+    ResourceManager::GetShader("sprite").SetMatrix4("projection", projection);
+    // set render-specific controls
+
+    RendererGame = new SpriteRenderer(ResourceManager::GetShader("sprite"));
+    ResourceManager::LoadTexture("textures/hud/hud.png", true, "hud");
+    ResourceManager::LoadTexture("textures/hud/1.png", true, "1");
+    ResourceManager::LoadTexture("textures/hud/2.png", true, "2");
+    ResourceManager::LoadTexture("textures/hud/3.png", true, "3");
+    ResourceManager::LoadTexture("textures/hud/4.png", true, "4");
+    ResourceManager::LoadTexture("textures/hud/5.png", true, "5");
+    ResourceManager::LoadTexture("textures/hud/6.png", true, "6");
+    ResourceManager::LoadTexture("textures/hud/7.png", true, "7");
+    ResourceManager::LoadTexture("textures/hud/9.png", true, "9");
+    ResourceManager::LoadTexture("textures/hud/10.png", true, "10");
+    ResourceManager::LoadTexture("textures/hud/11.png", true, "11");
+    ResourceManager::LoadTexture("textures/hud/12.png", true, "12");
+    ResourceManager::LoadTexture("textures/hud/13.png", true, "13");
+    ResourceManager::LoadTexture("textures/hud/14.png", true, "14");
+    ResourceManager::LoadTexture("textures/hud/15.png", true, "15");
+
+    m_teamOffSet1 = 0.0f;
+    m_teamOffSet2 = 960.0f;
+
+    m_Width = m_window->getWidth();
+    m_Height = m_window->getHeight();
+    m_resFix = Width / 1920;
+}
+
+void Game::drawHUD()
+{
+    //// rendering HUD
+    ClassicState* classicState = (ClassicState*)m_gameState;;
+    m_pocketed = classicState->getPocketedBalls();
+
+
+    for (int i = 1; i < 8; i++)
+    {
+        if (!m_pocketed[i])
+        {
+            RendererGame->DrawSprite(ResourceManager::GetTexture(std::to_string(i)),
+                glm::vec2(((100.0f + (85.0f * i)) + m_teamOffSet1) * m_resFix, 50.0f * m_resFix), glm::vec2(85 * m_resFix, 85 * m_resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+
+        }
+    }
+    for (int i = 9; i < 16; i++)
+    {
+        if (!m_pocketed[i])
+        {
+            RendererGame->DrawSprite(ResourceManager::GetTexture(std::to_string(i)),
+                glm::vec2(((100.0f + (85.0f * (i - 8))) + m_teamOffSet2) * m_resFix, 50.0f * m_resFix), glm::vec2(85 * m_resFix, 85 * m_resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+
+        }
+    }
+
+
+    RendererGame->DrawSprite(ResourceManager::GetTexture("hud"),
+        glm::vec2(0.0f * m_resFix, 0.0f * m_resFix), glm::vec2(1920 * m_resFix, 1080 * m_resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+
+}
+
 void Game::playerTurn(Coroutine* coro)
 {
     // gracias a bigrando420 se puede simplificar un monton este codigo
@@ -538,8 +614,6 @@ void Game::playerTurn(Coroutine* coro)
     CoroutineReset(coro);
 }
 
-SpriteRenderer* RendererGame;
-
 int Game::startGameLoop()
 {
     initializeBasicInputs();
@@ -564,40 +638,7 @@ int Game::startGameLoop()
 
     initializeBasicInputs();
 
-    // load shaders
-    ResourceManager::LoadShader("shaders/sprite.vs", "shaders/sprite.frag", nullptr, "sprite");
-    // configure shaders
-    float Width = m_window->getWidth();
-    float Height = m_window->getHeight();
-    float resFix = Width / 1920;
-
-    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(Width),
-        static_cast<float>(Height), 0.0f, -1.0f, 1.0f);
-    
-    ResourceManager::GetShader("sprite").Use().SetInteger("image", 0);
-    ResourceManager::GetShader("sprite").SetMatrix4("projection", projection);
-    // set render-specific controls
-    RendererGame = new SpriteRenderer(ResourceManager::GetShader("sprite"));
-    ResourceManager::LoadTexture("textures/hud/hud.png", true, "hud");
-    ResourceManager::LoadTexture("textures/hud/1.png", true, "1");
-    ResourceManager::LoadTexture("textures/hud/2.png", true, "2");
-    ResourceManager::LoadTexture("textures/hud/3.png", true, "3");
-    ResourceManager::LoadTexture("textures/hud/4.png", true, "4");
-    ResourceManager::LoadTexture("textures/hud/5.png", true, "5");
-    ResourceManager::LoadTexture("textures/hud/6.png", true, "6");
-    ResourceManager::LoadTexture("textures/hud/7.png", true, "7");
-    ResourceManager::LoadTexture("textures/hud/9.png", true, "9");
-    ResourceManager::LoadTexture("textures/hud/10.png", true, "10");
-    ResourceManager::LoadTexture("textures/hud/11.png", true, "11");
-    ResourceManager::LoadTexture("textures/hud/12.png", true, "12");
-    ResourceManager::LoadTexture("textures/hud/13.png", true, "13");
-    ResourceManager::LoadTexture("textures/hud/14.png", true, "14");
-    ResourceManager::LoadTexture("textures/hud/15.png", true, "15");
-
-    std::vector<bool> pocketed;
-    ClassicState* classicState = (ClassicState*)m_gameState;
-    float teamOffSet1 = 0.0f;
-    float teamOffSet2 = 960.0f;
+    initializeHUD();
 
     while (!m_window->shouldClose() && !m_shouldExit)
     {
@@ -640,32 +681,9 @@ int Game::startGameLoop()
 
         m_renderEngine->drawLights();
 
-        //// rendering HUD
-        pocketed = classicState->getPocketedBalls();
+        drawHUD();
 
-        for (int i = 1; i < 8; i++)
-        {
-            if (!pocketed[i])
-            {
-                RendererGame->DrawSprite(ResourceManager::GetTexture(std::to_string(i)),
-                    glm::vec2(((100.0f + (85.0f*i)) + teamOffSet1)* resFix, 50.0f * resFix), glm::vec2(85 * resFix, 85 * resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
-
-            }
-        }
-        for (int i = 9; i < 16; i++)
-        {
-            if (!pocketed[i])
-            {
-                RendererGame->DrawSprite(ResourceManager::GetTexture(std::to_string(i)),
-                    glm::vec2(((100.0f + (85.0f * (i-8))) + teamOffSet2) * resFix, 50.0f * resFix), glm::vec2(85 * resFix, 85 * resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
-
-            }
-        }
-
-
-        RendererGame->DrawSprite(ResourceManager::GetTexture("hud"),
-            glm::vec2(0.0f * resFix, 0.0f * resFix), glm::vec2(1920 * resFix, 1080 * resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
-
+        
         #ifdef DEBUG_SHADER
         std::vector<Rendering::CollisionBox>* p_rigidObjects = m_physicsEngine->getCollisionsBoxPtr();
         for (int i = 0; i < (*p_rigidObjects).size(); i++)

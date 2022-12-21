@@ -32,10 +32,19 @@ private:
     std::vector<int> m_ballRenderIndexes;
     std::vector<int> m_lightIndexes;
 
+    std::vector<bool> m_pocketed;
+    float m_teamOffSet1;
+    float m_teamOffSet2;
+
+    float m_Width;
+    float m_Height;
+    float m_resFix;
+
     void initializeRenderObjects();
     void initializeRenderLights();
     void initializeBasicInputs();
     void initializeDetectionBoxes();
+    void initializeHUD();
 
     CameraController* m_currentCameraController;
 
@@ -46,6 +55,7 @@ private:
 
 
     void drawDebugUI(unsigned int nFrame, double deltaTime, Input* input, glm::vec3* focusedBallPosition, Rendering::RuntimeModelEditor* runtimeModelEditor);
+    void drawHUD();
 
 
     // game functions
