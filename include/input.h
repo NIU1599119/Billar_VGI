@@ -14,7 +14,8 @@ enum ACTIONS {
     SWITCH_MOUSE,
     LEFT_CLICK,
     PUSH_BALL,
-    ACCELERATE_BALL,
+    POWER_UP,
+    POWER_DOWN,
     EXIT
 };
 
@@ -40,6 +41,18 @@ public:
         m_actionStatus[action] = RELEASED;
         if (isPolling)
         {
+            auto iter = m_pollingKeys.begin();
+            for (iter; iter != m_pollingKeys.end(); iter++)
+            {
+                if (*iter == key)
+                {
+                    break;
+                }
+            }
+            if (iter != m_pollingKeys.end())
+            {
+                m_pollingKeys.erase(iter);
+            }
             m_pollingKeys.push_back(key);
         }
         else// isEvent
@@ -86,11 +99,15 @@ public:
     void setActionStatus(ACTIONS action, STATUS status) { m_actionStatus[action] = status; };
     STATUS getActionStatus(ACTIONS action) { return m_actionStatus[action]; };
 
+    void disableKeyboard() { m_isKeyboardDisabled = true; };
+    void enableKeyboard() { m_isKeyboardDisabled = false; };
+
     ////////// MOUSE ///////////
 
     void updateCursor(float newX, float newY);
 
     void setMouseCallback(std::function<void(float, float)> mouseCallback, bool relative=true) { m_mouseCallback = mouseCallback; m_mouseOffset = relative; };
+    void removeMouseCallback() { m_mouseCallback = [](float x, float y){}; };
 
     void captureMouse() { m_mouseCapture = true; };
 
@@ -115,6 +132,9 @@ private:
 
     // std::vector<eventKey> m_eventKeys;
 
+    bool m_isKeyboardDisabled = false;
+
+
     ////////// MOUSE ///////////
     float m_sensitivity = 0.1f;
 
@@ -126,7 +146,6 @@ private:
     bool m_mouseOffset = true; // pass offset(true) or position(false)
 
     std::function<void(float, float)> m_mouseCallback;
-
 };
 
 

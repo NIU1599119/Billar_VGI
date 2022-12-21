@@ -7,6 +7,7 @@
 #include "camera/camera.h"
 #include "rendering/shader.h"
 #include "rendering/object.h"
+#include "rendering/line.h"
 #include "rendering/lightPoint.h"
 #include "rendering/primitives.h"
 
@@ -17,7 +18,7 @@ namespace Rendering {
 	class RenderEngine3D
 	{
 	public:
-		RenderEngine3D(Camera* camera, Rendering::Shader defaultShader, Rendering::Shader* lightShader = nullptr, Rendering::Shader* debugShader = nullptr);
+		RenderEngine3D(Camera* camera, Rendering::Shader* defaultShader, Rendering::Shader* shadowShader, Rendering::Shader* lightShader = nullptr, Rendering::Shader* debugShader = nullptr);
 		~RenderEngine3D();
 
 		/////// CAMERA & PROJECTION ///////
@@ -30,13 +31,14 @@ namespace Rendering {
 
 		/////// OBJECTS ///////
 		// generar un nuevo modelo
-		int createObject(std::string& path, double scale = 1.0, Rendering::Shader* customShader = nullptr);			// definimos el path del modelo y la escala inicial del objeto
-		int createObject(std::string& path, glm::vec3 scale, Rendering::Shader* customShader = nullptr);			// definimos el path del modelo y la escala inicial del objeto
+		int createObject(std::string path, double scale = 1.0, Rendering::Shader* customShader = nullptr);			// definimos el path del modelo y la escala inicial del objeto
+		int createObject(std::string path, glm::vec3 scale, Rendering::Shader* customShader = nullptr);			// definimos el path del modelo y la escala inicial del objeto
 		// utilizar uno ya existente
-		int createObject(Rendering::Model* model, double scale = 1.0, Rendering::Shader* customShader = nullptr);	// definimos el path del modelo y la escala inicial del objeto
-		int createObject(Rendering::Model* model, glm::vec3 scale, Rendering::Shader* customShader = nullptr);		// definimos el path del modelo y la escala inicial del objeto
+		int createObject(Rendering::Model* model, double scale = 1.0, bool manage = true, Rendering::Shader* customShader = nullptr);	// definimos el path del modelo y la escala inicial del objeto
+		int createObject(Rendering::Model* model, glm::vec3 scale, bool manage = true, Rendering::Shader* customShader = nullptr);		// definimos el path del modelo y la escala inicial del objeto
 		
 		// Nota : despues de borrar un objeto se tienen que actualizar los indices de los objetos que van despues a uno menos
+		void disableObject(int id);
 		void deleteObject(int id);
 
 		void updateObject(int id, glm::vec3 position, glm::quat orientation);	// usar para pasar datos del bullet
@@ -51,7 +53,9 @@ namespace Rendering {
 		glm::vec3 getObjectScaling(int id) { return m_objects[id].getScaling(); };
 
 		void draw(int id);
+		void drawWithOutline(int id, glm::vec3 color);
 		void drawAll();
+		void drawAllMinus(int id);
 
 		bool existsObjectID(int id) { return (m_objects.size() > id && id > 0); };
 
@@ -64,6 +68,20 @@ namespace Rendering {
 
 		void drawLights();
 		void updateShaderLighting();
+
+		/////// LINES ///////
+		int addLine(glm::vec3& start, glm::vec3& end, glm::vec3& color)
+		{
+			int lineID = m_lines.size();
+			m_lines.emplace_back(start, end);
+			m_lines[lineID].setColor(color);
+			return lineID;
+		}
+
+		void setLinePos(int lineID, glm::vec3 start, glm::vec3 end)
+		{
+			m_lines[lineID].setPos(start, end);
+		}
 
 		/////// DEBUGGING ///////
 		
@@ -82,9 +100,13 @@ namespace Rendering {
 		void updateProjection();
 
 		/////// OBJECTS ///////
-		Rendering::Shader m_defaultModelShader;			// shader por defecto
+		Rendering::Shader* m_defaultModelShader;			// shader por defecto
+		Rendering::Shader* m_shadowModelShader;
 		std::vector<Rendering::Shader*> m_shaders;	// posibles shaders especificos para algunos objetos (si son nullptr se utiliza el m_generalModelShader)
 		std::vector<Rendering::Object> m_objects;	// estructura con los objetos que se renderizan cada frame
+
+		std::vector<Rendering::Model*> m_models;	// lista de modelos usados, para poder borrar luego
+		std::vector<bool> m_manageModel;
 
 		/////// LIGHTS ///////
 		
@@ -94,6 +116,9 @@ namespace Rendering {
 		const double LIGHT_SCALE = 0.1;		// for the debug model
 		Rendering::Shader* m_lightShader;
 		Rendering::Model* m_debugBoxModel;
+
+		/////// LINES ///////
+		std::vector<Rendering::Line> m_lines;
 
 		/////// DEBUGGING ///////
 		Rendering::Shader* m_debugShader;

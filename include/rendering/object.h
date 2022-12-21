@@ -8,7 +8,7 @@ namespace Rendering {
     public:
         Object(Model* model, glm::vec3 scale = glm::vec3(1.0f)) : m_model(model), m_modelScaling(scale) {};
 
-        void draw(Shader* shader, glm::mat4& view, glm::mat4& projection, glm::vec3 cameraPosition);
+        void draw(Shader* shader, glm::mat4& view, glm::mat4& projection, glm::vec3& cameraPosition);
         void draw(Shader* shader);
 
         void setPosition(glm::vec3& position) { m_position = position; };
@@ -27,8 +27,11 @@ namespace Rendering {
             m_orientation = glm::normalize(m_orientation*rotation);
         };
 
+        void setDisabled(bool disabled) { m_disabled = disabled; };
+
     private:
         Model* m_model;
+        bool m_disabled = false;
 
         glm::vec3 m_position = glm::vec3(0.0f);
         glm::quat m_orientation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);

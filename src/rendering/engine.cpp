@@ -2,21 +2,49 @@
 
 namespace Rendering {
 
-	RenderEngine3D::RenderEngine3D(Camera* camera, Rendering::Shader defaultShader, Rendering::Shader* lightShader, Rendering::Shader* debugShader)
+	RenderEngine3D::RenderEngine3D(Camera* camera, Rendering::Shader* defaultShader, Rendering::Shader* shadowShader, Rendering::Shader* lightShader, Rendering::Shader* debugShader)
 		:
 		m_camera(camera),
 		m_defaultModelShader(defaultShader),
+		m_shadowModelShader(shadowShader),
 		m_lightShader(lightShader),
 		m_debugShader(debugShader)
 	{
 		m_debugBoxModel = Primitives::getNewCubeModel();
 		updateProjection();
-		glEnable(GL_DEPTH_TEST);
+		GL(glEnable(GL_MULTISAMPLE));
+		//GL(glEnable(GL_CULL_FACE));	// para poner esto habria que arreglar el modelo de la habitacion
+		GL(glEnable(GL_DEPTH_TEST));
+		GL(glEnable(GL_STENCIL_TEST));
+		GL(glDepthFunc(GL_LESS));
+		GL(glStencilFunc(GL_NOTEQUAL, 1, 0xFF));
+		GL(glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE));
 	}
 
 	RenderEngine3D::~RenderEngine3D()
 	{
-		glDisable(GL_DEPTH_TEST);
+		GL(glEnable(GL_MULTISAMPLE));
+		//GL(glDisable(GL_CULL_FACE));
+		GL(glDisable(GL_DEPTH_TEST));
+		GL(glDisable(GL_STENCIL_TEST));
+		// render engine se encarga de borrar todos los modelos utilizados
+		std::vector<Rendering::Model*> uniqueModels;
+		for (int i = 0; i < m_models.size(); i++)
+		{
+			if (!m_manageModel[i]) continue;	// si no se encarga de borrarlo se sale
+			if (m_models[i] == nullptr) continue;
+			std::vector<Rendering::Model*>::iterator it = std::find(uniqueModels.begin(), uniqueModels.end(), m_models[i]);
+			if (it == uniqueModels.end())
+			{
+				uniqueModels.push_back(m_models[i]);
+			}
+			m_models[i] = nullptr;
+		}
+
+		for (int i = 0; i < uniqueModels.size(); i++)
+		{
+			delete uniqueModels[i];
+		}
 	}
 
 	/////// CAMERA & PROJECTION ///////
@@ -32,7 +60,8 @@ namespace Rendering {
 		// updated every frame
 		glm::mat4 view = m_camera->getViewMatrix();
 		glm::vec3 viewPos = m_camera->getPosition();
-		Rendering::updateShaderView(&m_defaultModelShader, view, viewPos);
+		Rendering::updateShaderView(m_defaultModelShader, view, viewPos);
+		Rendering::updateShaderView(m_shadowModelShader, view, viewPos);
 
 		for (auto it = m_shaders.begin(); it != m_shaders.end(); it++)
 		{
@@ -64,7 +93,8 @@ namespace Rendering {
 	void RenderEngine3D::updateShaderProjection()
 	{
 		// updated only when resizing the window or changing the FOV or the maxRenderDistance
-		Rendering::updateShaderProjection(&m_defaultModelShader, m_projection);
+		Rendering::updateShaderProjection(m_defaultModelShader, m_projection);
+		Rendering::updateShaderProjection(m_shadowModelShader, m_projection);
 		for (auto it = m_shaders.begin(); it != m_shaders.end(); it++)
 		{
 			if (*it == nullptr) continue;
@@ -84,28 +114,36 @@ namespace Rendering {
 
 	/////// OBJECTS ///////
 
-	int RenderEngine3D::createObject(std::string& path, double scale, Rendering::Shader* customShader)
+	int RenderEngine3D::createObject(std::string path, double scale, Rendering::Shader* customShader)
 	{
 		return createObject(path, glm::vec3(scale), customShader);
 	}
-	int RenderEngine3D::createObject(std::string& path, glm::vec3 scale, Rendering::Shader* customShader)
+	int RenderEngine3D::createObject(std::string path, glm::vec3 scale, Rendering::Shader* customShader)
 	{
 		// generate Mesh
-		Rendering::Model* model = new Rendering::Model(path);
-		return createObject(model, scale, customShader);
+		Rendering::Model* model = Rendering::createModel(path);
+		if (model == nullptr) return -1;
+		return createObject(model, scale, true, customShader);
 	}
-	int RenderEngine3D::createObject(Rendering::Model* model, double scale, Rendering::Shader* customShader)
+	int RenderEngine3D::createObject(Rendering::Model* model, double scale, bool manage, Rendering::Shader* customShader)
 	{
-		return createObject(model, glm::vec3(scale), customShader);
+		return createObject(model, glm::vec3(scale), manage, customShader);
 	}
-	int RenderEngine3D::createObject(Rendering::Model* model, glm::vec3 scale, Rendering::Shader* customShader)
+	int RenderEngine3D::createObject(Rendering::Model* model, glm::vec3 scale, bool manage, Rendering::Shader* customShader)
 	{
 		Rendering::Object newObject = Rendering::Object(model, scale);
 		
 		int idx = m_objects.size();
 		m_objects.push_back(newObject);
+		m_models.push_back(model);
+		m_manageModel.push_back(manage);
 		m_shaders.push_back(customShader);	// sera nullptr por defecto
 		return idx;
+	}
+
+	void RenderEngine3D::disableObject(int id)
+	{
+		m_objects[id].setDisabled(true);
 	}
 
 	void RenderEngine3D::deleteObject(int id)
@@ -148,8 +186,55 @@ namespace Rendering {
 	void RenderEngine3D::draw(int id)
 	{
 		Rendering::Shader* objectShader = m_shaders[id];
-		if (objectShader == nullptr) objectShader = &m_defaultModelShader;
-		m_objects[id].draw(objectShader, m_camera->getViewMatrix(), m_projection, m_camera->getPosition());
+		if (objectShader == nullptr) objectShader = m_defaultModelShader;
+		m_objects[id].draw(objectShader);
+	}
+
+	void RenderEngine3D::drawWithOutline(int id, glm::vec3 color)
+	{
+		Rendering::Shader* objectShader = m_shaders[id];
+		if (objectShader == nullptr) objectShader = m_defaultModelShader;
+
+		GL(glStencilFunc(GL_ALWAYS, 1, 0xFF)); // all fragments should pass the stencil test
+		GL(glStencilMask(0xFF)); // enable writing to the stencil buffer
+
+		m_objects[id].draw(objectShader);
+
+		GL(glStencilFunc(GL_NOTEQUAL, 1, 0xFF));
+		GL(glStencilMask(0x00)); // disable writing to the stencil buffer
+		GL(glDisable(GL_DEPTH_TEST));
+		
+		m_debugShader->activate();
+		m_debugShader->setUniformVec3("color", color);
+
+		glm::vec3 previous = m_objects[id].getScaling();
+		m_objects[id].setScaling(previous * 1.2f);
+		m_objects[id].draw(m_debugShader);
+		m_objects[id].setScaling(previous);
+
+		GL(glStencilMask(0xFF)); // enable writing to the stencil buffer
+		GL(glStencilFunc(GL_ALWAYS, 0, 0xFF)); // all fragments should pass the stencil test
+		GL(glEnable(GL_DEPTH_TEST));
+	}
+
+	void RenderEngine3D::drawAllMinus(int id)
+	{
+		// esta version del renderizado es mas eficiente (lo hace todo de golpe)
+		updateShaderLighting();
+
+		for (int i = 0; i < m_objects.size(); i++)
+		{
+			if (id == i) continue;
+			Rendering::Shader* objectShader = m_shaders[i];
+			if (objectShader == nullptr) objectShader = m_defaultModelShader;
+			m_objects[i].draw(objectShader);
+		}
+
+		for (int i = 0; i < m_lines.size(); i++)
+		{
+			m_lines[i].setViewProjection(m_camera->getViewMatrix(), m_projection);
+			m_lines[i].draw();
+		}
 	}
 
 	void RenderEngine3D::drawAll()
@@ -160,8 +245,14 @@ namespace Rendering {
 		for (int i = 0; i < m_objects.size(); i++)
 		{
 			Rendering::Shader* objectShader = m_shaders[i];
-			if (objectShader == nullptr) objectShader = &m_defaultModelShader;
-			m_objects[i].draw(objectShader, m_camera->getViewMatrix(), m_projection, m_camera->getPosition());
+			if (objectShader == nullptr) objectShader = m_defaultModelShader;
+			m_objects[i].draw(objectShader);
+		}
+
+		for (int i = 0; i < m_lines.size(); i++)
+		{
+			m_lines[i].setViewProjection(m_camera->getViewMatrix(), m_projection);
+			m_lines[i].draw();
 		}
 	}
 
@@ -252,7 +343,8 @@ namespace Rendering {
 	{
 		for (int i = 0; i < m_lights.size(); i++)
 		{
-			Rendering::updateShaderLighting(&m_defaultModelShader, i, m_lights[i]);
+			Rendering::updateShaderLighting(m_defaultModelShader, i, m_lights[i]);
+			Rendering::updateShaderLighting(m_shadowModelShader, i, m_lights[i]);
 
 			for (auto it = m_shaders.begin(); it != m_shaders.end(); it++)
 			{
@@ -261,7 +353,8 @@ namespace Rendering {
 			}
 		}
 
-		Rendering::updateShaderLighting(&m_defaultModelShader, m_lights.size());
+		Rendering::updateShaderLighting(m_defaultModelShader, m_lights.size());
+		Rendering::updateShaderLighting(m_shadowModelShader, m_lights.size());
 
 		for (auto it = m_shaders.begin(); it != m_shaders.end(); it++)
 		{

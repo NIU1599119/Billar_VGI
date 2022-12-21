@@ -25,7 +25,10 @@ namespace Rendering {
     public:
         Model(const std::string &path, bool gamma = false) : m_gammaCorrection(gamma) { loadModel(path); };
         Model(Mesh& mesh, bool gamma = false) : m_gammaCorrection(gamma) { m_meshes.push_back(mesh); };
+        ~Model();
         void draw(Shader *shader);
+
+        bool errorLoading() { return m_errorLoading; };
     private:
         // model data
         std::vector<Mesh> m_meshes;
@@ -38,5 +41,9 @@ namespace Rendering {
         void processNode(aiNode *node, const aiScene *scene);
         Mesh processMesh(aiMesh *mesh, const aiScene *scene);
         std::vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName);
+
+        bool m_errorLoading = false;
     };
+
+    Model* createModel(const std::string &path, bool gamma = false);
 };

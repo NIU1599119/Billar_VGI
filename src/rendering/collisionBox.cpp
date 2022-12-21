@@ -1,35 +1,6 @@
 #include "rendering/collisionBox.h"
 
-#include "debug.h"
-
-#include <glm/gtc/matrix_transform.hpp>
-
-
 namespace Rendering {
-
-    void CollisionBox::draw(Shader* shader, glm::mat4& view, glm::mat4& projection)
-    {
-        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );    // wireframe rendering
-
-        if (m_mesh == nullptr)
-            return;
-        glm::mat4 translate = glm::mat4(1.0f);
-        translate = glm::translate(translate, m_position);
-        glm::mat4 orientation = glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-        glm::mat4 scale = glm::scale(glm::mat4(1.0f), m_scale);
-        glm::mat4 model = translate * orientation * scale;
-
-        shader->activate();
-        shader->setUniformVec3("color", m_color);
-        shader->setUniformMat4("model", model);
-        shader->setUniformMat4("normalRotation", orientation);
-        shader->setUniformMat4("view", view);
-        shader->setUniformMat4("projection", projection);
-
-        m_mesh->draw(shader);
-
-        glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );    // disable wireframe rendering
-    }
 
     void CollisionBox::draw(Shader* shader)
     {
@@ -39,7 +10,8 @@ namespace Rendering {
             return;
         glm::mat4 translate = glm::mat4(1.0f);
         translate = glm::translate(translate, m_position);
-        glm::mat4 orientation = glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+        glm::quat quatOrientation = glm::quat(m_orientation.getX(), m_orientation.getY(), m_orientation.getZ(), m_orientation.getW());
+        glm::mat4 orientation = glm::mat4_cast(quatOrientation);
         glm::mat4 scale = glm::scale(glm::mat4(1.0f), m_scale);
         glm::mat4 model = translate * orientation * scale;
 
@@ -53,7 +25,7 @@ namespace Rendering {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);    // disable wireframe rendering
     }
 
-    void CollisionBox::initializeBullet(btAlignedObjectArray<btCollisionShape*>& collisionShapes, btDiscreteDynamicsWorld* dynamicsWorld)
+    btRigidBody* CollisionBox::getRigidBodyBullet(btAlignedObjectArray<btCollisionShape*>& collisionShapes)
     {
         btCollisionShape* colShape = new btBoxShape(btVector3(m_scale.x/2, m_scale.y/2, m_scale.z/2));
 
@@ -63,6 +35,8 @@ namespace Rendering {
 		groundTransform.setIdentity();
         
 		groundTransform.setOrigin(btVector3(m_position.x, m_position.y, m_position.z));
+        groundTransform.setRotation(btQuaternion(m_orientation.getX(), m_orientation.getY(), m_orientation.getZ(), m_orientation.getW()));
+
 
 		btScalar mass(0.);
 
@@ -81,7 +55,8 @@ namespace Rendering {
         body->setRestitution(m_restitution);
 
 		//add the body to the dynamics world
-		dynamicsWorld->addRigidBody(body);
+
+        return body;
     }
 
     void CollisionBox::generateCubeMesh()

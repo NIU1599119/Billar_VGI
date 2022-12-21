@@ -3,6 +3,8 @@
 
 namespace Primitives
 {
+    Rendering::Model* CUBE = nullptr;
+
     Rendering::Model* getNewCubeModel()
     {
         float vertices[] = {
@@ -72,5 +74,11 @@ namespace Primitives
         Rendering::Model* model = new Rendering::Model(mesh);
 
         return model;
+    }
+
+    Rendering::Model* getCUBE()
+    {
+        if (CUBE == nullptr) CUBE = getNewCubeModel();
+        return CUBE;
     }
 }

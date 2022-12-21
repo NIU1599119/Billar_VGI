@@ -19,9 +19,16 @@ project "bullet"
         "bullet/src/Bullet3Common/**",
 		"bullet/src/Bullet3Collision/**",
 		"bullet/src/Bullet3Geometry/**",
-		-- "bullet/src/Bullet3OpenCL/**",
+		"bullet/src/Bullet3OpenCL/**",
 		"bullet/src/Bullet3Serialize/**",
 		"bullet/src/clew/**",
+	}
+
+    openmp "On"
+	defines {
+		"B3_USE_CLEW",
+        "BT_THREADSAFE",
+		"BT_USE_OPENMP"
 	}
     
 	filter "system:linux"
@@ -29,6 +36,8 @@ project "bullet"
 
 		systemversion "latest"
 		staticruntime "On"
+
+		linkoptions { "-fopenmp" }
 
 		defines
 		{

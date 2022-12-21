@@ -1,4 +1,3 @@
-
 // menu
 #include "menu/menu.h"
 
@@ -34,24 +33,47 @@ int main()
     float x, y;
     initResolution(x, y, window);
 
+    /* GENIOS
     if (Audio::initAudio() != 0)
     {
         return 1; // error inicializando audio
     }
     Audio::engine->setSoundVolume(0.1f);
-    Audio::engine->play2D("media/blues.ogg", true);
+    Audio::engine->play2D("media/blues.ogg", true);*/
+    Audio::AUDIO_FUNCTIONS.setVolume(1.0);
+
+    irrklang::ISound* music = Audio::AUDIO_FUNCTIONS.play2D("media/blues.ogg", false, true, true);
+    music->setVolume(0.6);
+    int musicNum = 1;
+    float volume = 0.6;
 
     bool continuarJugando = true;
     while(continuarJugando) {
         int opcio = 0;
+        music->setIsPaused(false);
         initMenu(opcio, window, x, y);
 
         if (opcio == 1)
         {
-            continuarJugando = (Game(window) == 0);
+            //music->setIsPaused(true);
+            Game newGame(&window, CLASSIC, 2);
+
+            continuarJugando = (newGame.startGameLoop() == 0);
             if (!continuarJugando)
             {
-                LOG_ERROR("El juego ha crasheado o no ha podido cargar");
+                LOG_ERROR("El juego ha crasheado o se ha cerrado manualmente");
+                music->drop();
+                window.close();
+                return 1;
+            }
+        }
+        else if (opcio == 4)
+        {
+            // Opciones
+            continuarJugando = (optionsMenu(window,x,y,music,musicNum,volume));
+            if (!continuarJugando)
+            {
+                LOG_ERROR("El menu de opciones ha crasheado");
                 return 1;
             }
         }
@@ -59,7 +81,8 @@ int main()
             continuarJugando = false;
     }
 
-    Audio::deleteAudio();
+    music->drop();
+
     window.close();
 
     return 0;
