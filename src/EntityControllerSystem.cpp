@@ -47,6 +47,10 @@ EntityControllerSystem::EntityControllerSystem(BaseGameState* gamestate, Renderi
     m_dynamicsWorld = new btDiscreteDynamicsWorldMt(m_dispatcher, m_overlappingPairCache, m_solverPool, nullptr, m_collisionConfiguration);
 
     m_dynamicsWorld->setGravity(btVector3(0, -9.81, 0));
+
+    btContactSolverInfo& info = m_dynamicsWorld->getSolverInfo();
+    // info.m_solverMode |= SOLVER_DISABLE_IMPLICIT_CONE_FRICTION;
+    info.m_solverMode = info.m_solverMode & ~SOLVER_DISABLE_IMPLICIT_CONE_FRICTION;
     ///-----initialization_end-----
 
     //the ground is a cube of side 100 at position y = -56.

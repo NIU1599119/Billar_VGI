@@ -23,10 +23,6 @@ namespace Rendering {
 		{
 			if (!m_manageModel[i]) continue;	// si no se encarga de borrarlo se sale
 			if (m_models[i] == nullptr) continue;
-			/*
-			m_models[i]->dealocate();
-			delete m_models[i];
-			*/
 			std::vector<Rendering::Model*>::iterator it = std::find(uniqueModels.begin(), uniqueModels.end(), m_models[i]);
 			if (it == uniqueModels.end())
 			{
@@ -192,6 +188,12 @@ namespace Rendering {
 			Rendering::Shader* objectShader = m_shaders[i];
 			if (objectShader == nullptr) objectShader = m_defaultModelShader;
 			m_objects[i].draw(objectShader);
+		}
+
+		for (int i = 0; i < m_lines.size(); i++)
+		{
+			m_lines[i].setViewProjection(m_camera->getViewMatrix(), m_projection);
+			m_lines[i].draw();
 		}
 	}
 

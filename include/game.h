@@ -37,6 +37,8 @@ private:
     void initializeBasicInputs();
     void initializeDetectionBoxes();
 
+    void processShadows();
+
     CameraController* m_currentCameraController;
 
     EntityControllerSystem* m_physicsEngine;

@@ -7,6 +7,7 @@
 #include "camera/camera.h"
 #include "rendering/shader.h"
 #include "rendering/object.h"
+#include "rendering/line.h"
 #include "rendering/lightPoint.h"
 #include "rendering/primitives.h"
 
@@ -66,6 +67,20 @@ namespace Rendering {
 		void drawLights();
 		void updateShaderLighting();
 
+		/////// LINES ///////
+		int addLine(glm::vec3& start, glm::vec3& end, glm::vec3& color)
+		{
+			int lineID = m_lines.size();
+			m_lines.emplace_back(start, end);
+			m_lines[lineID].setColor(color);
+			return lineID;
+		}
+
+		void setLinePos(int lineID, glm::vec3 start, glm::vec3 end)
+		{
+			m_lines[lineID].setPos(start, end);
+		}
+
 		/////// DEBUGGING ///////
 		
 		Rendering::Shader* getDebuggingShader() { return m_debugShader; };	// returns the debugging shader to let the collision box use it
@@ -98,6 +113,9 @@ namespace Rendering {
 		const double LIGHT_SCALE = 0.1;		// for the debug model
 		Rendering::Shader* m_lightShader;
 		Rendering::Model* m_debugBoxModel;
+
+		/////// LINES ///////
+		std::vector<Rendering::Line> m_lines;
 
 		/////// DEBUGGING ///////
 		Rendering::Shader* m_debugShader;
