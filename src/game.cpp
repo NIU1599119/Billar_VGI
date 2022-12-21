@@ -572,6 +572,7 @@ void Game::initializeHUD()
     ResourceManager::LoadTexture("textures/hud/power2.png", true, "power2");
     ResourceManager::LoadTexture("textures/hud/power3.png", true, "power3");
     ResourceManager::LoadTexture("textures/hud/power4.png", true, "power4");
+    ResourceManager::LoadTexture("textures/container2.png", true, "winScreen");
 
     m_teamOffSet1 = 0.0f;
     m_teamOffSet2 = 960.0f;
@@ -741,7 +742,17 @@ void Game::winCoroutine(Coroutine* coro)
 
     LOG_INFO("congrats to team %d", winningTeam);
 
-    CoroutineWait(coro, 5.0f);                      // waits for 5 seconds
+    coro->start_time = glfwGetTime();
+
+    while (glfwGetTime() < coro->start_time + 5.0f) // also waits for 5 seconds but can execute code
+    {
+        RendererGame->DrawSprite(ResourceManager::GetTexture("winScreen1"),
+            glm::vec2((1920/4) * m_resFix, (1080 / 4) * m_resFix), glm::vec2( (1920/2) * m_resFix, (1080 / 2) * m_resFix), 0.0f, m_playerColors[winningTeam]);
+
+        CoroutineYield(coro);
+    }
+
+    CoroutineWait(coro, 1.0f);                      // waits for 1 second
 
     LOG_INFO("goodbye");
     m_shouldExit = true;
@@ -805,6 +816,11 @@ int Game::startGameLoop()
             m_window->getInput()->enableKeyboard();
             playerTurn(&playerTurnCoroutine);
             m_window->processInput(deltaTime);
+
+            if (winningTeam != -1)
+            {
+                playerTurnCoroutine.line = -1;    // stop coroutine
+            }
         }
         else { m_window->getInput()->disableKeyboard(); };
         #else
