@@ -39,8 +39,8 @@ Game::Game(Window* window, GAMEMODE gamemode, int numPlayers)
         ASSERT(false);
     }
 
-    Rendering::Shader* tableShader = new Rendering::Shader("shaders/model.vert", "shaders/table.frag");
-    if(!tableShader->compileShaders())
+    Rendering::Shader* shadowShader = new Rendering::Shader("shaders/model.vert", "shaders/table.frag");
+    if (!shadowShader->compileShaders())
     {
         LOG_ERROR("Failed compiling shader");
         ASSERT(false);
@@ -61,7 +61,7 @@ Game::Game(Window* window, GAMEMODE gamemode, int numPlayers)
     }
 
     m_shaders.push_back(modelShader);
-    m_shaders.push_back(tableShader);
+    m_shaders.push_back(shadowShader);
     m_shaders.push_back(lightShader);
     m_shaders.push_back(debugShader);
 
@@ -69,7 +69,7 @@ Game::Game(Window* window, GAMEMODE gamemode, int numPlayers)
 
     // camara
     m_camera = Camera(glm::vec3(0.0f, 0.0f, 3.0f));
-    m_renderEngine = new Rendering::RenderEngine3D(&m_camera, modelShader, lightShader, debugShader);
+    m_renderEngine = new Rendering::RenderEngine3D(&m_camera, modelShader, shadowShader, lightShader, debugShader);
 
     initializeRenderObjects();
     initializeRenderLights();
@@ -226,7 +226,7 @@ void Game::initializeRenderObjects()
     case CLASSIC:
     {
         // add the table
-        int poolRenderID = m_renderEngine->createObject(std::string("models/pool-table/table.obj"), 0.7, m_shaders[1]); // custom table shader
+        int poolRenderID = m_renderEngine->createObject(std::string("models/pool-table/table.obj"), 0.7, m_shaders[1]);
         m_renderEngine->updateObject(poolRenderID, glm::vec3(0.0,0.064,0.0), glm::quat(1.0, 0.0, 0.0, 0.0));
         m_barRenderIndexes.push_back(poolRenderID);
 
@@ -266,11 +266,12 @@ void Game::processShadows()
     // table shader is [1]
     m_shaders[1]->activate();
     m_shaders[1]->setUniformInt("n_balls", m_ballRenderIndexes.size());
-    m_shaders[1]->setUniformFloat("ballShadowRadius", 0.05715);    // ball diameter so that we have more shadow
+    m_shaders[1]->setUniformFloat("ballShadowRadius", 0.05715/2);    // ball diameter so that we have more shadow
     for (int i = 0; i < m_ballRenderIndexes.size(); i++)
     {
         m_shaders[1]->setUniformVec3(std::string("ballPositions[" + std::to_string(i) + "]"), m_renderEngine->getObjectPosition(m_ballRenderIndexes[i]));
     }
+    //m_shaders[0]->setUniformInt("n_balls", 0);
 }
 
 void Game::initializeRenderLights()
@@ -522,6 +523,8 @@ void Game::playerTurn(Coroutine* coro)
     input->setKeyAction(PUSH_BALL, GLFW_KEY_F, false);
     input->setActionFunction(PUSH_BALL, m_pushBallFunction);
 
+    m_currentColor = m_playerColors[m_gameState->getCurrentPlayer()];
+
     // player has to throw the ball so we wait for it
     CoroutineYieldUntil(coro, m_isMoveDone);
     // when player does move, he can no longer shoot again
@@ -529,22 +532,43 @@ void Game::playerTurn(Coroutine* coro)
     input->removeActionFunction(PUSH_BALL);
     input->removeKeyAction(GLFW_KEY_F);
 
+    m_currentColor = m_playerColors[m_gameState->getCurrentPlayer()] * glm::vec3(0.5);
     // now that the move is done we wait for the simulation to be static
-    while(!m_physicsEngine->isStatic())
+    while (!m_physicsEngine->isStatic())
     {
         CoroutineYield(coro);   // esto hace que se detenga la ejecucion hasta que haya que salir del bucle
-                                // se ve raro pero el bucle no hace nada
-                                // tambien se podria poner como: CoroutineYieldUntil(coro, m_physicsEngine->isStatic())
+        // se ve raro pero el bucle no hace nada
+        // tambien se podria poner como: CoroutineYieldUntil(coro, m_physicsEngine->isStatic())
     }
     // LOG_DEBUG("World has stopped");
 
     // now that the simulation is static the next turn can go on
 
+    (*(int*)(coro->data)) = m_gameState->gameIsOver();
+
     m_gameState->processTurn();
     m_isMoveDone = false;
     // LOG_DEBUG("Corutine has ended, next turn\n");
-
+    
     CoroutineReset(coro);
+}
+
+void Game::winCoroutine(Coroutine* coro)
+{
+
+    int winningTeam = *((int*)coro->data);
+
+    CoroutineBegin(coro);                           // coroutine initialization
+
+    CoroutineYieldUntil(coro, winningTeam != -1);   // wait for game to finnish
+
+    LOG_INFO("congrats to team %d", winningTeam);
+
+    CoroutineWait(coro, 5.0f);                      // waits for 5 seconds
+
+    LOG_INFO("goodbye");
+    m_shouldExit = true;
+    CoroutineEnd(coro);                             // ends
 }
 
 int Game::startGameLoop()
@@ -565,7 +589,11 @@ int Game::startGameLoop()
     Rendering::RuntimeModelEditor runtimeModelEditor(m_renderEngine);
     #endif
 
+    int winningTeam = -1;
     Coroutine playerTurnCoroutine;
+    playerTurnCoroutine.data = (void*) &winningTeam;
+    Coroutine winAnimationCoroutine;
+    winAnimationCoroutine.data = (void*)&winningTeam;
 
     glm::vec3 startPos = glm::vec3(0.0,0.0,0.0);
     glm::vec3 endPos = startPos+glm::vec3(1.0, 1.0, 1.0);
@@ -579,13 +607,18 @@ int Game::startGameLoop()
     while (!m_window->shouldClose() && !m_shouldExit)
     {
         GL(glClearColor(0.1f, 0.1f, 0.15f, 1.0f));
-        GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+        GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
+        GL(glStencilMask(0x00));
 
         #ifdef DEBUG
         // ImGui newframe
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+        #endif
+
+
+        #ifdef DEBUG
 
         if (!io.WantCaptureMouse)
         {
@@ -596,11 +629,13 @@ int Game::startGameLoop()
         }
         else { m_window->getInput()->disableKeyboard(); };
         #else
-        playerTurn(&playerTurnCoroutine);
+        winningTeam = playerTurn(&playerTurnCoroutine);
         m_window->processInput(deltaTime);
         #endif
 
-        m_physicsEngine->update(deltaTime, &focusedBallPosition);
+        winCoroutine(&winAnimationCoroutine);
+
+        m_physicsEngine->update(deltaTime, &focusedBallPosition, m_gameState->getPlayerBallID());
         
         m_currentCameraController->update();
 
@@ -614,8 +649,11 @@ int Game::startGameLoop()
 
         m_renderEngine->setLinePos(lineID, focusedBallPosition, focusedBallPosition+m_camera.getPlaneFront());
 
+        processShadows();
         m_renderEngine->updateShaderView();
-        m_renderEngine->drawAll();
+        m_renderEngine->drawAllMinus(m_ballRenderIndexes[m_gameState->getPlayerBallID()]);
+
+        m_renderEngine->drawWithOutline(m_ballRenderIndexes[m_gameState->getPlayerBallID()], m_currentColor);
 
         m_renderEngine->drawLights();
 
@@ -629,12 +667,6 @@ int Game::startGameLoop()
         #endif
 
         #ifdef DEBUG
-
-        // ImGui::Begin("Lines");
-        // ImGui::SliderFloat3("start", glm::value_ptr(startPos), -1.0, 1.0);
-        // ImGui::SliderFloat3("end", glm::value_ptr(endPos), -1.0, 1.0);
-        // ImGui::End();
-
         drawDebugUI(nFrame, deltaTime, m_window->getInput(), &focusedBallPosition, &runtimeModelEditor);
         #endif
 

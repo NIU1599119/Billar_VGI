@@ -29,7 +29,7 @@ public:
     void processTurn();
 
     // returns -1 if game is not over, or the team id of the team that won
-    int gameIsOver();
+    int gameIsOver() { return m_winningTeam; };
 
     int getPlayerBallID() { return 0; };
 

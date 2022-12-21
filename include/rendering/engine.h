@@ -18,7 +18,7 @@ namespace Rendering {
 	class RenderEngine3D
 	{
 	public:
-		RenderEngine3D(Camera* camera, Rendering::Shader* defaultShader, Rendering::Shader* lightShader = nullptr, Rendering::Shader* debugShader = nullptr);
+		RenderEngine3D(Camera* camera, Rendering::Shader* defaultShader, Rendering::Shader* shadowShader, Rendering::Shader* lightShader = nullptr, Rendering::Shader* debugShader = nullptr);
 		~RenderEngine3D();
 
 		/////// CAMERA & PROJECTION ///////
@@ -53,7 +53,9 @@ namespace Rendering {
 		glm::vec3 getObjectScaling(int id) { return m_objects[id].getScaling(); };
 
 		void draw(int id);
+		void drawWithOutline(int id, glm::vec3 color);
 		void drawAll();
+		void drawAllMinus(int id);
 
 		bool existsObjectID(int id) { return (m_objects.size() > id && id > 0); };
 
@@ -99,6 +101,7 @@ namespace Rendering {
 
 		/////// OBJECTS ///////
 		Rendering::Shader* m_defaultModelShader;			// shader por defecto
+		Rendering::Shader* m_shadowModelShader;
 		std::vector<Rendering::Shader*> m_shaders;	// posibles shaders especificos para algunos objetos (si son nullptr se utiliza el m_generalModelShader)
 		std::vector<Rendering::Object> m_objects;	// estructura con los objetos que se renderizan cada frame
 

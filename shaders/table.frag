@@ -58,14 +58,14 @@ in mat3 TBN;
 uniform vec3 viewPos;
 // uniform DirLight dirLight;
 uniform PointLight pointLights[NR_POINT_LIGHTS];
-uniform int n_pointLights;
+uniform int n_pointLights = 0;
 // uniform SpotLight spotLight;
 uniform Material material;
 
 #define MAX_BALLS 16
 uniform vec3 ballPositions[MAX_BALLS];
 uniform float ballShadowRadius;
-uniform int n_balls;
+uniform int n_balls = 0;
 
 // function prototypes
 vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir);
@@ -103,11 +103,12 @@ void main()
     // result += calcSpotLight(spotLight, norm, FragPos, viewDir);
 
     // shadow calculation (very simple shadow xd)
-    // for (int i = 0; i < n_balls; i++)
-    // {
-    //     float shadow = min(1, max(0, (1/ballShadowRadius)*length(ballPositions[i]-FragPos)));
-    //     result *= vec3(shadow);
-    // }
+    for (int i = 0; i < n_balls; i++)
+    {
+        float shadowCoeficient = (1/ballShadowRadius)*length(ballPositions[i]-FragPos) - 1;
+        float shadow = min(1, max(0, shadowCoeficient));
+        result *= vec3(shadow);
+    }
 
 
     FragColor = vec4(result, 1.0);

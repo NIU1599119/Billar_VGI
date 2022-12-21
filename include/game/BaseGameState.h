@@ -27,6 +27,8 @@ public:
     // virtual function so that the children can reset player variables before the nextTurn, m_playerRepeatsTurn should be set here
     virtual void processTurn() { nextTurn(); m_playerRepeatsTurn = false; };
 
+    virtual int gameIsOver() { return -1; };
+
     GAMEMODE getGamemode() { return m_gamemode; };
 
     void registerCollision(int ball1, int ball2) { m_lastPlayerCollisionPairs.push_back(intPair(ball1, ball2)); };
