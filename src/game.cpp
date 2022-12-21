@@ -568,6 +568,10 @@ void Game::initializeHUD()
     ResourceManager::LoadTexture("textures/hud/15.png", true, "15");
     ResourceManager::LoadTexture("textures/hud/p1.png", true, "p1");
     ResourceManager::LoadTexture("textures/hud/p2.png", true, "p2");
+    ResourceManager::LoadTexture("textures/hud/power1.png", true, "power1");
+    ResourceManager::LoadTexture("textures/hud/power2.png", true, "power2");
+    ResourceManager::LoadTexture("textures/hud/power3.png", true, "power3");
+    ResourceManager::LoadTexture("textures/hud/power4.png", true, "power4");
 
     m_teamOffSet1 = 0.0f;
     m_teamOffSet2 = 960.0f;
@@ -632,6 +636,30 @@ void Game::drawHUD()
     {
         RendererGame->DrawSprite(ResourceManager::GetTexture("p2"),
             glm::vec2(810.0f * m_resFix, 900.0f * m_resFix), glm::vec2(300 * m_resFix, 150 * m_resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+    }
+
+    switch (m_power)
+    {
+    case 1:
+        RendererGame->DrawSprite(ResourceManager::GetTexture("power1"),
+            glm::vec2(1600.0f * m_resFix, 770.0f * m_resFix), glm::vec2(300 * m_resFix, 300 * m_resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+        break;
+    case 2:
+        RendererGame->DrawSprite(ResourceManager::GetTexture("power2"),
+            glm::vec2(1600.0f * m_resFix, 770.0f * m_resFix), glm::vec2(300 * m_resFix, 300 * m_resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+        break;
+    case 3:
+        RendererGame->DrawSprite(ResourceManager::GetTexture("power3"),
+            glm::vec2(1600.0f * m_resFix, 770.0f * m_resFix), glm::vec2(300 * m_resFix, 300 * m_resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+        break;
+    case 4:
+        RendererGame->DrawSprite(ResourceManager::GetTexture("power4"),
+            glm::vec2(1600.0f * m_resFix, 770.0f * m_resFix), glm::vec2(300 * m_resFix, 300 * m_resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+        break;
+    default:
+        RendererGame->DrawSprite(ResourceManager::GetTexture("power1"),
+            glm::vec2(1600.0f * m_resFix, 770.0f * m_resFix), glm::vec2(300 * m_resFix, 300 * m_resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+        break;
     }
 
     RendererGame->DrawSprite(ResourceManager::GetTexture("hud"),
