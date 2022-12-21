@@ -101,19 +101,34 @@ Game::Game(Window* window, GAMEMODE gamemode, int numPlayers)
     btDiscreteDynamicsWorldMt** p_dynamicsWorld = m_physicsEngine->getDynamicsWorld();
     Camera* p_camera = &m_camera;
     bool* p_isMoveDone = &m_isMoveDone;
+    float* p_power = &m_power;
     int currentBallToShoot = m_gameState->getPlayerBallID();
     currentBallToShoot = m_physicsEngine->getBallIdx(currentBallToShoot);
 
-    m_pushBallFunction = [p_dynamicsWorld, p_camera, currentBallToShoot, p_isMoveDone](float deltaTime){
+    m_pushBallFunction = [p_dynamicsWorld, p_camera, currentBallToShoot, p_isMoveDone, p_power](float deltaTime){
         btCollisionObject* obj = (*p_dynamicsWorld)->getCollisionObjectArray()[currentBallToShoot];
         btRigidBody* body = btRigidBody::upcast(obj);
         body->setActivationState(ACTIVE_TAG);
         glm::vec3 front = glm::normalize(p_camera->getPlaneFront());
-        front = front * 1.0f;
+        front = front * (*p_power);
         body->applyCentralImpulse(btVector3(front.x, body->getLinearVelocity().y(), front.z));
         // body->setLinearVelocity(btVector3(front.x, body->getLinearVelocity().y(), front.z));
         *p_isMoveDone = true;
     };
+
+    float* p_powerMax = &m_maxPower;
+    float* p_powerStep = &m_powerStep;
+    m_upPowerFunction = [p_power, p_powerMax, p_powerStep](float deltaTime) {
+        (*p_power) = (*p_power) + (*p_powerStep);
+        if ((*p_power) > (*p_powerMax))
+            (*p_power) = (*p_powerMax);
+    };
+    m_downPowerFunction = [p_power, p_powerStep](float deltaTime) {
+        (*p_power) = (*p_power) - (*p_powerStep);
+        if ((*p_power) < 0.0f)
+            (*p_power) = 0.0f;
+    };
+
     LOG_INFO("Initialized the game functions");
     
 
@@ -637,10 +652,22 @@ void Game::playerTurn(Coroutine* coro)
     Input* input = m_window->getInput();
 
     CoroutineBegin(coro);
+
+    while (!m_physicsEngine->isStatic())
+    {
+        CoroutineYield(coro);   // esto hace que se detenga la ejecucion hasta que haya que salir del bucle
+        // se ve raro pero el bucle no hace nada
+        // tambien se podria poner como: CoroutineYieldUntil(coro, m_physicsEngine->isStatic())
+    }
+
     // asign the input to the player
     // LOG_DEBUG("Begin corutine");
     input->setKeyAction(PUSH_BALL, GLFW_KEY_F, false);
     input->setActionFunction(PUSH_BALL, m_pushBallFunction);
+    input->setKeyAction(POWER_UP, GLFW_KEY_UP, false);
+    input->setActionFunction(POWER_UP, m_upPowerFunction);
+    input->setKeyAction(POWER_DOWN, GLFW_KEY_DOWN, false);
+    input->setActionFunction(POWER_DOWN, m_downPowerFunction);
 
     m_currentColor = m_playerColors[m_gameState->getCurrentPlayer()];
 
@@ -650,6 +677,10 @@ void Game::playerTurn(Coroutine* coro)
     // LOG_DEBUG("Player has moved");
     input->removeActionFunction(PUSH_BALL);
     input->removeKeyAction(GLFW_KEY_F);
+    input->removeActionFunction(POWER_UP);
+    input->removeKeyAction(GLFW_KEY_UP);
+    input->removeActionFunction(POWER_DOWN);
+    input->removeKeyAction(GLFW_KEY_DOWN);
 
     m_currentColor = m_playerColors[m_gameState->getCurrentPlayer()] * glm::vec3(0.5);
     // now that the move is done we wait for the simulation to be static

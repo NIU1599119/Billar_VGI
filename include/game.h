@@ -64,9 +64,14 @@ private:
     bool m_shouldExit = false;
     bool m_isMoveDone = false;    // se inicia en cada turno a false, cuando el jugador mueve una bola se pone en true
     void playerTurn(Coroutine* coro);
-    std::function<void (float)> m_pushBallFunction;
+    std::function<void(float)> m_pushBallFunction;
+    float m_power = 1.0f;
+    float m_maxPower = 2.0f;
+    float m_powerStep = 0.25f;
+    std::function<void(float)> m_upPowerFunction;
+    std::function<void(float)> m_downPowerFunction;
     void winCoroutine(Coroutine* coro);
 
-    std::vector<glm::vec3> m_playerColors{ glm::vec3(0x7C/255.0, 0xFC/255.0, 0x00/255.0), glm::vec3(0xA2/255.0, 0x4B/255.0, 0xFF/255.0) };  // #7CFC00, #A24BFF
-    glm::vec3 m_currentColor;
+    std::vector<glm::vec3> m_playerColors{ glm::vec3(0xA2/255.0, 0x4B/255.0, 0xFF/255.0), glm::vec3(0x7C / 255.0, 0xFC / 255.0, 0x00 / 255.0) };  // #A24BFF, #7CFC00
+    glm::vec3 m_currentColor = glm::vec3(0x44 / 255.0);
 };
