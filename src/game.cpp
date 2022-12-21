@@ -9,6 +9,15 @@
 #include "game/ClassicState.h"
 #include "game/CarambolaState.h"
 
+#include "menu/rendering/SpriteRenderer.h"
+#include "menu/resource_manager.h"
+
+// Matrix
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include "gl_utils.h"
+
 Game::Game(Window* window, GAMEMODE gamemode, int numPlayers)
 : m_window(window)
 {
@@ -122,6 +131,7 @@ Game::~Game()
 
 void Game::initializeRenderObjects()
 {   
+    
     //add the room
     Rendering::Model* roomModel = Rendering::createModel("models/room/Room.obj");
     int roomRenderID = m_renderEngine->createObject(roomModel, 1.0);
@@ -211,7 +221,7 @@ void Game::initializeRenderObjects()
     m_renderEngine->updateObject(chairRenderID9, glm::vec3(2.434, 0.0, -2.385), glm::quat(0.5, -0.5, 0.5, 0.5));
     m_renderEngine->updateObjectScaling(chairRenderID9, glm::vec3(0.8));
     m_barRenderIndexes.push_back(chairRenderID9);
-
+    
 
     switch (m_gameState->getGamemode())
     {
@@ -528,6 +538,8 @@ void Game::playerTurn(Coroutine* coro)
     CoroutineReset(coro);
 }
 
+SpriteRenderer* RendererGame;
+
 int Game::startGameLoop()
 {
     initializeBasicInputs();
@@ -551,6 +563,41 @@ int Game::startGameLoop()
     m_shouldExit = false;
 
     initializeBasicInputs();
+
+    // load shaders
+    ResourceManager::LoadShader("shaders/sprite.vs", "shaders/sprite.frag", nullptr, "sprite");
+    // configure shaders
+    float Width = m_window->getWidth();
+    float Height = m_window->getHeight();
+    float resFix = Width / 1920;
+
+    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(Width),
+        static_cast<float>(Height), 0.0f, -1.0f, 1.0f);
+    
+    ResourceManager::GetShader("sprite").Use().SetInteger("image", 0);
+    ResourceManager::GetShader("sprite").SetMatrix4("projection", projection);
+    // set render-specific controls
+    RendererGame = new SpriteRenderer(ResourceManager::GetShader("sprite"));
+    ResourceManager::LoadTexture("textures/hud/hud.png", true, "hud");
+    ResourceManager::LoadTexture("textures/hud/1.png", true, "1");
+    ResourceManager::LoadTexture("textures/hud/2.png", true, "2");
+    ResourceManager::LoadTexture("textures/hud/3.png", true, "3");
+    ResourceManager::LoadTexture("textures/hud/4.png", true, "4");
+    ResourceManager::LoadTexture("textures/hud/5.png", true, "5");
+    ResourceManager::LoadTexture("textures/hud/6.png", true, "6");
+    ResourceManager::LoadTexture("textures/hud/7.png", true, "7");
+    ResourceManager::LoadTexture("textures/hud/9.png", true, "9");
+    ResourceManager::LoadTexture("textures/hud/10.png", true, "10");
+    ResourceManager::LoadTexture("textures/hud/11.png", true, "11");
+    ResourceManager::LoadTexture("textures/hud/12.png", true, "12");
+    ResourceManager::LoadTexture("textures/hud/13.png", true, "13");
+    ResourceManager::LoadTexture("textures/hud/14.png", true, "14");
+    ResourceManager::LoadTexture("textures/hud/15.png", true, "15");
+
+    std::vector<bool> pocketed;
+    ClassicState* classicState = (ClassicState*)m_gameState;
+    float teamOffSet1 = 0.0f;
+    float teamOffSet2 = 960.0f;
 
     while (!m_window->shouldClose() && !m_shouldExit)
     {
@@ -592,6 +639,32 @@ int Game::startGameLoop()
         m_renderEngine->drawAll();
 
         m_renderEngine->drawLights();
+
+        //// rendering HUD
+        pocketed = classicState->getPocketedBalls();
+
+        for (int i = 1; i < 8; i++)
+        {
+            if (!pocketed[i])
+            {
+                RendererGame->DrawSprite(ResourceManager::GetTexture(std::to_string(i)),
+                    glm::vec2(((100.0f + (85.0f*i)) + teamOffSet1)* resFix, 50.0f * resFix), glm::vec2(85 * resFix, 85 * resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+
+            }
+        }
+        for (int i = 9; i < 16; i++)
+        {
+            if (!pocketed[i])
+            {
+                RendererGame->DrawSprite(ResourceManager::GetTexture(std::to_string(i)),
+                    glm::vec2(((100.0f + (85.0f * (i-8))) + teamOffSet2) * resFix, 50.0f * resFix), glm::vec2(85 * resFix, 85 * resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+
+            }
+        }
+
+
+        RendererGame->DrawSprite(ResourceManager::GetTexture("hud"),
+            glm::vec2(0.0f * resFix, 0.0f * resFix), glm::vec2(1920 * resFix, 1080 * resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
 
         #ifdef DEBUG_SHADER
         std::vector<Rendering::CollisionBox>* p_rigidObjects = m_physicsEngine->getCollisionsBoxPtr();
