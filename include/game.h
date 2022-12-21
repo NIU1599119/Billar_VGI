@@ -65,9 +65,8 @@ private:
     bool m_isMoveDone = false;    // se inicia en cada turno a false, cuando el jugador mueve una bola se pone en true
     void playerTurn(Coroutine* coro);
     std::function<void(float)> m_pushBallFunction;
-    float m_power = 1.0f;
-    float m_maxPower = 2.0f;
-    float m_powerStep = 0.25f;
+    int m_power = 1;
+    int m_maxPower = 4;
     std::function<void(float)> m_upPowerFunction;
     std::function<void(float)> m_downPowerFunction;
     void winCoroutine(Coroutine* coro);

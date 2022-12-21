@@ -101,7 +101,7 @@ Game::Game(Window* window, GAMEMODE gamemode, int numPlayers)
     btDiscreteDynamicsWorldMt** p_dynamicsWorld = m_physicsEngine->getDynamicsWorld();
     Camera* p_camera = &m_camera;
     bool* p_isMoveDone = &m_isMoveDone;
-    float* p_power = &m_power;
+    int* p_power = &m_power;
     int currentBallToShoot = m_gameState->getPlayerBallID();
     currentBallToShoot = m_physicsEngine->getBallIdx(currentBallToShoot);
 
@@ -110,23 +110,22 @@ Game::Game(Window* window, GAMEMODE gamemode, int numPlayers)
         btRigidBody* body = btRigidBody::upcast(obj);
         body->setActivationState(ACTIVE_TAG);
         glm::vec3 front = glm::normalize(p_camera->getPlaneFront());
-        front = front * (*p_power);
+        front = front * ((*p_power) * 0.25f + 0.25f);
         body->applyCentralImpulse(btVector3(front.x, body->getLinearVelocity().y(), front.z));
         // body->setLinearVelocity(btVector3(front.x, body->getLinearVelocity().y(), front.z));
         *p_isMoveDone = true;
     };
 
-    float* p_powerMax = &m_maxPower;
-    float* p_powerStep = &m_powerStep;
-    m_upPowerFunction = [p_power, p_powerMax, p_powerStep](float deltaTime) {
-        (*p_power) = (*p_power) + (*p_powerStep);
+    int* p_powerMax = &m_maxPower;
+    m_upPowerFunction = [p_power, p_powerMax](float deltaTime) {
+        (*p_power) = (*p_power) + 1;
         if ((*p_power) > (*p_powerMax))
             (*p_power) = (*p_powerMax);
     };
-    m_downPowerFunction = [p_power, p_powerStep](float deltaTime) {
-        (*p_power) = (*p_power) - (*p_powerStep);
-        if ((*p_power) < 0.0f)
-            (*p_power) = 0.0f;
+    m_downPowerFunction = [p_power](float deltaTime) {
+        (*p_power) = (*p_power) - 1;
+        if ((*p_power) < 0)
+            (*p_power) = 0;
     };
 
     LOG_INFO("Initialized the game functions");
