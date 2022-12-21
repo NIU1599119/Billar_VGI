@@ -9,6 +9,17 @@
 #include "game/ClassicState.h"
 #include "game/CarambolaState.h"
 
+#include "menu/rendering/SpriteRenderer.h"
+#include "menu/resource_manager.h"
+
+// Matrix
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include "gl_utils.h"
+
+SpriteRenderer* RendererGame;
+
 Game::Game(Window* window, GAMEMODE gamemode, int numPlayers)
 : m_window(window)
 {
@@ -131,12 +142,13 @@ Game::~Game()
 
 void Game::initializeRenderObjects()
 {   
-    // //add the room
-    // Rendering::Model* roomModel = Rendering::createModel("models/room/Room.obj");
-    // int roomRenderID = m_renderEngine->createObject(roomModel, 1.0);
-    // m_renderEngine->updateObject(roomRenderID, glm::vec3(0.0), glm::quat(1.0, 0.0, 0.0, 0.0));
-    // m_renderEngine->updateObjectScaling(roomRenderID, glm::vec3(2.0, 4.0, 2.0));
-    // m_barRenderIndexes.push_back(roomRenderID);
+    
+    //add the room
+    Rendering::Model* roomModel = Rendering::createModel("models/room/Room.obj");
+    int roomRenderID = m_renderEngine->createObject(roomModel, 1.0);
+    m_renderEngine->updateObject(roomRenderID, glm::vec3(0.0), glm::quat(1.0, 0.0, 0.0, 0.0));
+    m_renderEngine->updateObjectScaling(roomRenderID, glm::vec3(2.0, 4.0, 2.0));
+    m_barRenderIndexes.push_back(roomRenderID);
 
     // int roomRenderID2 = m_renderEngine->createObject(roomModel,1.0);
     // m_renderEngine->updateObject(roomRenderID2, glm::vec3(0.0, 4.0, 0.0), glm::quat(1.0, 0.0, 0.0, 0.0));
@@ -507,6 +519,112 @@ void Game::initializeDetectionBoxes()
     }
 }
 
+void Game::initializeHUD()
+{
+    // load shaders
+    ResourceManager::LoadShader("shaders/sprite.vs", "shaders/sprite.frag", nullptr, "sprite");
+    // configure shaders
+    float Width = m_window->getWidth();
+    float Height = m_window->getHeight();
+    float resFix = Width / 1920;
+
+    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(Width),
+        static_cast<float>(Height), 0.0f, -1.0f, 1.0f);
+
+
+    ResourceManager::GetShader("sprite").Use().SetInteger("image", 0);
+    ResourceManager::GetShader("sprite").SetMatrix4("projection", projection);
+    // set render-specific controls
+
+    RendererGame = new SpriteRenderer(ResourceManager::GetShader("sprite"));
+    ResourceManager::LoadTexture("textures/hud/hud.png", true, "hud");
+    ResourceManager::LoadTexture("textures/hud/1.png", true, "1");
+    ResourceManager::LoadTexture("textures/hud/2.png", true, "2");
+    ResourceManager::LoadTexture("textures/hud/3.png", true, "3");
+    ResourceManager::LoadTexture("textures/hud/4.png", true, "4");
+    ResourceManager::LoadTexture("textures/hud/5.png", true, "5");
+    ResourceManager::LoadTexture("textures/hud/6.png", true, "6");
+    ResourceManager::LoadTexture("textures/hud/7.png", true, "7");
+    ResourceManager::LoadTexture("textures/hud/9.png", true, "9");
+    ResourceManager::LoadTexture("textures/hud/10.png", true, "10");
+    ResourceManager::LoadTexture("textures/hud/11.png", true, "11");
+    ResourceManager::LoadTexture("textures/hud/12.png", true, "12");
+    ResourceManager::LoadTexture("textures/hud/13.png", true, "13");
+    ResourceManager::LoadTexture("textures/hud/14.png", true, "14");
+    ResourceManager::LoadTexture("textures/hud/15.png", true, "15");
+    ResourceManager::LoadTexture("textures/hud/p1.png", true, "p1");
+    ResourceManager::LoadTexture("textures/hud/p2.png", true, "p2");
+
+    m_teamOffSet1 = 0.0f;
+    m_teamOffSet2 = 960.0f;
+
+    m_Width = m_window->getWidth();
+    m_Height = m_window->getHeight();
+    m_resFix = Width / 1920;
+}
+
+void Game::drawHUD()
+{
+    //// rendering HUD
+    ClassicState* classicState = (ClassicState*)m_gameState;;
+    m_pocketed = classicState->getPocketedBalls();
+
+
+    std::vector<CLASSIC_BALL_TYPES> teams = classicState->getTeams();
+
+    bool print = false;
+
+    if (teams[0] == STRIPED)
+    {
+        print = true;
+        m_teamOffSet1 = 960.0f;
+        m_teamOffSet2 = 0.0f;
+    }
+    else if (teams[0] == SOLID)
+    {
+        print = true;
+        m_teamOffSet1 = 0.0f;
+        m_teamOffSet2 = 960.0f;
+    }
+
+    if (print)
+    {
+        for (int i = 1; i < 8; i++)
+        {
+            if (!m_pocketed[i])
+            {
+                RendererGame->DrawSprite(ResourceManager::GetTexture(std::to_string(i)),
+                    glm::vec2(((100.0f + (85.0f * i)) + m_teamOffSet1) * m_resFix, 50.0f * m_resFix), glm::vec2(85 * m_resFix, 85 * m_resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+
+            }
+        }
+        for (int i = 9; i < 16; i++)
+        {
+            if (!m_pocketed[i])
+            {
+                RendererGame->DrawSprite(ResourceManager::GetTexture(std::to_string(i)),
+                    glm::vec2(((100.0f + (85.0f * (i - 8))) + m_teamOffSet2) * m_resFix, 50.0f * m_resFix), glm::vec2(85 * m_resFix, 85 * m_resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+
+            }
+        }
+    }
+
+    if (classicState->getCurrentPlayer() == 0)
+    {
+        RendererGame->DrawSprite(ResourceManager::GetTexture("p1"),
+            glm::vec2(810.0f * m_resFix, 900.0f * m_resFix), glm::vec2(300 * m_resFix, 150 * m_resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+    }
+    else
+    {
+        RendererGame->DrawSprite(ResourceManager::GetTexture("p2"),
+            glm::vec2(810.0f * m_resFix, 900.0f * m_resFix), glm::vec2(300 * m_resFix, 150 * m_resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+    }
+
+    RendererGame->DrawSprite(ResourceManager::GetTexture("hud"),
+        glm::vec2(0.0f * m_resFix, 0.0f * m_resFix), glm::vec2(1920 * m_resFix, 1080 * m_resFix), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+
+}
+
 void Game::playerTurn(Coroutine* coro)
 {
     // gracias a bigrando420 se puede simplificar un monton este codigo
@@ -605,6 +723,8 @@ int Game::startGameLoop()
 
     initializeBasicInputs();
 
+    initializeHUD();
+
     while (!m_window->shouldClose() && !m_shouldExit)
     {
         GL(glClearColor(0.1f, 0.1f, 0.15f, 1.0f));
@@ -658,6 +778,9 @@ int Game::startGameLoop()
 
         m_renderEngine->drawLights();
 
+        drawHUD();
+
+        
         #ifdef DEBUG_SHADER
         std::vector<Rendering::CollisionBox>* p_rigidObjects = m_physicsEngine->getCollisionsBoxPtr();
         for (int i = 0; i < (*p_rigidObjects).size(); i++)
