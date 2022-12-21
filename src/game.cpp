@@ -97,9 +97,10 @@ Game::Game(Window* window, GAMEMODE gamemode, int numPlayers)
         btCollisionObject* obj = (*p_dynamicsWorld)->getCollisionObjectArray()[currentBallToShoot];
         btRigidBody* body = btRigidBody::upcast(obj);
         body->setActivationState(ACTIVE_TAG);
-        glm::vec3 front = p_camera->getPlaneFront();
-        front = front * 3.0f;
-        body->setLinearVelocity(btVector3(front.x, body->getLinearVelocity().y(), front.z));
+        glm::vec3 front = glm::normalize(p_camera->getPlaneFront());
+        front = front * 1.0f;
+        body->applyCentralImpulse(btVector3(front.x, body->getLinearVelocity().y(), front.z));
+        // body->setLinearVelocity(btVector3(front.x, body->getLinearVelocity().y(), front.z));
         *p_isMoveDone = true;
     };
     LOG_INFO("Initialized the game functions");
@@ -629,7 +630,7 @@ int Game::startGameLoop()
         }
         else { m_window->getInput()->disableKeyboard(); };
         #else
-        winningTeam = playerTurn(&playerTurnCoroutine);
+        playerTurn(&playerTurnCoroutine);
         m_window->processInput(deltaTime);
         #endif
 

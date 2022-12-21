@@ -85,6 +85,7 @@ public:
         glm::vec3 actualSize = glm::vec3(m_size.x*2, m_size.y*2, m_size.z*2);
         m_renderEngine->updateObjectScaling(m_renderID, actualSize);
         Rendering::Shader* debugShader = m_renderEngine->getDebuggingShader();
+        debugShader->activate();
         debugShader->setUniformVec3("color", (m_isDetected) ? DETECTED : OUTSIDE);
         #endif
         for (int i = 0; i < m_detectedBallIDs.size(); i++)
