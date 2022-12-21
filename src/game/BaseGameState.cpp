@@ -6,8 +6,14 @@ void BaseGameState::nextPlayer()
     if (m_currentPlayer == m_numPlayers)
     {
         m_currentPlayer = 0;
-        m_numTurn++;
     }
+}
 
+void BaseGameState::nextTurn()
+{
     m_lastPlayerCollisionPairs.clear();
+    m_numTurn++;
+    if (m_playerRepeatsTurn) return;
+
+    nextPlayer();
 }

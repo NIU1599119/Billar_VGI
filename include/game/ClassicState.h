@@ -23,15 +23,19 @@ public:
 
     };
 
-    void pocketBall(int ballID);
+    bool pocketBall(int ballID);
 
-    // returns if the current player has to repeat turn
-    bool willRepeatTurn();
+    // resets player variables, sets m_playerRepeatsTurn and passes the turn
+    void processTurn();
 
     // returns -1 if game is not over, or the team id of the team that won
     int gameIsOver();
 
     int getPlayerBallID() { return 0; };
+
+    std::vector<CLASSIC_BALL_TYPES> getTeams() { return m_teams; };
+
+    std::vector<bool> getPocketedBalls() { return m_pocketedBalls; };
 
 private:
     // team info
@@ -50,5 +54,5 @@ private:
 
     // current player info
     bool m_playerFoul = false;          // skipear el turno (bola blanca se resetearia)
-    bool m_repeatPlayerTurn = false;    // repetir turno (se invalida si se skipea el turno)
+    bool m_playerPocketed = false;    // repetir turno (se invalida si se skipea el turno)
 };

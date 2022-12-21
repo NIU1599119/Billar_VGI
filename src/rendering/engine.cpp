@@ -133,6 +133,11 @@ namespace Rendering {
 		return idx;
 	}
 
+	void RenderEngine3D::disableObject(int id)
+	{
+		m_objects[id].setDisabled(true);
+	}
+
 	void RenderEngine3D::deleteObject(int id)
 	{
 		m_objects.erase(m_objects.begin() + id);

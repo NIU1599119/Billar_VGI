@@ -3,6 +3,7 @@
 #include "debug.h"
 
 #include "game/gamemodes.h"
+#include "game/BaseGameState.h"
 
 namespace Entities 
 {
@@ -15,7 +16,7 @@ namespace Entities
     class Entity
     {
     public:
-        Entity(TYPE type, GAMEMODE subType) : m_type(type), m_subType(subType) {};
+        Entity(TYPE type, BaseGameState* gamestate) : m_type(type), m_gamestate(gamestate), m_subType(gamestate->getGamemode()) {};
 
         // void setPosition();
         // void getPosition();
@@ -23,13 +24,21 @@ namespace Entities
         TYPE getType() { return m_type; };
         GAMEMODE getSubType() { return m_subType; };
 
-        virtual void collision(Entity* entity) = 0;
         virtual void collision(Entity* entity, double force) = 0;
+
+        bool getIsDisabled() { return m_disabled; };
+
+        void disable() { m_disabled = true; };
+        void enable() { m_disabled = false; };
 
     protected:
         // glm::vec3 m_position;
         TYPE m_type;
         GAMEMODE m_subType;
+
+        BaseGameState* m_gamestate;
+
+        bool m_disabled = false;
     };
 
 };

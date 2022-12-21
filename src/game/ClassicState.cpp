@@ -1,6 +1,6 @@
 #include "game/ClassicState.h"
 
-void ClassicState::pocketBall(int ballID)
+bool ClassicState::pocketBall(int ballID)
 {
     // checkeamos si el equipo tiene una bola asignada o no. (tambien que lo que hayamos metido sean lisas o ralladas, si no pues no se asigna todavia)
     if (m_teams[m_playerTeam[m_currentPlayer]] == CUE && (BALL_TYPES[ballID] == SOLID || BALL_TYPES[ballID] == STRIPED))
@@ -20,12 +20,14 @@ void ClassicState::pocketBall(int ballID)
         }
     }
 
+    bool resetBall = false;
     // segun el tipo de bolas metidas hacemos una cosa o otra
     switch (BALL_TYPES[ballID])
     {
     case CUE:
         m_playerFoul = true;    // invalida el repetir turno y simplemente lo salta
         // avisar de que el proximo jugador coloque la bola blanca (o que se coloque sola)
+        resetBall = true;   // se coloca sola la bola de momento
         break;
     case EIGHT:
     {
@@ -49,11 +51,12 @@ void ClassicState::pocketBall(int ballID)
         if (m_teams[m_playerTeam[m_currentPlayer]] == BALL_TYPES[ballID])  // si ha metido bola y es la que tiene que meter
         {
             // el jugador puede repetir el turno
-            m_repeatPlayerTurn = true;
+            m_playerPocketed = true;
         }
         // si mete bola contraria no pasa nada creo
         break;
     }
+    return resetBall;
 }
 
 bool ClassicState::checkWin()
@@ -69,4 +72,14 @@ bool ClassicState::checkWin()
         }
     }
     return teamWin;
+}
+
+void ClassicState::processTurn()
+{
+    if (m_playerPocketed) m_playerRepeatsTurn = true;
+    if (m_playerFoul) m_playerRepeatsTurn = false;
+    nextTurn();
+    m_playerRepeatsTurn = false;
+    m_playerFoul = false;
+    m_playerPocketed = false;
 }

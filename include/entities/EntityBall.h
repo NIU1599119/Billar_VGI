@@ -7,11 +7,10 @@ namespace Entities
     class EntityBall : public Entity
     {
     public:
-        EntityBall(int ballID, GAMEMODE game_type) : Entity(BALL, game_type), m_ballID(ballID) {};
+        EntityBall(int ballID, BaseGameState* gamestate) : Entity(BALL, gamestate), m_ballID(ballID) {};
 
         int getBallID() { return m_ballID; };
 
-        void collision(Entity* entity) {};
         void collision(Entity* entity, double force);
 
         std::string getBallName();

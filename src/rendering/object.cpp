@@ -23,6 +23,7 @@ namespace Rendering {
     }
     void Object::draw(Shader* shader)
     {
+        if (m_disabled) return;
         glm::mat4 translate = glm::mat4(1.0f);
         translate = glm::translate(translate, m_position);
         glm::mat4 orientation = glm::mat4_cast(m_orientation);

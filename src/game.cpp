@@ -71,9 +71,11 @@ Game::Game(Window* window, GAMEMODE gamemode, int numPlayers)
     //////////// FISICAS ////////////
     ///-----initialization_start-----
 
-    m_physicsEngine = new EntityControllerSystem(gamemode, m_renderEngine, m_ballRenderIndexes);
+    m_physicsEngine = new EntityControllerSystem(m_gameState, m_renderEngine, m_ballRenderIndexes);
 
     LOG_INFO("Initialized the physics engine");
+
+    initializeDetectionBoxes();
 
     // variables necesarias para las funciones
     Input* input = m_window->getInput();
@@ -300,7 +302,7 @@ void Game::initializeBasicInputs()
 }
 
 
-void Game::drawDebugUI(unsigned int nFrame, double deltaTime, Input* input, glm::vec3* focusedBallPosition, Rendering::RuntimeModelEditor* runtimeModelEditor, DetectionBox& hole)
+void Game::drawDebugUI(unsigned int nFrame, double deltaTime, Input* input, glm::vec3* focusedBallPosition, Rendering::RuntimeModelEditor* runtimeModelEditor)
 {
     /////////// ImGui ///////////
 
@@ -350,20 +352,139 @@ void Game::drawDebugUI(unsigned int nFrame, double deltaTime, Input* input, glm:
 
     runtimeModelEditor->update();
 
-    ImGui::Begin("Holes");
-    glm::vec3 holePos = hole.getPosition();
-    glm::vec3 holeSize = hole.getSize();
-    ImGui::DragFloat3("position", glm::value_ptr(holePos), 0.001);
-    ImGui::DragFloat3("size", glm::value_ptr(holeSize), 0.001);
-    hole.setPosition(holePos);
-    hole.setSize(holeSize);
-    ImGui::End();
+    switch (m_gameState->getGamemode())
+    {
+    case CLASSIC:
+    {
+        ClassicState* classicState = (ClassicState*)m_gameState;
+        ImGui::Begin("Classic mode debug window");
+        ImGui::Text("Teams:");
+
+        std::vector<CLASSIC_BALL_TYPES> teams = classicState->getTeams();
+        ImGui::Indent(8);
+        for (int i = 0; i < teams.size(); i++)
+        {
+            std::string ballType = "NOT SET";
+            if (teams[i] == STRIPED)
+                ballType = "STRIPED (ralladas)";
+            else if (teams[i] == SOLID)
+                ballType = "SOLID (lisas)";
+
+            std::string team = "Team " + std::to_string(i) + " : " + ballType;
+            ImGui::Text(team.c_str());
+        }
+        ImGui::Unindent(8);
+        ImGui::Separator();
+        ImGui::Text("Balls:");
+
+        std::vector<bool> pocketed = classicState->getPocketedBalls();
+
+        ImGui::Indent(8);
+        ImGui::Text("SOLID");
+        ImGui::Indent(8);
+        std::string solidPockets;
+        for (int i = 1; i < 8; i++)
+        {
+            if (pocketed[i])
+                solidPockets = solidPockets + "1 ";
+            else
+                solidPockets = solidPockets + "0 ";
+        }
+        ImGui::Text(solidPockets.c_str());
+        ImGui::Unindent(8);
+        ImGui::Text("EIGHT");
+        ImGui::Indent(8);
+        {
+            if (pocketed[8])
+                ImGui::Text("1");
+            else
+                ImGui::Text("0");
+        }
+        ImGui::Unindent(8);
+        ImGui::Text("STRIPED");
+        ImGui::Indent(8);
+        std::string stripedPockets;
+        for (int i = 9; i < 16; i++)
+        {
+            if (pocketed[i])
+                stripedPockets = stripedPockets + "1 ";
+            else
+                stripedPockets = stripedPockets + "0 ";
+        }
+        ImGui::Text(stripedPockets.c_str());
+        ImGui::Unindent(8);
+        ImGui::Unindent(8);
+
+        ImGui::End();
+
+        ImGui::Begin("Holes");
+
+        for (int i = 0; i < m_detectionBoxes.size(); i++)
+        {
+            ImGui::Text("Hole %d", i);
+            std::vector<int> balls = m_detectionBoxes[i].getDetectedBallIDs();;
+            for (int j = 0; j < balls.size(); j++)
+            {
+                ImGui::Text("Ball %d", balls[j]);
+            }
+        }
+        ImGui::End();
+
+        break;
+    }
+    case CARAMBOLA:
+    {
+        ImGui::Begin("Carambola mode debug window");
+        ImGui::Text("Not implemented");
+        ImGui::End();
+        break;
+    }
+    default:
+        break;
+    }
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 }
 
+void Game::initializeDetectionBoxes()
+{
+    EntityControllerSystem** p_physicsEngine = &m_physicsEngine;
+    BaseGameState** p_gameState = &m_gameState;
+    std::function<void(int)> pocketCallback = [p_physicsEngine, p_gameState](int ballID) {
+
+        (*p_physicsEngine)->resetBall(ballID);
+        if ((*p_gameState)->getGamemode() == CLASSIC)
+        {
+            bool shouldResetBall = ((ClassicState*)(*p_gameState))->pocketBall(ballID);
+            if (shouldResetBall) return;
+        }
+        (*p_physicsEngine)->disableBall(ballID);
+    };
+    std::function<void(int)> outOfBoundsCallback = [p_physicsEngine](int ballID) {
+        (*p_physicsEngine)->resetBall(ballID);
+    };
+    // floor
+    m_detectionBoxes.emplace_back(m_renderEngine, m_physicsEngine, outOfBoundsCallback, glm::vec3(0.0f, -0.5f, 0.0f), glm::vec3(10.0, 1.2, 10.0));
+
+    switch (m_gameState->getGamemode())
+    {
+    case CLASSIC:
+        // holes
+        /// middle
+        m_detectionBoxes.emplace_back(m_renderEngine, m_physicsEngine, pocketCallback, glm::vec3( 0.0f,  0.7f,  0.66f), glm::vec3(0.2, 0.1, 0.2));
+        m_detectionBoxes.emplace_back(m_renderEngine, m_physicsEngine, pocketCallback, glm::vec3( 0.0f,  0.7f, -0.66f), glm::vec3(0.2, 0.1, 0.2));
+        /// corner
+        m_detectionBoxes.emplace_back(m_renderEngine, m_physicsEngine, pocketCallback, glm::vec3( 1.15f, 0.7f, -0.6f), glm::vec3(0.2, 0.1, 0.2));
+        m_detectionBoxes.emplace_back(m_renderEngine, m_physicsEngine, pocketCallback, glm::vec3( 1.15f, 0.7f,  0.6f), glm::vec3(0.2, 0.1, 0.2));
+        m_detectionBoxes.emplace_back(m_renderEngine, m_physicsEngine, pocketCallback, glm::vec3(-1.15f, 0.7f, -0.6f), glm::vec3(0.2, 0.1, 0.2));
+        m_detectionBoxes.emplace_back(m_renderEngine, m_physicsEngine, pocketCallback, glm::vec3(-1.15f, 0.7f,  0.6f), glm::vec3(0.2, 0.1, 0.2));
+        break;
+    default:
+        break;
+    }
+}
 
 void Game::playerTurn(Coroutine* coro)
 {
@@ -400,7 +521,7 @@ void Game::playerTurn(Coroutine* coro)
 
     // now that the simulation is static the next turn can go on
 
-    m_gameState->nextTurn();
+    m_gameState->processTurn();
     m_isMoveDone = false;
     // LOG_DEBUG("Corutine has ended, next turn\n");
 
@@ -424,9 +545,6 @@ int Game::startGameLoop()
     // debug imgui tools
     Rendering::RuntimeModelEditor runtimeModelEditor(m_renderEngine);
     #endif
-
-    DetectionBox hole(m_renderEngine, m_physicsEngine, glm::vec3(0.0f, 0.789f, 1.0f), glm::vec3(0.1, 0.1, 0.1));
-
 
     Coroutine playerTurnCoroutine;
 
@@ -462,8 +580,11 @@ int Game::startGameLoop()
         
         m_currentCameraController->update();
 
-        hole.checkBallInside(m_gameState->getGamemode());
-        hole.update();
+        for (int i = 0; i < m_detectionBoxes.size(); i++)
+        {
+            m_detectionBoxes[i].checkBallInside(m_gameState->getGamemode());
+            m_detectionBoxes[i].update();
+        }
 
         //// rendering update
 
@@ -482,7 +603,7 @@ int Game::startGameLoop()
         #endif
 
         #ifdef DEBUG
-        drawDebugUI(nFrame, deltaTime, m_window->getInput(), &focusedBallPosition, &runtimeModelEditor, hole);
+        drawDebugUI(nFrame, deltaTime, m_window->getInput(), &focusedBallPosition, &runtimeModelEditor);
         #endif
 
         m_window->update();

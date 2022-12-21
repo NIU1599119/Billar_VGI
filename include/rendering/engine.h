@@ -37,6 +37,7 @@ namespace Rendering {
 		int createObject(Rendering::Model* model, glm::vec3 scale, bool manage = true, Rendering::Shader* customShader = nullptr);		// definimos el path del modelo y la escala inicial del objeto
 		
 		// Nota : despues de borrar un objeto se tienen que actualizar los indices de los objetos que van despues a uno menos
+		void disableObject(int id);
 		void deleteObject(int id);
 
 		void updateObject(int id, glm::vec3 position, glm::quat orientation);	// usar para pasar datos del bullet

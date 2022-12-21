@@ -11,9 +11,8 @@ namespace Entities
     class EntityTable : public Entity
     {
     public:
-        EntityTable(GAMEMODE gameType, TABLE_PART part) : Entity(TABLE, gameType), m_part(part) {};
+        EntityTable(TABLE_PART part, BaseGameState* gamestate) : Entity(TABLE, gamestate), m_part(part) {};
 
-        void collision(Entity* entity) {};
         void collision(Entity* entity, double force) {};
 
     private:

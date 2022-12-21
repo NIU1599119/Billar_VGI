@@ -17,8 +17,15 @@ public:
     ~BaseGameState() {};
 
     int getCurrentPlayer() { return m_currentPlayer; };
+
+    // set the current player to the next player
     void nextPlayer();
-    void nextTurn() { nextPlayer(); };
+
+    // passes the turn and resets player variables, then calls next player if m_playerRepeatsTurn
+    void nextTurn();
+
+    // virtual function so that the children can reset player variables before the nextTurn, m_playerRepeatsTurn should be set here
+    virtual void processTurn() { nextTurn(); m_playerRepeatsTurn = false; };
 
     GAMEMODE getGamemode() { return m_gamemode; };
 
@@ -35,4 +42,6 @@ protected:
 
     int m_numBalls;
     std::vector<intPair> m_lastPlayerCollisionPairs;  // pairs of ball colisions in a player's turn, resets in player change
+
+    bool m_playerRepeatsTurn = false;
 };

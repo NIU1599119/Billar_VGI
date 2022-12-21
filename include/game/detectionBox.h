@@ -8,9 +8,10 @@
 class DetectionBox
 {
 public:
-    DetectionBox(Rendering::RenderEngine3D* renderEngine, EntityControllerSystem* ecs, glm::vec3 position = glm::vec3(0.0f), glm::vec3 size = glm::vec3(1.0f))
+    DetectionBox(Rendering::RenderEngine3D* renderEngine, EntityControllerSystem* ecs, std::function<void(int)> detectionCallback, glm::vec3 position = glm::vec3(0.0f), glm::vec3 size = glm::vec3(1.0f))
     : m_renderEngine(renderEngine),
       m_ecs(ecs),
+      m_detectionCallback(detectionCallback),
       m_position(position),
       m_size(size.x/2, size.y/2, size.z/2)
     {
@@ -21,6 +22,9 @@ public:
 
     void setPosition(glm::vec3 position) { m_position = position; };
     void setSize(glm::vec3 size) { m_size.x = size.x/2; m_size.y = size.y/2; m_size.z = size.z/2; };
+
+    glm::vec3 getPosition() { return m_position; };
+    glm::vec3 getSize() { return glm::vec3(m_size.x * 2, m_size.y * 2, m_size.z * 2); };
 
     // checks if there is a ball with a position in here
     bool checkBallInside(GAMEMODE gamemode)
@@ -76,15 +80,22 @@ public:
 
     void update()
     {
+        #ifdef DEBUG
         m_renderEngine->updateObjectPosition(m_renderID, m_position);
         glm::vec3 actualSize = glm::vec3(m_size.x*2, m_size.y*2, m_size.z*2);
         m_renderEngine->updateObjectScaling(m_renderID, actualSize);
         Rendering::Shader* debugShader = m_renderEngine->getDebuggingShader();
         debugShader->setUniformVec3("color", (m_isDetected) ? DETECTED : OUTSIDE);
+        #endif
+        for (int i = 0; i < m_detectedBallIDs.size(); i++)
+        {
+            m_detectionCallback(m_detectedBallIDs[i]);
+        }
     }
 
-    glm::vec3 getPosition() { return m_position; };
-    glm::vec3 getSize() { return glm::vec3(m_size.x*2, m_size.y*2, m_size.z*2); };
+    std::vector<int> getDetectedBallIDs() { return m_detectedBallIDs; };
+
+
 private:
     int m_renderID;
 
@@ -99,4 +110,6 @@ private:
 
     bool m_isDetected = false;
     std::vector<int> m_detectedBallIDs;
+
+    std::function<void(int)> m_detectionCallback;
 };

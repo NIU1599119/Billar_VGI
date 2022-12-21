@@ -19,6 +19,8 @@ namespace Entities
         irrklang::ISound* sound = Audio::AUDIO_FUNCTIONS.play2D("media/collision.wav", false, true, true);
         sound->setVolume(force/MAX_BALL_FORCE);
         sound->setIsPaused(false);
+
+        m_gamestate->registerCollision(m_ballID, p_otherBall->getBallID());
     }
 
     std::string EntityBall::getBallName()

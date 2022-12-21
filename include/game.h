@@ -35,12 +35,17 @@ private:
     void initializeRenderObjects();
     void initializeRenderLights();
     void initializeBasicInputs();
+    void initializeDetectionBoxes();
 
     CameraController* m_currentCameraController;
 
     EntityControllerSystem* m_physicsEngine;
 
-    void drawDebugUI(unsigned int nFrame, double deltaTime, Input* input, glm::vec3* focusedBallPosition, Rendering::RuntimeModelEditor* runtimeModelEditor, DetectionBox& hole);
+
+    std::vector<DetectionBox> m_detectionBoxes;
+
+
+    void drawDebugUI(unsigned int nFrame, double deltaTime, Input* input, glm::vec3* focusedBallPosition, Rendering::RuntimeModelEditor* runtimeModelEditor);
 
 
     // game functions

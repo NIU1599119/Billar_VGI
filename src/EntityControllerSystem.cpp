@@ -1,13 +1,14 @@
 ﻿#include "EntityControllerSystem.h"
 
 
-EntityControllerSystem::EntityControllerSystem(GAMEMODE gamemode, Rendering::RenderEngine3D* renderingEngine, std::vector<int>& ballRenderIDs, int maxSubSteps, double fixedTimeStep)
+EntityControllerSystem::EntityControllerSystem(BaseGameState* gamestate, Rendering::RenderEngine3D* renderingEngine, std::vector<int>& ballRenderIDs, int maxSubSteps, double fixedTimeStep)
     : // simple initial constructors
-    m_gamemode(gamemode),
+    m_gamemode(gamestate->getGamemode()),
     m_maxSubSteps(maxSubSteps),
     m_fixedTimeStep(fixedTimeStep),
     m_renderEngine(renderingEngine),
-    m_ballRenderIDs(ballRenderIDs)
+    m_ballRenderIDs(ballRenderIDs),
+    m_taskScheduler(nullptr)
 {
     /*
     ///collision configuration contains default setup for memory, collision setup. Advanced users can create their own configuration.
@@ -68,19 +69,28 @@ EntityControllerSystem::EntityControllerSystem(GAMEMODE gamemode, Rendering::Ren
         └─┴───────────┴─┴───────────┴─┘
     */
 
+    Rendering::CollisionBox floor;
+    floor.setFriction(1.2);
+    floor.setRestitution(.3);
+
+
     Rendering::CollisionBox table;
-    table.setFriction(.9565);
-    table.setRestitution(.513);
+    table.setFriction(TABLE_FRICTION);
+    table.setRestitution(TABLE_RESTITUTION);
 
     Rendering::CollisionBox wallAux(table.getMesh());
-    wallAux.setFriction(.6165);             // all walls have this values
-    wallAux.setRestitution(.8695);          // restitucion real (se supone)
+    wallAux.setFriction(RAIL_FRICTION);             // all walls have this values
+    wallAux.setRestitution(RAIL_RESTITUTION);        // restitucion real (se supone)
 
     ///////////// Inicialization EntityPool /////////////////
 
     int wallsIdStart = 0;
 
-    switch(gamemode) 
+    floor.setPosition(glm::vec3(0.0, -.5, 0.0));
+    floor.setScale(glm::vec3(10.0, 1.0, 10.0));
+    m_EntityPool.push_back(floor);
+
+    switch(m_gamemode) 
     {
         case CLASSIC:
         case FREE_SHOTS:
@@ -257,9 +267,9 @@ EntityControllerSystem::EntityControllerSystem(GAMEMODE gamemode, Rendering::Ren
         
         Entities::Entity* tablePart;
         if (i < wallsIdStart)
-            tablePart = new Entities::EntityTable(gamemode, Entities::CLOTH);
+            tablePart = new Entities::EntityTable(Entities::CLOTH, gamestate);
         else
-            tablePart = new Entities::EntityTable(gamemode, Entities::RAIL);
+            tablePart = new Entities::EntityTable(Entities::RAIL, gamestate);
         body->setUserPointer(tablePart);
         m_dynamicsWorld->addRigidBody(body);
         m_entities.push_back(tablePart);
@@ -269,10 +279,7 @@ EntityControllerSystem::EntityControllerSystem(GAMEMODE gamemode, Rendering::Ren
 
     m_ballsIndex = m_collisionShapes.size();
 
-    std::vector<btVector3> entityBallPositions;
-
-
-    switch (gamemode)
+    switch (m_gamemode)
     {
     case CLASSIC:
         if (m_ballRenderIDs.size() != 16)
@@ -282,35 +289,35 @@ EntityControllerSystem::EntityControllerSystem(GAMEMODE gamemode, Rendering::Ren
         }
 
         // Bola blanca
-        entityBallPositions.push_back(btVector3(0, 3, 0));
+        m_ballPositions.push_back(btVector3(-0.7, 2, 0));
 
         // Fila 1
-        entityBallPositions.push_back(btVector3(0.7, 3, 0));
+        m_ballPositions.push_back(btVector3(0.7, 3, 0));
 
         // Fila 2
-        entityBallPositions.push_back(btVector3(0.75, 3, 0.03));
-        entityBallPositions.push_back(btVector3(0.75, 3, -0.03));
+        m_ballPositions.push_back(btVector3(0.75, 3, 0.03));
+        m_ballPositions.push_back(btVector3(0.75, 3, -0.03));
 
         // Fila 3
-        entityBallPositions.push_back(btVector3(0.8, 3, 0));
-        entityBallPositions.push_back(btVector3(0.8, 3, 0.06));
-        entityBallPositions.push_back(btVector3(0.8, 3, -0.06));
+        m_ballPositions.push_back(btVector3(0.8, 3, 0));
+        m_ballPositions.push_back(btVector3(0.8, 3, 0.06));
+        m_ballPositions.push_back(btVector3(0.8, 3, -0.06));
 
         // Fila 4
-        entityBallPositions.push_back(btVector3(0.85, 3, 0.09));
-        entityBallPositions.push_back(btVector3(0.85, 3, 0.03));
-        entityBallPositions.push_back(btVector3(0.85, 3, -0.03));
-        entityBallPositions.push_back(btVector3(0.85, 3, -0.09));
+        m_ballPositions.push_back(btVector3(0.85, 3, 0.09));
+        m_ballPositions.push_back(btVector3(0.85, 3, 0.03));
+        m_ballPositions.push_back(btVector3(0.85, 3, -0.03));
+        m_ballPositions.push_back(btVector3(0.85, 3, -0.09));
 
         // Fila 5
-        entityBallPositions.push_back(btVector3(0.9, 3, 0.12));
-        entityBallPositions.push_back(btVector3(0.9, 3, 0.06));
-        entityBallPositions.push_back(btVector3(0.9, 3, 0));
-        entityBallPositions.push_back(btVector3(0.9, 3, -0.06));
-        entityBallPositions.push_back(btVector3(0.9, 3, -0.12));
-    
+        m_ballPositions.push_back(btVector3(0.9, 3, 0.12));
+        m_ballPositions.push_back(btVector3(0.9, 3, 0.06));
+        m_ballPositions.push_back(btVector3(0.9, 3, 0));
+        m_ballPositions.push_back(btVector3(0.9, 3, -0.06));
+        m_ballPositions.push_back(btVector3(0.9, 3, -0.12));
+
         break;
-    
+
     case CARAMBOLA:
         break;
     case FREE_SHOTS:
@@ -320,7 +327,7 @@ EntityControllerSystem::EntityControllerSystem(GAMEMODE gamemode, Rendering::Ren
     }
 
 
-    for (int i = 0; i < entityBallPositions.size(); i++)
+    for (int i = 0; i < m_ballPositions.size(); i++)
     {
         //create a dynamic rigidbody
 
@@ -341,20 +348,21 @@ EntityControllerSystem::EntityControllerSystem(GAMEMODE gamemode, Rendering::Ren
         if (isDynamic)
             colShape->calculateLocalInertia(mass, localInertia);
 
-        startTransform.setOrigin(entityBallPositions[i]);
+        startTransform.setOrigin(m_ballPositions[i]);
 
         //using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
         btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
         btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
         btRigidBody* body = new btRigidBody(rbInfo);
-        body->setFriction(.145);
-        body->setRestitution(0.97468);
+        body->setFriction(BALL_FRICTION);
+        body->setRestitution(BALL_RESTITUTION);
         body->setContactProcessingThreshold(0);// ESTE ERA EL THRESHOLD DIOOOOOOS
-        body->setSpinningFriction(0.8);
-        body->setRollingFriction(0.0006);
+        body->setSpinningFriction(BALL_SPINNING_FRICTION);
+        body->setRollingFriction(BALL_ROLLING_FRICTION);
+        //body->setDamping(0.0, 1.0);
 
 
-        Entities::Entity* ballEntity = new Entities::EntityBall(i, gamemode);
+        Entities::Entity* ballEntity = new Entities::EntityBall(i, gamestate);
         body->setUserPointer(ballEntity);
         m_dynamicsWorld->addRigidBody(body);
         m_entities.push_back(ballEntity);
@@ -510,11 +518,78 @@ bool EntityControllerSystem::isStatic()
         if (activationState != ACTIVE_TAG)
             continue;
         
+        Entities::Entity* currentEntity = (Entities::Entity*)body->getUserPointer();
+        
+        if (currentEntity->getIsDisabled())
+        {
+            body->forceActivationState(DISABLE_SIMULATION);
+            continue;
+        }
+
         simulationIsStatic = false;
         break;
     }
 
     return simulationIsStatic;
+}
+
+void EntityControllerSystem::disableBall(int ballID)
+{
+    for (int i = 0; i < m_entities.size(); i++)
+    {
+        if (m_entities[i]->getType() != Entities::BALL) continue;
+
+        Entities::EntityBall* entityBall = (Entities::EntityBall*)m_entities[i];
+        if (entityBall->getBallID() != ballID) continue;
+
+        entityBall->disable();
+        btCollisionObject* obj = m_dynamicsWorld->getCollisionObjectArray()[i];
+        btRigidBody* body = btRigidBody::upcast(obj);
+        if (body)
+        {
+            body->forceActivationState(DISABLE_SIMULATION);
+            body->getBroadphaseHandle()->m_collisionFilterGroup = 0;
+            body->getBroadphaseHandle()->m_collisionFilterMask = 0;
+        }
+        //m_renderEngine->disableObject(m_ballRenderIDs[ballID]);
+        break;
+    }
+}
+
+void EntityControllerSystem::resetBall(int ballID)
+{
+    for (int i = 0; i < m_entities.size(); i++)
+    {
+        if (m_entities[i]->getType() != Entities::BALL) continue;
+
+        Entities::EntityBall* entityBall = (Entities::EntityBall*)m_entities[i];
+        if (entityBall->getBallID() != ballID) continue;
+
+        btCollisionObject* obj = m_dynamicsWorld->getCollisionObjectArray()[i];
+        btRigidBody* body = btRigidBody::upcast(obj);
+        btTransform trans;
+        if (body)
+        {
+            trans = body->getWorldTransform();
+            trans.setOrigin(m_ballPositions[ballID]);
+            body->setWorldTransform(trans);
+            if (body->getMotionState())
+                body->getMotionState()->setWorldTransform(trans);
+
+            body->setActivationState(ACTIVE_TAG);
+            body->setLinearVelocity(btVector3(0.0, 1, 0.0));
+        }
+        else
+        {
+            trans = obj->getWorldTransform();
+            trans.setOrigin(m_ballPositions[ballID]);
+            obj->setWorldTransform(trans);
+            obj->setActivationState(ACTIVE_TAG);
+            //body->setActivationState(ACTIVE_TAG);
+            body->setLinearVelocity(btVector3(0.0, 1, 0.0));
+        }
+        break;
+    }
 }
 
 int EntityControllerSystem::createEntity(Entities::Entity* newEntity, btCollisionShape* colShape, btVector3& position)
@@ -546,5 +621,6 @@ int EntityControllerSystem::createEntity(Entities::Entity* newEntity, btCollisio
 
     body->setUserPointer(newEntity);
     m_dynamicsWorld->addRigidBody(body);
+    m_entities.push_back(newEntity);
     return entityID;
 }
