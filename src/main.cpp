@@ -42,7 +42,7 @@ int main()
     Audio::engine->play2D("media/blues.ogg", true);*/
     Audio::AUDIO_FUNCTIONS.setVolume(1.0);
 
-    irrklang::ISound* music = Audio::AUDIO_FUNCTIONS.play2D("media/blues.ogg", true, true, true);
+    irrklang::ISound* music = Audio::AUDIO_FUNCTIONS.play2D("media/blues.ogg", false, true, true);
     music->setVolume(0.6);
     int musicNum = 1;
     float volume = 0.6;

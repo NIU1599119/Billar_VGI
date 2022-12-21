@@ -15,9 +15,11 @@ public:
       m_position(position),
       m_size(size.x/2, size.y/2, size.z/2)
     {
+        #ifdef DEBUG
         m_renderID = renderEngine->createObject(Primitives::getCUBE(), glm::vec3(1.0f), false, renderEngine->getDebuggingShader());
         renderEngine->updateObjectPosition(m_renderID, position);
         renderEngine->updateObjectScaling(m_renderID, size);
+        #endif
     };
 
     void setPosition(glm::vec3 position) { m_position = position; };

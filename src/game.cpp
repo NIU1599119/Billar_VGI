@@ -303,7 +303,7 @@ void Game::processShadows()
 
 void Game::initializeRenderLights()
 {
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < 4; i++)
     {
         int idx = m_renderEngine->addLight();
         m_lightIndexes.push_back(idx);

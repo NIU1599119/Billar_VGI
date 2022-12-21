@@ -12,6 +12,8 @@ namespace Rendering {
 	{
 		m_debugBoxModel = Primitives::getNewCubeModel();
 		updateProjection();
+		GL(glEnable(GL_MULTISAMPLE));
+		//GL(glEnable(GL_CULL_FACE));	// para poner esto habria que arreglar el modelo de la habitacion
 		GL(glEnable(GL_DEPTH_TEST));
 		GL(glEnable(GL_STENCIL_TEST));
 		GL(glDepthFunc(GL_LESS));
@@ -21,6 +23,8 @@ namespace Rendering {
 
 	RenderEngine3D::~RenderEngine3D()
 	{
+		GL(glEnable(GL_MULTISAMPLE));
+		//GL(glDisable(GL_CULL_FACE));
 		GL(glDisable(GL_DEPTH_TEST));
 		GL(glDisable(GL_STENCIL_TEST));
 		// render engine se encarga de borrar todos los modelos utilizados
