@@ -510,25 +510,25 @@ int optionsMenu(Window& window, float& Width, float& Height, irrklang::ISound* m
                     switch (musicNum) {
                     case 1:
                         music->stop();
-                        music = Audio::AUDIO_FUNCTIONS.play2D("media/blues.ogg", true, true, true);
+                        music = Audio::AUDIO_FUNCTIONS.play2D("media/blues.ogg", false, true, true);
                         music->setVolume(volume);
                         music->setIsPaused(false);
                         break;
                     case 2:
                         music->stop();
-                        music = Audio::AUDIO_FUNCTIONS.play2D("media/Kichijoji.ogg", true, true, true);
+                        music = Audio::AUDIO_FUNCTIONS.play2D("media/Kichijoji.ogg", false, true, true);
                         music->setVolume(volume);
                         music->setIsPaused(false);
                         break;
                     case 3:
                         music->stop();
-                        music = Audio::AUDIO_FUNCTIONS.play2D("media/SnowdinTown.ogg", true, true, true);
+                        music = Audio::AUDIO_FUNCTIONS.play2D("media/SnowdinTown.ogg", false, true, false);
                         music->setVolume(volume);
                         music->setIsPaused(false);
                         break;
                     case 4:
                         music->stop();
-                        music = Audio::AUDIO_FUNCTIONS.play2D("media/otherside.ogg", true, true, true);
+                        music = Audio::AUDIO_FUNCTIONS.play2D("media/otherside.ogg", false, true, true);
                         music->setVolume(volume);
                         music->setIsPaused(false);
                         break;
