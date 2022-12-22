@@ -501,6 +501,10 @@ void Game::initializeDetectionBoxes()
     BaseGameState** p_gameState = &m_gameState;
     std::function<void(int)> pocketCallback = [p_physicsEngine, p_gameState](int ballID) {
 
+        irrklang::ISound* sound = Audio::AUDIO_FUNCTIONS.play2D("media/bola metida.wav", false, true, true);
+        sound->setVolume(0.8);
+        sound->setIsPaused(false);
+
         (*p_physicsEngine)->resetBall(ballID);
         if ((*p_gameState)->getGamemode() == CLASSIC)
         {

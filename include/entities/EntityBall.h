@@ -2,6 +2,8 @@
 #include "entities/Entity.h"
 #include <string>
 
+const double MAX_BALL_FORCE = 4.0;
+
 namespace Entities
 {
     class EntityBall : public Entity
@@ -18,7 +20,6 @@ namespace Entities
     private:
         int m_ballID;
 
-        const double MAX_BALL_FORCE = 4.0;
     };
 
 

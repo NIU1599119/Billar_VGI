@@ -9,7 +9,10 @@ namespace Entities
         std::string myBallName = getBallName();
 
         if (entity->getType() != BALL)
+        {
+            entity->collision(this, force);
             return;
+        }
 
         EntityBall* p_otherBall = (EntityBall*) entity;
 
